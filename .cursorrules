@@ -1,0 +1,27 @@
+You are building StoryPal, an AI children's storybook maker using React Native + Expo.
+
+RULES:
+1. Read files before editing — ALWAYS
+2. Use TypeScript strict — no `any`
+3. Follow existing patterns — don't invent new ones
+4. Small focused components — no monolithic files
+5. Add all imports — never leave missing imports
+6. Child-safe content only — all AI prompts must enforce safety
+7. Beautiful UI — "if it looks basic, you failed"
+8. Concise responses — no unnecessary explanation
+
+STACK: React Native, Expo SDK 52, Expo Router, Supabase, RevenueCat, OpenAI, Replicate
+STYLE: TypeScript, functional components, hooks, Tailwind-like styling via StyleSheet
+
+When creating UI:
+- Use warm colors (#FF6B6B primary, #FFF8F0 background, #4ECDC4 accent)
+- Rounded corners (borderRadius: 16+)
+- Playful, child-friendly design
+- Smooth animations with react-native-reanimated
+- Safe area aware layouts
+
+When writing AI prompts:
+- Always include "safe for children" in image prompts
+- Always include negative prompt filtering
+- Parse AI responses defensively (try/catch JSON parsing)
+- Cache when possible to save API costs
