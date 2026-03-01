@@ -29,6 +29,13 @@ export default function SelectThemeScreen() {
     });
   };
 
+  const handleCustomIdea = () => {
+    router.push({
+      pathname: '/story/custom-idea',
+      params: { ageGroup: ageGroup ?? '3-5', language: language ?? 'en' },
+    });
+  };
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Back Button */}
@@ -46,6 +53,7 @@ export default function SelectThemeScreen() {
           <View style={styles.stepDot} />
           <View style={styles.stepDot} />
           <View style={styles.stepDot} />
+          <View style={styles.stepDot} />
         </View>
       </Animated.View>
 
@@ -58,6 +66,25 @@ export default function SelectThemeScreen() {
           <Text style={styles.subtitle}>
             Where should your adventure take place?
           </Text>
+        </Animated.View>
+
+        {/* Your Idea Card */}
+        <Animated.View entering={FadeInUp.duration(400)}>
+          <TouchableOpacity activeOpacity={0.85} onPress={handleCustomIdea}>
+            <LinearGradient
+              colors={['#A18CD1', '#FBC2EB']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.customIdeaCard}
+            >
+              <Text style={styles.customIdeaEmoji}>{'\u{1FA84}'}</Text>
+              <View style={styles.customIdeaContent}>
+                <Text style={styles.customIdeaTitle}>YOUR IDEA</Text>
+                <Text style={styles.customIdeaDesc}>Write your own story idea!</Text>
+              </View>
+              <Text style={styles.customIdeaArrow}>{'\u2192'}</Text>
+            </LinearGradient>
+          </TouchableOpacity>
         </Animated.View>
 
         <View style={styles.grid}>
@@ -176,5 +203,40 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: 'rgba(255,255,255,0.8)',
     marginTop: 2,
+  },
+  customIdeaCard: {
+    borderRadius: RADIUS.lg,
+    padding: SPACING.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+    shadowColor: '#A18CD1',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  customIdeaEmoji: {
+    fontSize: 40,
+    marginRight: SPACING.md,
+  },
+  customIdeaContent: {
+    flex: 1,
+  },
+  customIdeaTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#fff',
+    letterSpacing: 1,
+  },
+  customIdeaDesc: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.85)',
+    marginTop: 2,
+  },
+  customIdeaArrow: {
+    fontSize: 24,
+    color: '#fff',
+    fontWeight: '700',
   },
 });

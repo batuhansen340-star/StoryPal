@@ -73,6 +73,16 @@ export interface PersonalizationData {
   hairColor: string;
   skinTone: string;
   hasGlasses: boolean;
+  photoUri?: string;
+  faceDescription?: string;
+  usePhotoFace?: boolean;
+}
+
+export interface StoryChoice {
+  id: string;
+  emoji: string;
+  text: string;
+  nextPageIndex: number;
 }
 
 export interface StoryGenerationRequest {
@@ -81,6 +91,7 @@ export interface StoryGenerationRequest {
   ageGroup: AgeGroup;
   language: string;
   personalization?: PersonalizationData;
+  customPrompt?: string;
 }
 
 export interface StoryGenerationResponse {
@@ -88,7 +99,26 @@ export interface StoryGenerationResponse {
   pages: {
     text: string;
     imagePrompt: string;
+    choices?: StoryChoice[];
   }[];
+}
+
+export interface CharacterSheet {
+  baseDescription: string;
+  features: string[];
+  style: string;
+  consistencyPrompt: string;
+}
+
+export interface VoiceCharacter {
+  id: string;
+  name: string;
+  emoji: string;
+  description: string;
+  pitch: number;
+  rate: number;
+  gradient: [string, string];
+  isPremium: boolean;
 }
 
 export interface SubscriptionPlan {

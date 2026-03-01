@@ -14,15 +14,20 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
+import type { StoryChoice } from '../../packages/shared/types';
 import { THEMES } from '../../apps/storypal/constants/themes';
 import { speak, stop as stopTTS, type TTSSpeed } from '../../packages/shared/services/tts';
 import { getSpeechLanguageCode } from '../../packages/shared/services/tts';
+import { getVoiceCharacterById } from '../../constants/voice-characters';
+import { getRecordingForPage } from '../../packages/shared/services/audio-recorder';
+import { Audio } from 'expo-av';
 
 const { width, height } = Dimensions.get('window');
 
 interface StoryPageData {
   text: string;
   imagePrompt: string;
+  choices?: StoryChoice[];
 }
 
 const BEDTIME_BG = '#1a1a2e';
@@ -40,6 +45,7 @@ export default function ViewerScreen() {
     characterId?: string;
     storyId?: string;
     language?: string;
+    voiceCharacterId?: string;
   }>();
 
   const [currentPage, setCurrentPage] = useState(0);
@@ -49,14 +55,20 @@ export default function ViewerScreen() {
   const [ttsSpeed, setTtsSpeed] = useState<TTSSpeed>('normal');
   const [showControls, setShowControls] = useState(false);
   const [showSweetDreams, setShowSweetDreams] = useState(false);
+  const [useParentVoice, setUseParentVoice] = useState(false);
+  const [hasParentRecording, setHasParentRecording] = useState(false);
   const flatListRef = useRef<FlatList>(null);
   const autoPlayRef = useRef(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
 
   const title = params.title ?? 'My Story';
   const themeId = params.themeId ?? 'space';
   const languageCode = params.language ?? 'en';
+  const voiceCharacterId = params.voiceCharacterId;
+  const voiceCharacter = voiceCharacterId ? getVoiceCharacterById(voiceCharacterId) : undefined;
   const selectedTheme = THEMES.find(t => t.id === themeId);
   const themeGradient = selectedTheme?.gradient ?? [COLORS.primary, COLORS.accent];
+  const storyId = params.storyId ?? 'demo';
 
   let pages: StoryPageData[] = [];
   let imageUrls: string[] = [];
@@ -70,11 +82,12 @@ export default function ViewerScreen() {
   }
 
   const allPages = [
-    { type: 'cover' as const, text: title, imageUrl: coverUrl },
+    { type: 'cover' as const, text: title, imageUrl: coverUrl, choices: undefined as StoryChoice[] | undefined },
     ...pages.map((p, i) => ({
       type: 'page' as const,
       text: p.text,
       imageUrl: imageUrls[i] ?? '',
+      choices: p.choices,
     })),
   ];
 
@@ -85,8 +98,18 @@ export default function ViewerScreen() {
   useEffect(() => {
     return () => {
       stopTTS();
+      soundRef.current?.unloadAsync();
     };
   }, []);
+
+  // Check for parent recording on page change
+  useEffect(() => {
+    if (currentPage > 0) {
+      getRecordingForPage(storyId, currentPage - 1).then(uri => {
+        setHasParentRecording(!!uri);
+      });
+    }
+  }, [currentPage, storyId]);
 
   const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
     if (viewableItems.length > 0 && viewableItems[0].index !== null) {
@@ -96,18 +119,57 @@ export default function ViewerScreen() {
 
   const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
 
+  const playParentRecording = useCallback(async (pageIndex: number) => {
+    const uri = await getRecordingForPage(storyId, pageIndex - 1);
+    if (!uri) return;
+
+    if (soundRef.current) {
+      await soundRef.current.unloadAsync();
+    }
+
+    const { sound } = await Audio.Sound.createAsync({ uri });
+    soundRef.current = sound;
+
+    setIsSpeaking(true);
+    sound.setOnPlaybackStatusUpdate((status) => {
+      if (status.isLoaded && status.didJustFinish) {
+        setIsSpeaking(false);
+        if (autoPlayRef.current && pageIndex < allPages.length - 1) {
+          setTimeout(() => {
+            flatListRef.current?.scrollToIndex({ index: pageIndex + 1 });
+          }, 800);
+        }
+      }
+    });
+    await sound.playAsync();
+  }, [allPages, storyId]);
+
   const speakCurrentPage = useCallback(async (pageIndex: number) => {
     const page = allPages[pageIndex];
     if (!page || page.type === 'cover') return;
+
+    // Check for parent voice
+    if (useParentVoice) {
+      const uri = await getRecordingForPage(storyId, pageIndex - 1);
+      if (uri) {
+        await playParentRecording(pageIndex);
+        return;
+      }
+    }
 
     setIsSpeaking(true);
     await speak(page.text, {
       language: getSpeechLanguageCode(languageCode),
       speed: ttsSpeed,
       isBedtimeMode: bedtimeMode,
+      voiceCharacter,
       onDone: () => {
         setIsSpeaking(false);
         if (autoPlayRef.current && pageIndex < allPages.length - 1) {
+          // Don't auto-advance on choice pages
+          const currentPageData = allPages[pageIndex];
+          if (currentPageData?.choices && currentPageData.choices.length > 0) return;
+
           setTimeout(() => {
             flatListRef.current?.scrollToIndex({ index: pageIndex + 1 });
           }, 800);
@@ -116,7 +178,7 @@ export default function ViewerScreen() {
         }
       },
     });
-  }, [allPages, languageCode, ttsSpeed, bedtimeMode]);
+  }, [allPages, languageCode, ttsSpeed, bedtimeMode, voiceCharacter, useParentVoice, storyId, playParentRecording]);
 
   useEffect(() => {
     if (autoPlay && currentPage > 0) {
@@ -127,6 +189,9 @@ export default function ViewerScreen() {
   const handlePlayPause = async () => {
     if (isSpeaking) {
       await stopTTS();
+      if (soundRef.current) {
+        await soundRef.current.stopAsync();
+      }
       setIsSpeaking(false);
     } else {
       speakCurrentPage(currentPage);
@@ -158,9 +223,29 @@ export default function ViewerScreen() {
     setShowSweetDreams(false);
   };
 
+  const handleChoice = (choice: StoryChoice) => {
+    stopTTS();
+    flatListRef.current?.scrollToIndex({ index: choice.nextPageIndex + 1 }); // +1 for cover
+  };
+
+  const handleRecordVoice = () => {
+    stopTTS();
+    router.push({
+      pathname: '/story/record-voice',
+      params: {
+        title,
+        pages: params.pages ?? '[]',
+        storyId,
+      },
+    });
+  };
+
   const bgColors = bedtimeMode
     ? [BEDTIME_BG, '#16213e']
     : ['#FFF8F0', '#FFE8D6'];
+
+  const currentPageData = allPages[currentPage];
+  const hasChoices = currentPageData?.choices && currentPageData.choices.length > 0;
 
   const renderPage = ({ item, index }: { item: typeof allPages[0]; index: number }) => {
     const isCover = item.type === 'cover';
@@ -211,17 +296,50 @@ export default function ViewerScreen() {
                 <Text style={styles.coverSubtitle}>A StoryPal Adventure</Text>
               </>
             ) : (
-              <View style={[
-                styles.storyTextCard,
-                bedtimeMode && styles.storyTextCardBedtime,
-              ]}>
-                <Text style={[
-                  styles.storyText,
-                  bedtimeMode && styles.storyTextBedtime,
+              <>
+                <View style={[
+                  styles.storyTextCard,
+                  bedtimeMode && styles.storyTextCardBedtime,
                 ]}>
-                  {item.text}
-                </Text>
-              </View>
+                  <Text style={[
+                    styles.storyText,
+                    bedtimeMode && styles.storyTextBedtime,
+                  ]}>
+                    {item.text}
+                  </Text>
+                </View>
+
+                {/* Choice Buttons */}
+                {item.choices && item.choices.length > 0 && (
+                  <View style={styles.choicesContainer}>
+                    {item.choices.map((choice, ci) => (
+                      <React.Fragment key={choice.id}>
+                        {ci > 0 && (
+                          <Text style={styles.choiceOr}>or</Text>
+                        )}
+                        <TouchableOpacity
+                          activeOpacity={0.85}
+                          onPress={() => handleChoice(choice)}
+                        >
+                          <LinearGradient
+                            colors={
+                              choice.id === 'purple' ? ['#A18CD1', '#FBC2EB'] :
+                              choice.id === 'green' ? ['#52B788', '#95D5B2'] :
+                              [COLORS.primary, '#FF8E53']
+                            }
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={styles.choiceButton}
+                          >
+                            <Text style={styles.choiceEmoji}>{choice.emoji}</Text>
+                            <Text style={styles.choiceText}>{choice.text}</Text>
+                          </LinearGradient>
+                        </TouchableOpacity>
+                      </React.Fragment>
+                    ))}
+                  </View>
+                )}
+              </>
             )}
           </Animated.View>
 
@@ -306,6 +424,19 @@ export default function ViewerScreen() {
           entering={FadeInUp.duration(300)}
           style={[styles.controlsPanel, { top: insets.top + 64 }, bedtimeMode && styles.controlsPanelBedtime]}
         >
+          {/* Voice Character Display */}
+          {voiceCharacter && (
+            <>
+              <View style={styles.controlRow}>
+                <Text style={styles.controlEmoji}>{voiceCharacter.emoji}</Text>
+                <Text style={[styles.controlLabel, bedtimeMode && styles.controlLabelBedtime]}>
+                  {voiceCharacter.name}
+                </Text>
+              </View>
+              <View style={styles.controlDivider} />
+            </>
+          )}
+
           {/* Bedtime Mode Toggle */}
           <TouchableOpacity
             style={[styles.controlRow, bedtimeMode && styles.controlRowActive]}
@@ -351,6 +482,43 @@ export default function ViewerScreen() {
                 {ttsSpeed === 'slow' ? 'Slow' : ttsSpeed === 'fast' ? 'Fast' : 'Normal'}
               </Text>
             </View>
+          </TouchableOpacity>
+
+          <View style={styles.controlDivider} />
+
+          {/* Parent Voice Toggle */}
+          <TouchableOpacity
+            style={[styles.controlRow, !hasParentRecording && styles.controlRowDisabled]}
+            onPress={() => hasParentRecording && setUseParentVoice(!useParentVoice)}
+            activeOpacity={hasParentRecording ? 0.8 : 1}
+          >
+            <Text style={styles.controlEmoji}>{'\u{1F3A4}'}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.controlLabel, bedtimeMode && styles.controlLabelBedtime]}>
+                Parent Voice
+              </Text>
+              {!hasParentRecording && (
+                <Text style={styles.controlHint}>Record to enable</Text>
+              )}
+            </View>
+            {hasParentRecording && (
+              <View style={[styles.toggleTrack, useParentVoice && styles.toggleTrackActive]}>
+                <View style={[styles.toggleThumb, useParentVoice && styles.toggleThumbActive]} />
+              </View>
+            )}
+          </TouchableOpacity>
+
+          {/* Record Voice Button */}
+          <TouchableOpacity
+            style={styles.controlRow}
+            onPress={handleRecordVoice}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.controlEmoji}>{'\u{1F3A4}'}</Text>
+            <Text style={[styles.controlLabel, bedtimeMode && styles.controlLabelBedtime]}>
+              Record Voice
+            </Text>
+            <Text style={styles.controlArrow}>{'\u2192'}</Text>
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -400,13 +568,17 @@ export default function ViewerScreen() {
         </View>
 
         {currentPage < allPages.length - 1 ? (
-          <TouchableOpacity
-            style={[styles.arrowButton, bedtimeMode && styles.arrowButtonBedtime]}
-            onPress={goToNext}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.arrowText}>{'\u2192'}</Text>
-          </TouchableOpacity>
+          hasChoices ? (
+            <View style={{ width: 52 }} />
+          ) : (
+            <TouchableOpacity
+              style={[styles.arrowButton, bedtimeMode && styles.arrowButtonBedtime]}
+              onPress={goToNext}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.arrowText}>{'\u2192'}</Text>
+            </TouchableOpacity>
+          )
         ) : (
           <TouchableOpacity
             style={styles.doneButton}
@@ -540,6 +712,40 @@ const styles = StyleSheet.create({
     color: BEDTIME_TEXT,
     fontWeight: '500',
   },
+  // Choices
+  choicesContainer: {
+    marginTop: SPACING.md,
+    gap: SPACING.sm,
+    alignItems: 'center',
+  },
+  choiceButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: RADIUS.lg,
+    minWidth: width * 0.65,
+    shadowColor: 'rgba(0,0,0,0.2)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  choiceEmoji: {
+    fontSize: 24,
+    marginRight: SPACING.md,
+  },
+  choiceText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#fff',
+  },
+  choiceOr: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    fontWeight: '600',
+    fontStyle: 'italic',
+  },
   pageNumber: {
     position: 'absolute',
     bottom: 100,
@@ -590,7 +796,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
-  // TTS Controls Panel
   controlsPanel: {
     position: 'absolute',
     right: SPACING.lg,
@@ -617,6 +822,9 @@ const styles = StyleSheet.create({
   controlRowActive: {
     backgroundColor: 'rgba(255, 107, 107, 0.08)',
   },
+  controlRowDisabled: {
+    opacity: 0.5,
+  },
   controlEmoji: {
     fontSize: 18,
     marginRight: SPACING.sm,
@@ -629,6 +837,20 @@ const styles = StyleSheet.create({
   },
   controlLabelBedtime: {
     color: BEDTIME_TEXT,
+  },
+  controlHint: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+  },
+  controlArrow: {
+    fontSize: 16,
+    color: COLORS.textMuted,
+    fontWeight: '700',
+  },
+  controlDivider: {
+    height: 1,
+    backgroundColor: COLORS.backgroundDark,
+    marginVertical: 2,
   },
   toggleTrack: {
     width: 40,
@@ -661,7 +883,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: COLORS.primary,
   },
-  // Bottom
   bottomNav: {
     position: 'absolute',
     bottom: 0,
@@ -740,7 +961,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '800',
   },
-  // Sweet Dreams
   sweetDreamsContainer: {
     flex: 1,
   },

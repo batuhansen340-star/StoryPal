@@ -1,0 +1,88 @@
+import type { VoiceCharacter } from '../packages/shared/types';
+
+export const VOICE_CHARACTERS: VoiceCharacter[] = [
+  {
+    id: 'narrator',
+    name: 'Storyteller',
+    emoji: '\u{1F4D6}',
+    description: 'Classic warm narrator',
+    pitch: 1.0,
+    rate: 1.0,
+    gradient: ['#FF6B6B', '#FF8E53'],
+    isPremium: false,
+  },
+  {
+    id: 'fairy',
+    name: 'Fairy Sparkle',
+    emoji: '\u{1F9DA}',
+    description: 'High, magical voice',
+    pitch: 1.4,
+    rate: 0.95,
+    gradient: ['#C77DFF', '#E8A0FF'],
+    isPremium: false,
+  },
+  {
+    id: 'wizard',
+    name: 'Old Wizard',
+    emoji: '\u{1F9D9}',
+    description: 'Deep, wise voice',
+    pitch: 0.7,
+    rate: 0.85,
+    gradient: ['#1A1A6E', '#4A4AE0'],
+    isPremium: true,
+  },
+  {
+    id: 'robot',
+    name: 'Beep Bot',
+    emoji: '\u{1F916}',
+    description: 'Fun robotic voice',
+    pitch: 0.5,
+    rate: 1.1,
+    gradient: ['#00B4D8', '#48CAE4'],
+    isPremium: true,
+  },
+  {
+    id: 'pirate',
+    name: 'Captain Arr',
+    emoji: '\u{1F3F4}\u{200D}\u{2620}\u{FE0F}',
+    description: 'Adventurous pirate voice',
+    pitch: 0.8,
+    rate: 0.9,
+    gradient: ['#D4380D', '#FF7A45'],
+    isPremium: true,
+  },
+  {
+    id: 'princess',
+    name: 'Princess Rose',
+    emoji: '\u{1F478}',
+    description: 'Sweet, gentle voice',
+    pitch: 1.3,
+    rate: 0.9,
+    gradient: ['#FF69B4', '#FFB6C1'],
+    isPremium: true,
+  },
+  {
+    id: 'dragon',
+    name: 'Drago',
+    emoji: '\u{1F432}',
+    description: 'Playful dragon growl',
+    pitch: 0.6,
+    rate: 1.05,
+    gradient: ['#52B788', '#95D5B2'],
+    isPremium: true,
+  },
+  {
+    id: 'alien',
+    name: 'Zibzob',
+    emoji: '\u{1F47D}',
+    description: 'Quirky alien voice',
+    pitch: 1.6,
+    rate: 1.15,
+    gradient: ['#A8E6CF', '#DCEDC1'],
+    isPremium: true,
+  },
+];
+
+export function getVoiceCharacterById(id: string): VoiceCharacter | undefined {
+  return VOICE_CHARACTERS.find(v => v.id === id);
+}

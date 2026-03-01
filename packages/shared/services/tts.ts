@@ -1,4 +1,5 @@
 import * as Speech from 'expo-speech';
+import type { VoiceCharacter } from '../types';
 
 export type TTSSpeed = 'slow' | 'normal' | 'fast';
 
@@ -14,6 +15,7 @@ export interface TTSOptions {
   language: string;
   speed: TTSSpeed;
   isBedtimeMode: boolean;
+  voiceCharacter?: VoiceCharacter;
   onDone?: () => void;
   onStart?: () => void;
 }
@@ -21,13 +23,25 @@ export interface TTSOptions {
 export async function speak(text: string, options: TTSOptions): Promise<void> {
   await stop();
 
-  const rate = options.isBedtimeMode ? BEDTIME_RATE : SPEED_RATES[options.speed];
+  let rate: number;
+  let pitch: number;
+
+  if (options.isBedtimeMode) {
+    rate = BEDTIME_RATE;
+    pitch = 1.0;
+  } else if (options.voiceCharacter) {
+    rate = options.voiceCharacter.rate * SPEED_RATES[options.speed];
+    pitch = options.voiceCharacter.pitch;
+  } else {
+    rate = SPEED_RATES[options.speed];
+    pitch = 1.0;
+  }
 
   return new Promise<void>((resolve) => {
     Speech.speak(text, {
       language: options.language,
       rate,
-      pitch: 1.0,
+      pitch,
       onStart: () => {
         options.onStart?.();
       },

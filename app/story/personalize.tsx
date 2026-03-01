@@ -7,12 +7,16 @@ import {
   TouchableOpacity,
   TextInput,
   Dimensions,
+  Image,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
+import { pickPhoto, takePhoto, analyzeFaceDemo, buildCharacterPrompt } from '../../packages/shared/services/face-analysis';
+import type { FaceDescription } from '../../packages/shared/services/face-analysis';
 
 const { width } = Dimensions.get('window');
 
@@ -40,11 +44,12 @@ const GENDERS = [
 export default function PersonalizeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { themeId, characterId, ageGroup, language } = useLocalSearchParams<{
+  const { themeId, characterId, ageGroup, language, customPrompt } = useLocalSearchParams<{
     themeId: string;
     characterId: string;
     ageGroup: string;
     language: string;
+    customPrompt: string;
   }>();
 
   const [name, setName] = useState('');
@@ -52,9 +57,39 @@ export default function PersonalizeScreen() {
   const [hairColor, setHairColor] = useState<string>('brown');
   const [skinTone, setSkinTone] = useState<string>('medium');
   const [hasGlasses, setHasGlasses] = useState(false);
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [faceDesc, setFaceDesc] = useState<FaceDescription | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [photoAdded, setPhotoAdded] = useState(false);
 
-  // Demo mode: no premium gate, always allow
   const isPremium = true;
+
+  const handlePhotoResult = async (uri: string | null) => {
+    if (!uri) return;
+    setPhotoUri(uri);
+    setIsAnalyzing(true);
+
+    await new Promise(r => setTimeout(r, 1500));
+
+    const face = analyzeFaceDemo();
+    setFaceDesc(face);
+    setIsAnalyzing(false);
+    setPhotoAdded(true);
+
+    if (face.gender === 'girl' || face.gender === 'boy') {
+      setGender(face.gender);
+    }
+  };
+
+  const handlePickPhoto = async () => {
+    const uri = await pickPhoto();
+    handlePhotoResult(uri);
+  };
+
+  const handleTakePhoto = async () => {
+    const uri = await takePhoto();
+    handlePhotoResult(uri);
+  };
 
   const handleContinue = () => {
     const personalization = JSON.stringify({
@@ -63,28 +98,33 @@ export default function PersonalizeScreen() {
       hairColor,
       skinTone,
       hasGlasses,
+      photoUri: photoUri ?? undefined,
+      faceDescription: faceDesc ? buildCharacterPrompt(faceDesc) : undefined,
+      usePhotoFace: !!faceDesc,
     });
 
     router.push({
-      pathname: '/story/generating',
+      pathname: '/story/select-voice',
       params: {
         themeId,
         characterId,
         ageGroup: ageGroup ?? '3-5',
         language: language ?? 'en',
         personalization,
+        customPrompt: customPrompt ?? '',
       },
     });
   };
 
   const handleSkip = () => {
     router.push({
-      pathname: '/story/generating',
+      pathname: '/story/select-voice',
       params: {
         themeId,
         characterId,
         ageGroup: ageGroup ?? '3-5',
         language: language ?? 'en',
+        customPrompt: customPrompt ?? '',
       },
     });
   };
@@ -148,6 +188,7 @@ export default function PersonalizeScreen() {
           <View style={[styles.stepDot, styles.stepDotCompleted]} />
           <View style={[styles.stepDot, styles.stepDotActive]} />
           <View style={styles.stepDot} />
+          <View style={styles.stepDot} />
         </View>
       </Animated.View>
 
@@ -159,6 +200,41 @@ export default function PersonalizeScreen() {
         <Animated.View entering={FadeInDown.duration(600)}>
           <Text style={styles.title}>Make It Personal {'\u{2728}'}</Text>
           <Text style={styles.subtitle}>Put your child in the story!</Text>
+        </Animated.View>
+
+        {/* Photo Upload Section */}
+        <Animated.View entering={FadeInDown.duration(600).delay(50)} style={styles.photoSection}>
+          <View style={styles.photoCircle}>
+            {photoUri ? (
+              <Image source={{ uri: photoUri }} style={styles.photoImage} />
+            ) : (
+              <Text style={styles.photoPlaceholder}>{'\u{1F4F7}'}</Text>
+            )}
+            {isAnalyzing && (
+              <View style={styles.analyzingOverlay}>
+                <ActivityIndicator color="#fff" size="small" />
+                <Text style={styles.analyzingText}>{'\u{2728}'} Analyzing...</Text>
+              </View>
+            )}
+            {photoAdded && !isAnalyzing && (
+              <View style={styles.photoAddedBadge}>
+                <Text style={styles.photoAddedText}>{'\u{1F4F8}'} Photo Added!</Text>
+              </View>
+            )}
+          </View>
+          <View style={styles.photoButtons}>
+            <TouchableOpacity style={styles.photoBtn} onPress={handleTakePhoto} activeOpacity={0.8}>
+              <Text style={styles.photoBtnText}>{'\u{1F4F7}'} Take Photo</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.photoBtn} onPress={handlePickPhoto} activeOpacity={0.8}>
+              <Text style={styles.photoBtnText}>{'\u{1F5BC}\u{FE0F}'} Gallery</Text>
+            </TouchableOpacity>
+          </View>
+          {faceDesc && (
+            <View style={styles.faceResultCard}>
+              <Text style={styles.faceResultText}>{faceDesc.fullDescription}</Text>
+            </View>
+          )}
         </Animated.View>
 
         {/* Avatar Preview */}
@@ -365,6 +441,99 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     marginBottom: SPACING.lg,
   },
+  // Photo Upload
+  photoSection: {
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  photoCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: COLORS.backgroundDark,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    borderWidth: 3,
+    borderColor: COLORS.glassBorder,
+    shadowColor: COLORS.cardShadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  photoImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+  },
+  photoPlaceholder: {
+    fontSize: 44,
+  },
+  analyzingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 60,
+  },
+  analyzingText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '700',
+    marginTop: 4,
+  },
+  photoAddedBadge: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: COLORS.success,
+    paddingVertical: 3,
+    alignItems: 'center',
+  },
+  photoAddedText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  photoButtons: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    marginTop: SPACING.md,
+  },
+  photoBtn: {
+    backgroundColor: COLORS.card,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderRadius: RADIUS.full,
+    shadowColor: COLORS.cardShadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  photoBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  faceResultCard: {
+    backgroundColor: COLORS.glass,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    borderColor: COLORS.glassBorder,
+    padding: SPACING.md,
+    marginTop: SPACING.md,
+    maxWidth: width - SPACING.lg * 4,
+  },
+  faceResultText: {
+    fontSize: 13,
+    color: COLORS.textLight,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  // Avatar
   avatarSection: {
     alignItems: 'center',
     marginBottom: SPACING.xl,
@@ -577,7 +746,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
   },
-  // Locked state styles
   lockedContainer: {
     flex: 1,
     alignItems: 'center',

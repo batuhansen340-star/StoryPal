@@ -19,10 +19,11 @@ const { width } = Dimensions.get('window');
 export default function SelectCharacterScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { themeId, ageGroup, language } = useLocalSearchParams<{
+  const { themeId, ageGroup, language, customPrompt } = useLocalSearchParams<{
     themeId: string;
     ageGroup: string;
     language: string;
+    customPrompt: string;
   }>();
 
   const selectedTheme = THEMES.find(t => t.id === themeId);
@@ -35,6 +36,7 @@ export default function SelectCharacterScreen() {
         characterId,
         ageGroup: ageGroup ?? '3-5',
         language: language ?? 'en',
+        customPrompt: customPrompt ?? '',
       },
     });
   };
@@ -54,6 +56,7 @@ export default function SelectCharacterScreen() {
           <View style={[styles.stepDot, styles.stepDotCompleted]} />
           <View style={[styles.stepDot, styles.stepDotCompleted]} />
           <View style={[styles.stepDot, styles.stepDotActive]} />
+          <View style={styles.stepDot} />
           <View style={styles.stepDot} />
           <View style={styles.stepDot} />
         </View>

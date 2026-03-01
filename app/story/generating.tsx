@@ -11,13 +11,16 @@ export default function GeneratingScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const hasStarted = useRef(false);
-  const { themeId, characterId, ageGroup, language, personalization } = useLocalSearchParams<{
-    themeId: string;
-    characterId: string;
-    ageGroup: string;
-    language: string;
-    personalization: string;
-  }>();
+  const { themeId, characterId, ageGroup, language, personalization, customPrompt, voiceCharacterId } =
+    useLocalSearchParams<{
+      themeId: string;
+      characterId: string;
+      ageGroup: string;
+      language: string;
+      personalization: string;
+      customPrompt: string;
+      voiceCharacterId: string;
+    }>();
 
   const {
     status,
@@ -49,6 +52,7 @@ export default function GeneratingScreen() {
         ageGroup: (ageGroup as AgeGroup) ?? '3-5',
         language: language ?? 'en',
         personalization: parsedPersonalization,
+        customPrompt: customPrompt || undefined,
       });
     }
   }, [themeId, characterId, ageGroup]);
@@ -66,6 +70,7 @@ export default function GeneratingScreen() {
             themeId: themeId ?? '',
             characterId: characterId ?? '',
             language: language ?? 'en',
+            voiceCharacterId: voiceCharacterId ?? '',
           },
         });
       }, 600);
@@ -76,7 +81,7 @@ export default function GeneratingScreen() {
   if (error) {
     return (
       <View style={[styles.errorContainer, { paddingTop: insets.top }]}>
-        <Text style={styles.errorEmoji}>😔</Text>
+        <Text style={styles.errorEmoji}>{'\u{1F614}'}</Text>
         <Text style={styles.errorTitle}>Oops!</Text>
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity
@@ -87,7 +92,7 @@ export default function GeneratingScreen() {
           }}
           activeOpacity={0.8}
         >
-          <Text style={styles.retryText}>Try Again ✨</Text>
+          <Text style={styles.retryText}>Try Again {'\u{2728}'}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.goBackButton}

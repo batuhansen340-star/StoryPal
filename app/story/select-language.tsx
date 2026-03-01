@@ -58,6 +58,7 @@ export default function SelectLanguageScreen() {
           <View style={styles.stepDot} />
           <View style={styles.stepDot} />
           <View style={styles.stepDot} />
+          <View style={styles.stepDot} />
         </View>
       </Animated.View>
 

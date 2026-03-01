@@ -189,7 +189,63 @@ const DEMO_BY_LANG: Record<string, DemoStories> = {
   ja: DEMO_STORIES_JA,
 };
 
-function getDemoStory(theme: string, character: string, language: string = 'en'): StoryGenerationResponse {
+const INTERACTIVE_DEMO: StoryGenerationResponse = {
+  title: "Luna's Space Choice",
+  pages: [
+    {
+      text: 'Luna floated through space in her rocket ship when she saw two strange planets ahead.',
+      imagePrompt: 'girl in rocket seeing two planets',
+    },
+    {
+      text: 'One planet glowed purple and hummed with music. The other sparkled green with dancing lights.',
+      imagePrompt: 'purple musical planet and green sparkling planet',
+      choices: [
+        { id: 'purple', emoji: '\u{1F7E3}', text: 'Visit the Purple Planet', nextPageIndex: 2 },
+        { id: 'green', emoji: '\u{1F7E2}', text: 'Visit the Green Planet', nextPageIndex: 4 },
+      ],
+    },
+    {
+      text: "On the Purple Planet, musical flowers sang Luna's favorite songs! She danced with the flower creatures.",
+      imagePrompt: 'girl dancing with singing flowers on purple planet',
+    },
+    {
+      text: 'The flowers gave Luna a magic melody that would help her wherever she went. What a musical adventure!',
+      imagePrompt: 'girl receiving glowing melody gift from flowers',
+    },
+    {
+      text: 'On the Green Planet, friendly light-bugs created amazing shapes in the sky just for Luna!',
+      imagePrompt: 'girl watching light bugs creating shapes in green sky',
+    },
+    {
+      text: 'The light-bugs taught Luna how to paint with light. She created a masterpiece across the stars!',
+      imagePrompt: 'girl painting with light across starry sky',
+    },
+  ],
+};
+
+function getCustomDemoStory(customPrompt: string): StoryGenerationResponse {
+  return {
+    title: 'A Magical Adventure',
+    pages: [
+      { text: 'Once upon a time, someone had an incredible idea...', imagePrompt: 'magical idea sparkling' },
+      { text: `"${customPrompt}" \u2014 and so the adventure began!`, imagePrompt: 'adventure beginning with sparkles' },
+      { text: 'Magic sparkled everywhere as the story came to life.', imagePrompt: 'magic sparkles everywhere' },
+      { text: 'New friends appeared to help along the way!', imagePrompt: 'friendly characters greeting' },
+      { text: 'And everyone lived happily ever after. The end!', imagePrompt: 'happy ending celebration' },
+    ],
+  };
+}
+
+function getDemoStory(theme: string, character: string, language: string = 'en', customPrompt?: string): StoryGenerationResponse {
+  if (customPrompt) {
+    return getCustomDemoStory(customPrompt);
+  }
+
+  // 50% chance of interactive demo for space/luna in English
+  if (theme === 'space' && character === 'luna' && language === 'en' && Math.random() > 0.5) {
+    return INTERACTIVE_DEMO;
+  }
+
   const langStories = DEMO_BY_LANG[language] ?? DEMO_BY_LANG.en;
   const themeStories = langStories[theme] ?? langStories[Object.keys(langStories)[0]];
   if (!themeStories) {
@@ -239,6 +295,7 @@ export function useAI() {
     ageGroup: AgeGroup;
     language: string;
     personalization?: PersonalizationData;
+    customPrompt?: string;
   }) => {
     setState({
       status: 'generating-text',
@@ -256,7 +313,7 @@ export function useAI() {
       if (isDemoMode) {
         await sleep(1500);
 
-        const story = getDemoStory(params.theme, params.character, params.language);
+        const story = getDemoStory(params.theme, params.character, params.language, params.customPrompt);
         const totalSteps = story.pages.length + 2;
 
         setState(prev => ({
