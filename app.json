@@ -39,7 +39,8 @@
           "color": "#FF6B6B"
         }
       ],
-      "expo-image-picker"
+      "expo-image-picker",
+      "expo-sharing"
     ]
   }
 }
