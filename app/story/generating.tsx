@@ -11,10 +11,12 @@ export default function GeneratingScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const hasStarted = useRef(false);
-  const { themeId, characterId, ageGroup } = useLocalSearchParams<{
+  const { themeId, characterId, ageGroup, language, personalization } = useLocalSearchParams<{
     themeId: string;
     characterId: string;
     ageGroup: string;
+    language: string;
+    personalization: string;
   }>();
 
   const {
@@ -33,11 +35,20 @@ export default function GeneratingScreen() {
   useEffect(() => {
     if (themeId && characterId && !hasStarted.current) {
       hasStarted.current = true;
+
+      let parsedPersonalization;
+      try {
+        if (personalization) parsedPersonalization = JSON.parse(personalization);
+      } catch {
+        // ignore parse errors
+      }
+
       generateFullStory({
         theme: themeId,
         character: characterId,
         ageGroup: (ageGroup as AgeGroup) ?? '3-5',
-        language: 'English',
+        language: language ?? 'en',
+        personalization: parsedPersonalization,
       });
     }
   }, [themeId, characterId, ageGroup]);
@@ -54,6 +65,7 @@ export default function GeneratingScreen() {
             coverUrl: coverUrl ?? '',
             themeId: themeId ?? '',
             characterId: characterId ?? '',
+            language: language ?? 'en',
           },
         });
       }, 600);

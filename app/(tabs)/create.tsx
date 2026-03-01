@@ -32,7 +32,7 @@ export default function CreateScreen() {
 
   const handleSelectAge = (ageGroup: AgeGroup) => {
     router.push({
-      pathname: '/story/select-theme',
+      pathname: '/story/select-language',
       params: { ageGroup },
     });
   };

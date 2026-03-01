@@ -19,20 +19,22 @@ const { width } = Dimensions.get('window');
 export default function SelectCharacterScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { themeId, ageGroup } = useLocalSearchParams<{
+  const { themeId, ageGroup, language } = useLocalSearchParams<{
     themeId: string;
     ageGroup: string;
+    language: string;
   }>();
 
   const selectedTheme = THEMES.find(t => t.id === themeId);
 
   const handleSelectCharacter = (characterId: string) => {
     router.push({
-      pathname: '/story/generating',
+      pathname: '/story/personalize',
       params: {
         themeId,
         characterId,
         ageGroup: ageGroup ?? '3-5',
+        language: language ?? 'en',
       },
     });
   };
@@ -50,7 +52,9 @@ export default function SelectCharacterScreen() {
         </TouchableOpacity>
         <View style={styles.stepIndicator}>
           <View style={[styles.stepDot, styles.stepDotCompleted]} />
+          <View style={[styles.stepDot, styles.stepDotCompleted]} />
           <View style={[styles.stepDot, styles.stepDotActive]} />
+          <View style={styles.stepDot} />
           <View style={styles.stepDot} />
         </View>
       </Animated.View>

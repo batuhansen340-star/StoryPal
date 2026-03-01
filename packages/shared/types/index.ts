@@ -67,11 +67,20 @@ export interface UsageLog {
   createdAt: string;
 }
 
+export interface PersonalizationData {
+  name?: string;
+  gender?: 'girl' | 'boy';
+  hairColor: string;
+  skinTone: string;
+  hasGlasses: boolean;
+}
+
 export interface StoryGenerationRequest {
   theme: string;
   character: string;
   ageGroup: AgeGroup;
   language: string;
+  personalization?: PersonalizationData;
 }
 
 export interface StoryGenerationResponse {

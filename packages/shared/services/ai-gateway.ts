@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { AgeGroup, StoryGenerationResponse } from '../types';
+import type { AgeGroup, StoryGenerationResponse, PersonalizationData } from '../types';
 
 const SAFETY_POSITIVE = 'safe for children, friendly, colorful, whimsical, storybook illustration style';
 const SAFETY_NEGATIVE = 'scary, violent, dark, horror, blood, weapon, nsfw, realistic, photograph';
@@ -9,6 +9,7 @@ export async function generateStoryText(params: {
   character: string;
   ageGroup: AgeGroup;
   language: string;
+  personalization?: PersonalizationData;
 }): Promise<StoryGenerationResponse> {
   const { data, error } = await supabase.functions.invoke('ai-text', {
     body: {
@@ -16,6 +17,7 @@ export async function generateStoryText(params: {
       character: params.character,
       ageGroup: params.ageGroup,
       language: params.language,
+      personalization: params.personalization,
     },
   });
 

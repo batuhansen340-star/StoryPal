@@ -43,7 +43,7 @@ export default function HomeScreen() {
         <Animated.View entering={FadeInDown.duration(600).delay(150)}>
           <TouchableOpacity
             activeOpacity={0.9}
-            onPress={() => router.push('/story/select-theme')}
+            onPress={() => router.push('/(tabs)/create')}
           >
             <LinearGradient
               colors={[COLORS.primary, '#FF8E53']}
@@ -78,10 +78,7 @@ export default function HomeScreen() {
               >
                 <TouchableOpacity
                   activeOpacity={0.85}
-                  onPress={() => router.push({
-                    pathname: '/story/select-character',
-                    params: { themeId: theme.id },
-                  })}
+                  onPress={() => router.push('/(tabs)/create')}
                 >
                   <LinearGradient
                     colors={theme.gradient}

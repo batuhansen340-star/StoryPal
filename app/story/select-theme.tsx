@@ -20,12 +20,12 @@ const CARD_WIDTH = (width - SPACING.lg * 2 - SPACING.md) / 2;
 export default function SelectThemeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { ageGroup } = useLocalSearchParams<{ ageGroup?: string }>();
+  const { ageGroup, language } = useLocalSearchParams<{ ageGroup?: string; language?: string }>();
 
   const handleSelectTheme = (themeId: string) => {
     router.push({
       pathname: '/story/select-character',
-      params: { themeId, ageGroup: ageGroup ?? '3-5' },
+      params: { themeId, ageGroup: ageGroup ?? '3-5', language: language ?? 'en' },
     });
   };
 
@@ -41,7 +41,9 @@ export default function SelectThemeScreen() {
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
         <View style={styles.stepIndicator}>
+          <View style={[styles.stepDot, styles.stepDotCompleted]} />
           <View style={[styles.stepDot, styles.stepDotActive]} />
+          <View style={styles.stepDot} />
           <View style={styles.stepDot} />
           <View style={styles.stepDot} />
         </View>
@@ -124,6 +126,10 @@ const styles = StyleSheet.create({
   stepDotActive: {
     width: 24,
     backgroundColor: COLORS.primary,
+    opacity: 1,
+  },
+  stepDotCompleted: {
+    backgroundColor: COLORS.success,
     opacity: 1,
   },
   scrollContent: {

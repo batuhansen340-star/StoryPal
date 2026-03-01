@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,8 +11,10 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
+import { getLanguageByCode } from '../../constants/languages';
 
 interface SettingsRowProps {
   emoji: string;
@@ -48,6 +50,13 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [currentLang, setCurrentLang] = useState('en');
+
+  useEffect(() => {
+    AsyncStorage.getItem('storypal_language').then(saved => {
+      if (saved) setCurrentLang(saved);
+    });
+  }, []);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -101,10 +110,10 @@ export default function SettingsScreen() {
             />
             <View style={styles.divider} />
             <SettingsRow
-              emoji="🌐"
+              emoji={getLanguageByCode(currentLang).flag}
               title="Language"
-              subtitle="English"
-              onPress={() => {}}
+              subtitle={getLanguageByCode(currentLang).nativeName}
+              onPress={() => router.push('/story/select-language')}
             />
             <View style={styles.divider} />
             <SettingsRow

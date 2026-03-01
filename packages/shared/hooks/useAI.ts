@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { AgeGroup, StoryGenerationResponse } from '../types';
+import type { AgeGroup, StoryGenerationResponse, PersonalizationData } from '../types';
 
 type AIStatus = 'idle' | 'generating-text' | 'generating-images' | 'complete' | 'error';
 
@@ -14,7 +14,9 @@ interface AIState {
   error: string | null;
 }
 
-const DEMO_STORIES: Record<string, Record<string, StoryGenerationResponse>> = {
+type DemoStories = Record<string, Record<string, StoryGenerationResponse>>;
+
+const DEMO_STORIES_EN: DemoStories = {
   space: {
     luna: {
       title: 'Luna and the Star Dragon',
@@ -83,9 +85,119 @@ const DEMO_STORIES: Record<string, Record<string, StoryGenerationResponse>> = {
   },
 };
 
-function getDemoStory(theme: string, character: string): StoryGenerationResponse {
-  const themeStories = DEMO_STORIES[theme] ?? DEMO_STORIES.space;
-  return themeStories[character] ?? themeStories.default ?? DEMO_STORIES.space.default;
+const DEMO_STORIES_TR: DemoStories = {
+  space: {
+    default: {
+      title: 'Yildizlara Yolculuk',
+      pages: [
+        { text: 'Bir gece, gokyuzune bakan kucuk kahraman, ayin arkasina dusen bir yildiz gordu.', imagePrompt: 'child looking at shooting star' },
+        { text: '"O yildizi bulmaliyim!" dedi ve kartondan yapilmis roketine atladi.', imagePrompt: 'child in cardboard rocket' },
+        { text: 'Uzayda, yildiz isignindan yapilmis minik bir ejderhayla karsilasti. "Merhaba! Ben Cosmo!"', imagePrompt: 'star dragon in space' },
+        { text: 'Cosmo kaybolmustu ve takimyildizi ailesini ozlemisti. "Sana onlari bulmanda yardim edecegim!"', imagePrompt: 'friends flying in space' },
+        { text: 'Birlikte seker gezegenlerinin ve peynir aylarin yanindan gecip gulduler. Ne guzel bir macera!', imagePrompt: 'candy planets in space' },
+      ],
+    },
+  },
+  ocean: {
+    default: {
+      title: 'Derin Denizin Sirlari',
+      pages: [
+        { text: 'Okyanus dalgalarinin altinda, anlatilmamis hazinelerle parlayan gizli bir krallik vardi.', imagePrompt: 'underwater kingdom' },
+        { text: 'Renkli baliklar daireler cizerek dans ediyor, denizin altinda gokkusagi olusturuyorlardi.', imagePrompt: 'dancing colorful fish' },
+        { text: 'Nazik bir balina, suda yankilanan en guzel sarkiyi soyledi.', imagePrompt: 'singing whale' },
+        { text: 'Tum deniz canlilari birlikte kabuklar ve mercanlardan bir dostluk koprusu insa ettiler.', imagePrompt: 'shell bridge underwater' },
+        { text: 'Okyanus sevgiyle doluydu ve her dalga yeni bir hikaye tasiyordu. Son!', imagePrompt: 'happy ocean ending' },
+      ],
+    },
+  },
+  forest: {
+    default: {
+      title: 'Buyulu Orman Macerasi',
+      pages: [
+        { text: 'Ormanin derinliklerinde, gunes isiginin yapraklar arasinda dans ettigi yerde, her yer sihirle doluydu.', imagePrompt: 'sunlit magical forest' },
+        { text: 'Yol boyunca minik mantar evler dizilmisti, her biri farkli bir orman arkadaasinin eviydi.', imagePrompt: 'mushroom houses in forest' },
+        { text: 'Bilge yasli bir tilki, kadim ormanin ve onun harikulade sirlarinin hikayelerini paylasti.', imagePrompt: 'wise fox telling stories' },
+        { text: 'Atesbocekleri aksam gokyuzunu bin tane kucuk fener gibi aydinlatti.', imagePrompt: 'fireflies lighting forest' },
+        { text: 'Bu buyulu ormanda, her yaratikn bir hikayesi vardi ve her hikayenin mutlu bir sonu!', imagePrompt: 'happy forest ending' },
+      ],
+    },
+  },
+};
+
+const DEMO_STORIES_ES: DemoStories = {
+  space: {
+    default: {
+      title: 'Viaje a las Estrellas',
+      pages: [
+        { text: 'Una noche, mirando al cielo, vio una estrella fugaz caer detras de la luna.', imagePrompt: 'child looking at shooting star' },
+        { text: '"Debo encontrar esa estrella!" dijo, y salto a su cohete hecho de carton y suenos.', imagePrompt: 'child in cardboard rocket' },
+        { text: 'En el espacio, conocio un pequeno dragon hecho de luz de estrellas. "Hola! Soy Cosmo!"', imagePrompt: 'star dragon in space' },
+        { text: 'Cosmo estaba perdido y extranaba a su familia de constelaciones. "Te ayudare a encontrarlos!"', imagePrompt: 'friends flying in space' },
+        { text: 'Juntos volaron por planetas de dulces y lunas de queso, riendo todo el camino. Fin!', imagePrompt: 'candy planets in space' },
+      ],
+    },
+  },
+  ocean: {
+    default: {
+      title: 'Secretos del Azul Profundo',
+      pages: [
+        { text: 'Bajo las olas del oceano, un reino escondido brillaba con tesoros sin contar.', imagePrompt: 'underwater kingdom' },
+        { text: 'Peces coloridos bailaban en circulos, creando un arcoiris bajo el mar.', imagePrompt: 'dancing colorful fish' },
+        { text: 'Una ballena gentil canto la cancion mas hermosa que resono por el agua.', imagePrompt: 'singing whale' },
+        { text: 'Juntas, todas las criaturas del mar construyeron un puente de amistad con conchas y corales.', imagePrompt: 'shell bridge underwater' },
+        { text: 'El oceano estaba lleno de amor, y cada ola llevaba una nueva historia. Fin!', imagePrompt: 'happy ocean ending' },
+      ],
+    },
+  },
+};
+
+const DEMO_STORIES_AR: DemoStories = {
+  space: {
+    default: {
+      title: '\u0631\u062D\u0644\u0629 \u0625\u0644\u0649 \u0627\u0644\u0646\u062C\u0648\u0645',
+      pages: [
+        { text: '\u0641\u064A \u0644\u064A\u0644\u0629 \u0645\u0646 \u0627\u0644\u0644\u064A\u0627\u0644\u064A\u060C \u0646\u0638\u0631 \u0625\u0644\u0649 \u0627\u0644\u0633\u0645\u0627\u0621 \u0648\u0631\u0623\u0649 \u0646\u062C\u0645\u0629 \u062A\u0633\u0642\u0637 \u062E\u0644\u0641 \u0627\u0644\u0642\u0645\u0631.', imagePrompt: 'child looking at shooting star' },
+        { text: '"\u064A\u062C\u0628 \u0623\u0646 \u0623\u062C\u062F \u062A\u0644\u0643 \u0627\u0644\u0646\u062C\u0645\u0629!" \u0642\u0627\u0644\u060C \u0648\u0642\u0641\u0632 \u0625\u0644\u0649 \u0635\u0627\u0631\u0648\u062E\u0647 \u0627\u0644\u0645\u0635\u0646\u0648\u0639 \u0645\u0646 \u0627\u0644\u0643\u0631\u062A\u0648\u0646 \u0648\u0627\u0644\u0623\u062D\u0644\u0627\u0645.', imagePrompt: 'child in cardboard rocket' },
+        { text: '\u0641\u064A \u0627\u0644\u0641\u0636\u0627\u0621\u060C \u0627\u0644\u062A\u0642\u0649 \u0628\u062A\u0646\u064A\u0646 \u0635\u063A\u064A\u0631 \u0645\u0635\u0646\u0648\u0639 \u0645\u0646 \u0636\u0648\u0621 \u0627\u0644\u0646\u062C\u0648\u0645. "\u0645\u0631\u062D\u0628\u0627! \u0623\u0646\u0627 \u0643\u0648\u0632\u0645\u0648!"', imagePrompt: 'star dragon in space' },
+        { text: '\u0643\u0627\u0646 \u0643\u0648\u0632\u0645\u0648 \u062A\u0627\u0626\u0647\u0627\u064B \u0648\u064A\u0634\u062A\u0627\u0642 \u0644\u0639\u0627\u0626\u0644\u062A\u0647. "\u0633\u0623\u0633\u0627\u0639\u062F\u0643 \u0641\u064A \u0627\u0644\u0639\u062B\u0648\u0631 \u0639\u0644\u064A\u0647\u0645!"', imagePrompt: 'friends flying in space' },
+        { text: '\u0645\u0639\u0627\u064B \u0637\u0627\u0631\u0627 \u0639\u0628\u0631 \u0643\u0648\u0627\u0643\u0628 \u0627\u0644\u062D\u0644\u0648\u0649 \u0648\u0623\u0642\u0645\u0627\u0631 \u0627\u0644\u062C\u0628\u0646\u060C \u0636\u0627\u062D\u0643\u064A\u0646 \u0637\u0648\u0627\u0644 \u0627\u0644\u0637\u0631\u064A\u0642. \u0627\u0644\u0646\u0647\u0627\u064A\u0629!', imagePrompt: 'candy planets in space' },
+      ],
+    },
+  },
+};
+
+const DEMO_STORIES_JA: DemoStories = {
+  space: {
+    default: {
+      title: '\u661F\u3078\u306E\u65C5',
+      pages: [
+        { text: '\u3042\u308B\u591C\u3001\u7A7A\u3092\u898B\u4E0A\u3052\u308B\u3068\u3001\u6708\u306E\u5F8C\u308D\u306B\u6D41\u308C\u661F\u304C\u843D\u3061\u308B\u306E\u304C\u898B\u3048\u307E\u3057\u305F\u3002', imagePrompt: 'child looking at shooting star' },
+        { text: '\u300C\u3042\u306E\u661F\u3092\u898B\u3064\u3051\u306A\u304D\u3083\uFF01\u300D\u3068\u8A00\u3063\u3066\u3001\u6BB5\u30DC\u30FC\u30EB\u3068\u5922\u3067\u4F5C\u3063\u305F\u30ED\u30B1\u30C3\u30C8\u306B\u98DB\u3073\u4E57\u308A\u307E\u3057\u305F\u3002', imagePrompt: 'child in cardboard rocket' },
+        { text: '\u5B87\u5B99\u3067\u3001\u661F\u306E\u5149\u3067\u3067\u304D\u305F\u5C0F\u3055\u306A\u7ADC\u306B\u51FA\u4F1A\u3044\u307E\u3057\u305F\u3002\u300C\u3053\u3093\u306B\u3061\u306F\uFF01\u50D5\u306F\u30B3\u30B9\u30E2\uFF01\u300D', imagePrompt: 'star dragon in space' },
+        { text: '\u30B3\u30B9\u30E2\u306F\u8FF7\u5B50\u3067\u3001\u661F\u5EA7\u306E\u5BB6\u65CF\u304C\u604B\u3057\u304B\u3063\u305F\u306E\u3067\u3059\u3002\u300C\u898B\u3064\u3051\u308B\u306E\u3092\u624B\u4F1D\u3046\u3088\uFF01\u300D', imagePrompt: 'friends flying in space' },
+        { text: '\u4E00\u7DD2\u306B\u30AD\u30E3\u30F3\u30C7\u30A3\u306E\u60D1\u661F\u3084\u30C1\u30FC\u30BA\u306E\u6708\u3092\u901A\u308A\u904E\u304E\u3001\u7B11\u3044\u5408\u3044\u307E\u3057\u305F\u3002\u304A\u3057\u307E\u3044\uFF01', imagePrompt: 'candy planets in space' },
+      ],
+    },
+  },
+};
+
+const DEMO_BY_LANG: Record<string, DemoStories> = {
+  en: DEMO_STORIES_EN,
+  tr: DEMO_STORIES_TR,
+  es: DEMO_STORIES_ES,
+  ar: DEMO_STORIES_AR,
+  ja: DEMO_STORIES_JA,
+};
+
+function getDemoStory(theme: string, character: string, language: string = 'en'): StoryGenerationResponse {
+  const langStories = DEMO_BY_LANG[language] ?? DEMO_BY_LANG.en;
+  const themeStories = langStories[theme] ?? langStories[Object.keys(langStories)[0]];
+  if (!themeStories) {
+    const fallback = DEMO_BY_LANG.en;
+    const fallbackTheme = fallback[theme] ?? fallback.space;
+    return fallbackTheme[character] ?? fallbackTheme.default;
+  }
+  return themeStories[character] ?? themeStories.default ?? DEMO_STORIES_EN.space.default;
 }
 
 const PLACEHOLDER_IMAGES = [
@@ -126,6 +238,7 @@ export function useAI() {
     character: string;
     ageGroup: AgeGroup;
     language: string;
+    personalization?: PersonalizationData;
   }) => {
     setState({
       status: 'generating-text',
@@ -143,7 +256,7 @@ export function useAI() {
       if (isDemoMode) {
         await sleep(1500);
 
-        const story = getDemoStory(params.theme, params.character);
+        const story = getDemoStory(params.theme, params.character, params.language);
         const totalSteps = story.pages.length + 2;
 
         setState(prev => ({

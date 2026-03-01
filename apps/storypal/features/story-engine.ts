@@ -9,7 +9,7 @@ import {
 } from '../../../packages/shared/services/supabase';
 import * as aiGateway from '../../../packages/shared/services/ai-gateway';
 import { AGE_GROUPS } from '../constants/themes';
-import type { AgeGroup, Story, StoryGenerationResponse } from '../../../packages/shared/types';
+import type { AgeGroup, Story, StoryGenerationResponse, PersonalizationData } from '../../../packages/shared/types';
 
 const FREE_DAILY_LIMIT = 2;
 
@@ -20,6 +20,7 @@ export interface StoryCreationParams {
   ageGroup: AgeGroup;
   language: string;
   isPremium: boolean;
+  personalization?: PersonalizationData;
 }
 
 export interface StoryCreationCallbacks {
