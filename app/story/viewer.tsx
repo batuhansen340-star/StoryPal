@@ -21,7 +21,7 @@ import { getSpeechLanguageCode } from '../../packages/shared/services/tts';
 import { getVoiceCharacterById } from '../../constants/voice-characters';
 import { getRecordingForPage } from '../../packages/shared/services/audio-recorder';
 import { Audio } from 'expo-av';
-import { saveStory } from '../../packages/shared/services/story-storage';
+import { saveStory, getStoryById } from '../../packages/shared/services/story-storage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -59,29 +59,47 @@ export default function ViewerScreen() {
   const [showSweetDreams, setShowSweetDreams] = useState(false);
   const [useParentVoice, setUseParentVoice] = useState(false);
   const [hasParentRecording, setHasParentRecording] = useState(false);
+  const [isLoadingSaved, setIsLoadingSaved] = useState(!!params.savedStoryId && !params.pages);
   const flatListRef = useRef<FlatList>(null);
   const autoPlayRef = useRef(false);
   const soundRef = useRef<Audio.Sound | null>(null);
+  const hasSaved = useRef(false);
 
-  const title = params.title ?? 'My Story';
-  const themeId = params.themeId ?? 'space';
-  const languageCode = params.language ?? 'en';
+  // Story data as state — initialized from params, updated from storage for saved stories
+  const [title, setTitle] = useState(params.title ?? 'My Story');
+  const [themeId, setThemeId] = useState(params.themeId ?? 'space');
+  const [languageCode, setLanguageCode] = useState(params.language ?? 'en');
+  const [pages, setPages] = useState<StoryPageData[]>(() => {
+    try { return params.pages ? JSON.parse(params.pages) : []; }
+    catch { return []; }
+  });
+  const [imageUrls, setImageUrls] = useState<string[]>(() => {
+    try { return params.imageUrls ? JSON.parse(params.imageUrls) : []; }
+    catch { return []; }
+  });
+  const [coverUrl, setCoverUrl] = useState(params.coverUrl ?? '');
+
   const voiceCharacterId = params.voiceCharacterId;
   const voiceCharacter = voiceCharacterId ? getVoiceCharacterById(voiceCharacterId) : undefined;
   const selectedTheme = THEMES.find(t => t.id === themeId);
   const themeGradient = selectedTheme?.gradient ?? [COLORS.primary, COLORS.accent];
-  const storyId = params.storyId ?? 'demo';
+  const storyId = params.storyId ?? params.savedStoryId ?? 'demo';
 
-  let pages: StoryPageData[] = [];
-  let imageUrls: string[] = [];
-  const coverUrl = params.coverUrl ?? '';
-
-  try {
-    if (params.pages) pages = JSON.parse(params.pages);
-    if (params.imageUrls) imageUrls = JSON.parse(params.imageUrls);
-  } catch {
-    // fallback to empty
-  }
+  // Load saved story from AsyncStorage
+  useEffect(() => {
+    if (!params.savedStoryId || params.pages) return;
+    (async () => {
+      const saved = await getStoryById(params.savedStoryId as string);
+      if (!saved) { setIsLoadingSaved(false); return; }
+      setTitle(saved.title);
+      setThemeId(saved.theme);
+      setLanguageCode(saved.language);
+      setCoverUrl(saved.coverUrl);
+      try { setPages(JSON.parse(saved.pages)); } catch {}
+      try { setImageUrls(JSON.parse(saved.imageUrls)); } catch {}
+      setIsLoadingSaved(false);
+    })();
+  }, [params.savedStoryId]);
 
   const allPages = [
     { type: 'cover' as const, text: title, imageUrl: coverUrl, choices: undefined as StoryChoice[] | undefined },
@@ -104,9 +122,11 @@ export default function ViewerScreen() {
     };
   }, []);
 
-  // Auto-save new stories (not from library)
+  // Auto-save new stories (not from library) — runs once
   useEffect(() => {
+    if (hasSaved.current) return;
     if (!params.savedStoryId && params.pages && params.title) {
+      hasSaved.current = true;
       saveStory({
         title: params.title,
         theme: themeId,
@@ -371,6 +391,14 @@ export default function ViewerScreen() {
       </View>
     );
   };
+
+  if (isLoadingSaved) {
+    return (
+      <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
+        <Text style={{ fontSize: 48 }}>{'\u{1F4D6}'}</Text>
+      </View>
+    );
+  }
 
   if (showSweetDreams) {
     return (

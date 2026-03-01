@@ -71,13 +71,6 @@ export default function LibraryScreen() {
     router.push({
       pathname: '/story/viewer',
       params: {
-        title: story.title,
-        pages: story.pages,
-        imageUrls: story.imageUrls,
-        coverUrl: story.coverUrl,
-        themeId: story.theme,
-        characterId: story.character,
-        language: story.language,
         savedStoryId: story.id,
       },
     });
