@@ -23,7 +23,10 @@ export default function RootLayout() {
           animation: 'slide_from_right',
         }}
       >
-        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="index" options={{ animation: 'none' }} />
+        <Stack.Screen name="onboarding" options={{ animation: 'none' }} />
+        <Stack.Screen name="auth" options={{ animation: 'slide_from_bottom' }} />
+        <Stack.Screen name="(tabs)" options={{ animation: 'none' }} />
         <Stack.Screen
           name="story"
           options={{ presentation: 'modal', animation: 'slide_from_bottom' }}

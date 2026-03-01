@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,11 +10,12 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
 import { getLanguageByCode } from '../../constants/languages';
+import { type AuthUser, getAuthUser, signOut } from '../../packages/shared/services/auth';
 
 interface SettingsRowProps {
   emoji: string;
@@ -51,12 +52,30 @@ export default function SettingsScreen() {
   const router = useRouter();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [currentLang, setCurrentLang] = useState('en');
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
 
-  useEffect(() => {
-    AsyncStorage.getItem('storypal_language').then(saved => {
-      if (saved) setCurrentLang(saved);
-    });
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      AsyncStorage.getItem('storypal_language').then(saved => {
+        if (saved) setCurrentLang(saved);
+      });
+      getAuthUser().then(u => setAuthUser(u));
+    }, [])
+  );
+
+  const handleSignOut = () => {
+    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Sign Out',
+        style: 'destructive',
+        onPress: async () => {
+          await signOut();
+          router.replace('/auth');
+        },
+      },
+    ]);
+  };
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -78,14 +97,16 @@ export default function SettingsScreen() {
               style={styles.profileCard}
             >
               <View style={styles.avatarContainer}>
-                <Text style={styles.avatarEmoji}>👤</Text>
+                <Text style={styles.avatarEmoji}>{authUser?.isGuest ? '\u{1F47B}' : '\u{1F9D2}'}</Text>
               </View>
               <View style={styles.profileInfo}>
-                <Text style={styles.profileName}>Story Explorer</Text>
-                <Text style={styles.profilePlan}>Free Plan · 2 stories/day</Text>
+                <Text style={styles.profileName}>{authUser?.displayName ?? 'Story Explorer'}</Text>
+                <Text style={styles.profilePlan}>
+                  {authUser?.isGuest ? 'Guest' : authUser?.email ?? 'Free Plan'} {'\u00B7'} 2 stories/day
+                </Text>
               </View>
               <View style={styles.upgradeBadge}>
-                <Text style={styles.upgradeBadgeText}>Upgrade 👑</Text>
+                <Text style={styles.upgradeBadgeText}>Upgrade {'\u{1F451}'}</Text>
               </View>
             </LinearGradient>
           </TouchableOpacity>
@@ -178,12 +199,9 @@ export default function SettingsScreen() {
           <Text style={styles.sectionLabel}>Account</Text>
           <View style={styles.settingsCard}>
             <SettingsRow
-              emoji="🚪"
+              emoji={'\u{1F6AA}'}
               title="Sign Out"
-              onPress={() => Alert.alert('Sign Out', 'Are you sure?', [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Sign Out', style: 'destructive' },
-              ])}
+              onPress={handleSignOut}
             />
           </View>
         </Animated.View>

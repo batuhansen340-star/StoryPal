@@ -21,6 +21,7 @@ import { getSpeechLanguageCode } from '../../packages/shared/services/tts';
 import { getVoiceCharacterById } from '../../constants/voice-characters';
 import { getRecordingForPage } from '../../packages/shared/services/audio-recorder';
 import { Audio } from 'expo-av';
+import { saveStory } from '../../packages/shared/services/story-storage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -46,6 +47,7 @@ export default function ViewerScreen() {
     storyId?: string;
     language?: string;
     voiceCharacterId?: string;
+    savedStoryId?: string;
   }>();
 
   const [currentPage, setCurrentPage] = useState(0);
@@ -101,6 +103,21 @@ export default function ViewerScreen() {
       soundRef.current?.unloadAsync();
     };
   }, []);
+
+  // Auto-save new stories (not from library)
+  useEffect(() => {
+    if (!params.savedStoryId && params.pages && params.title) {
+      saveStory({
+        title: params.title,
+        theme: themeId,
+        character: params.characterId ?? '',
+        language: languageCode,
+        pages: params.pages,
+        imageUrls: params.imageUrls ?? '[]',
+        coverUrl: coverUrl,
+      }).catch(() => {});
+    }
+  }, [params.savedStoryId, params.pages, params.title]);
 
   // Check for parent recording on page change
   useEffect(() => {
