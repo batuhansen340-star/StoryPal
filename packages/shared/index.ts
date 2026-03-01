@@ -4,6 +4,7 @@ export { getSavedStories, saveStory, deleteStory, getStoryById } from './service
 export { canCreateStory, recordStoryCreation, getTodayStoryCount } from './services/usage-limiter';
 export { getChildProfiles, createChildProfile, deleteChildProfile, getAvatarEmoji, getAvatarOptions, ageToAgeGroup } from './services/child-profiles';
 export { generateStoryText, generateStoryImage, generateCoverImage } from './services/ai-gateway';
+export { exportStoryAsPDF, shareStoryPDF } from './services/story-export';
 export { configureRevenueCat, checkSubscriptionStatus, getOfferings, purchasePackage, restorePurchases } from './services/revenue-cat';
 
 export { useSubscription } from './hooks/useSubscription';

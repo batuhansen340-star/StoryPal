@@ -25,6 +25,7 @@ import { getVoiceCharacterById } from '../../constants/voice-characters';
 import { getRecordingForPage } from '../../packages/shared/services/audio-recorder';
 import { Audio } from 'expo-av';
 import { saveStory, getStoryById } from '../../packages/shared/services/story-storage';
+import { shareStoryPDF } from '../../packages/shared/services/story-export';
 
 const { width, height } = Dimensions.get('window');
 
@@ -63,6 +64,7 @@ export default function ViewerScreen() {
   const [useParentVoice, setUseParentVoice] = useState(false);
   const [hasParentRecording, setHasParentRecording] = useState(false);
   const [isLoadingSaved, setIsLoadingSaved] = useState(!!params.savedStoryId && !params.pages);
+  const [isExporting, setIsExporting] = useState(false);
   const flatListRef = useRef<FlatList>(null);
   const autoPlayRef = useRef(false);
   const soundRef = useRef<Audio.Sound | null>(null);
@@ -289,6 +291,25 @@ export default function ViewerScreen() {
         storyId,
       },
     });
+  };
+
+  const handleSharePDF = async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      await shareStoryPDF({
+        title,
+        pages: pages.map((p, i) => ({
+          text: p.text,
+          imageUrl: imageUrls[i] || undefined,
+        })),
+        coverUrl: coverUrl || undefined,
+      });
+    } catch (err) {
+      console.warn('[Viewer] PDF export failed:', err);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const bgColors = bedtimeMode
@@ -578,6 +599,21 @@ export default function ViewerScreen() {
             <Text style={styles.controlEmoji}>{'\u{1F3A4}'}</Text>
             <Text style={[styles.controlLabel, bedtimeMode && styles.controlLabelBedtime]}>
               Record Voice
+            </Text>
+            <Text style={styles.controlArrow}>{'\u2192'}</Text>
+          </TouchableOpacity>
+
+          <View style={styles.controlDivider} />
+
+          {/* Share PDF Button */}
+          <TouchableOpacity
+            style={[styles.controlRow, isExporting && styles.controlRowDisabled]}
+            onPress={handleSharePDF}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.controlEmoji}>{isExporting ? '\u{23F3}' : '\u{1F4E4}'}</Text>
+            <Text style={[styles.controlLabel, bedtimeMode && styles.controlLabelBedtime]}>
+              {isExporting ? 'Exporting...' : 'Share as PDF'}
             </Text>
             <Text style={styles.controlArrow}>{'\u2192'}</Text>
           </TouchableOpacity>
