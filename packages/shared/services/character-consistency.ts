@@ -17,7 +17,7 @@ export function buildCharacterSheet(params: {
       if (personalization.name) {
         baseDescription = `A child named ${personalization.name}`;
       }
-      if (personalization.gender && personalization.gender !== 'skip') {
+      if (personalization.gender) {
         features.push(`${personalization.gender} character`);
       }
       features.push(`${personalization.hairColor} hair`);

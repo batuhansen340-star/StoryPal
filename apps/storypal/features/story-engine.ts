@@ -1,15 +1,9 @@
-import {
-  generateStoryText,
-  generateStoryImage,
-  generateCoverImage,
-  saveStory,
-  saveStoryPages,
-  logUsage,
-  getTodayUsageCount,
-} from '../../../packages/shared/services/supabase';
 import * as aiGateway from '../../../packages/shared/services/ai-gateway';
+import { saveStory as saveLocalStory } from '../../../packages/shared/services/story-storage';
+import { recordStoryCreation, getTodayStoryCount } from '../../../packages/shared/services/usage-limiter';
+import { supabase } from '../../../packages/shared/services/supabase';
 import { AGE_GROUPS } from '../constants/themes';
-import type { AgeGroup, Story, StoryGenerationResponse, PersonalizationData } from '../../../packages/shared/types';
+import type { AgeGroup, Story, PersonalizationData } from '../../../packages/shared/types';
 
 const FREE_DAILY_LIMIT = 2;
 
@@ -36,7 +30,7 @@ export async function checkCanCreateStory(
     return { canCreate: true, remaining: Infinity };
   }
 
-  const todayCount = await getTodayUsageCount(userId);
+  const todayCount = await getTodayStoryCount();
   const remaining = Math.max(0, FREE_DAILY_LIMIT - todayCount);
 
   if (remaining <= 0) {
@@ -90,14 +84,14 @@ export async function createFullStory(
 
   // Step 3: Save story to database
   onStatusChange('Saving your story...');
-  const savedStory = await saveStory({
-    user_id: userId,
+  const savedStory = await saveLocalStory({
     title: storyData.title,
     theme,
     character,
-    age_group: ageGroup,
     language,
-    cover_image_url: coverImageUrl,
+    pages: JSON.stringify(storyData.pages),
+    imageUrls: '[]',
+    coverUrl: coverImageUrl,
   });
 
   // Step 4: Generate page images and save pages
@@ -135,15 +129,13 @@ export async function createFullStory(
     onProgress(i + 3, totalSteps);
   }
 
-  await saveStoryPages(pageData);
+  // Save pages to Supabase
+  if (pageData.length > 0) {
+    await supabase.from('story_pages').insert(pageData).throwOnError();
+  }
 
   // Log usage
-  await logUsage({
-    user_id: userId,
-    action: 'story_created',
-    cost: 0,
-    metadata: { theme, character, ageGroup, pageCount: storyData.pages.length },
-  });
+  await recordStoryCreation();
 
   onStatusChange('Story complete!');
   onProgress(totalSteps, totalSteps);

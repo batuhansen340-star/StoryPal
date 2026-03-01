@@ -98,7 +98,7 @@ export function PaywallScreen({ userId, onClose, onSuccess }: PaywallScreenProps
                   <Text style={styles.planName}>{planInfo.name}</Text>
                   <Text style={styles.planPrice}>{pkg.product.priceString}</Text>
                   <Text style={styles.planPeriod}>
-                    {pkg.packageType === '$rc_lifetime' ? 'one time' : `per ${pkg.packageType === '$rc_annual' ? 'year' : 'month'}`}
+                    {String(pkg.packageType) === '$rc_lifetime' ? 'one time' : `per ${String(pkg.packageType) === '$rc_annual' ? 'year' : 'month'}`}
                   </Text>
                 </TouchableOpacity>
               );
