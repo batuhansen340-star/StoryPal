@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -24,18 +23,23 @@ export default function AuthScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   const handleSubmit = async () => {
+    setErrorMsg('');
+    setSuccessMsg('');
+
     if (!email.trim() || !password.trim()) {
-      Alert.alert('Missing Fields', 'Please enter your email and password.');
+      setErrorMsg('Please enter your email and password.');
       return;
     }
     if (!email.includes('@')) {
-      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      setErrorMsg('Please enter a valid email address.');
       return;
     }
     if (password.length < 6) {
-      Alert.alert('Weak Password', 'Password must be at least 6 characters.');
+      setErrorMsg('Password must be at least 6 characters.');
       return;
     }
 
@@ -43,24 +47,36 @@ export default function AuthScreen() {
     try {
       if (isSignUp) {
         await signUpWithEmail(email.trim(), password);
+        // Supabase may require email confirmation — try auto-login
+        try {
+          await signInWithEmail(email.trim(), password);
+          router.replace('/(tabs)');
+        } catch {
+          // Email confirmation required — show success message
+          setSuccessMsg('Account created! Check your email to confirm, then sign in.');
+          setIsSignUp(false);
+        }
       } else {
         await signInWithEmail(email.trim(), password);
+        router.replace('/(tabs)');
       }
-      router.replace('/(tabs)');
-    } catch {
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      setErrorMsg(message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleGuest = async () => {
+    setErrorMsg('');
+    setSuccessMsg('');
     setLoading(true);
     try {
       await signInAsGuest();
       router.replace('/(tabs)');
     } catch {
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      setErrorMsg('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -88,6 +104,18 @@ export default function AuthScreen() {
           </Text>
         </Animated.View>
 
+        {/* Error / Success Messages */}
+        {errorMsg !== '' && (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>{errorMsg}</Text>
+          </View>
+        )}
+        {successMsg !== '' && (
+          <View style={styles.successBox}>
+            <Text style={styles.successText}>{successMsg}</Text>
+          </View>
+        )}
+
         {/* Form */}
         <Animated.View entering={FadeInUp.duration(600).delay(200)} style={styles.form}>
           <View style={styles.inputContainer}>
@@ -100,7 +128,7 @@ export default function AuthScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(t) => { setEmail(t); setErrorMsg(''); }}
             />
           </View>
 
@@ -112,7 +140,7 @@ export default function AuthScreen() {
               placeholderTextColor={COLORS.textMuted}
               secureTextEntry
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(t) => { setPassword(t); setErrorMsg(''); }}
             />
           </View>
 
@@ -136,7 +164,7 @@ export default function AuthScreen() {
 
           {/* Toggle Sign In / Sign Up */}
           <TouchableOpacity
-            onPress={() => setIsSignUp(!isSignUp)}
+            onPress={() => { setIsSignUp(!isSignUp); setErrorMsg(''); setSuccessMsg(''); }}
             activeOpacity={0.7}
             style={styles.toggleButton}
           >
@@ -203,6 +231,34 @@ const styles = StyleSheet.create({
     fontSize: 17,
     color: COLORS.textLight,
     fontWeight: '500',
+  },
+  errorBox: {
+    backgroundColor: '#FFE8E8',
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: '#FFB8B8',
+  },
+  errorText: {
+    color: '#C62828',
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  successBox: {
+    backgroundColor: '#E8F5E9',
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: '#A5D6A7',
+  },
+  successText: {
+    color: '#2E7D32',
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   form: {
     marginBottom: SPACING.lg,

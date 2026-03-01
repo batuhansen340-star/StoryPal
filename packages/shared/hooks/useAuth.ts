@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   type AuthUser,
   getAuthUser,
@@ -7,19 +7,51 @@ import {
   signInAsGuest,
   signOut as authSignOut,
 } from '../services/auth';
+import { supabase } from '../services/supabase';
 
 export function useAuth() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const mounted = useRef(true);
 
   const refresh = useCallback(async () => {
-    const u = await getAuthUser();
-    setUser(u);
-    setLoading(false);
+    try {
+      const u = await getAuthUser();
+      if (mounted.current) {
+        setUser(u);
+        setLoading(false);
+      }
+    } catch {
+      if (mounted.current) setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
+    mounted.current = true;
     refresh();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted.current) return;
+
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email ?? '',
+          displayName: session.user.user_metadata?.display_name ?? session.user.email?.split('@')[0] ?? 'Story Explorer',
+          isGuest: false,
+          createdAt: session.user.created_at,
+        });
+        setLoading(false);
+      } else {
+        // Session cleared — check if guest is still active
+        refresh();
+      }
+    });
+
+    return () => {
+      mounted.current = false;
+      subscription.unsubscribe();
+    };
   }, [refresh]);
 
   const login = useCallback(async (email: string, password: string) => {

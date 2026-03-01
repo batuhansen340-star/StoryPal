@@ -63,9 +63,16 @@ export default function SettingsScreen() {
     }, [])
   );
 
+  const [signOutError, setSignOutError] = useState('');
+
   const handleSignOut = async () => {
-    await signOut();
-    router.replace('/');
+    setSignOutError('');
+    try {
+      await signOut();
+      router.replace('/');
+    } catch {
+      setSignOutError('Sign out failed. Please try again.');
+    }
   };
 
   return (

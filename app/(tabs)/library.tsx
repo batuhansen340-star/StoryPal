@@ -7,6 +7,7 @@ import {
   Dimensions,
   FlatList,
   Alert,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -40,6 +41,7 @@ export default function LibraryScreen() {
           setState('guest-locked');
           return;
         }
+        // Both logged-in and guest users can see their saved stories
         const saved = await getSavedStories();
         setStories(saved);
         setState(saved.length > 0 ? 'stories' : 'empty');
@@ -47,24 +49,24 @@ export default function LibraryScreen() {
     }, [])
   );
 
-  const handleDelete = (id: string, title: string) => {
-    Alert.alert(
-      'Delete Story',
-      `Are you sure you want to delete "${title}"?`,
-      [
+  const handleDelete = async (id: string, title: string) => {
+    const doDelete = async () => {
+      await deleteStory(id);
+      const updated = await getSavedStories();
+      setStories(updated);
+      if (updated.length === 0) setState('empty');
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(`Delete "${title}"?`)) {
+        await doDelete();
+      }
+    } else {
+      Alert.alert('Delete Story', `Are you sure you want to delete "${title}"?`, [
         { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            await deleteStory(id);
-            const updated = await getSavedStories();
-            setStories(updated);
-            if (updated.length === 0) setState('empty');
-          },
-        },
-      ]
-    );
+        { text: 'Delete', style: 'destructive', onPress: doDelete },
+      ]);
+    }
   };
 
   const openStory = (story: SavedStory) => {

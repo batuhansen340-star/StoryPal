@@ -7,7 +7,10 @@ import {
   Dimensions,
   FlatList,
   Image,
+  Platform,
   type ViewToken,
+  type NativeSyntheticEvent,
+  type NativeScrollEvent,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -127,6 +130,7 @@ export default function ViewerScreen() {
     if (hasSaved.current) return;
     if (!params.savedStoryId && params.pages && params.title) {
       hasSaved.current = true;
+      console.log('[Viewer] Auto-saving story:', params.title);
       saveStory({
         title: params.title,
         theme: themeId,
@@ -135,7 +139,9 @@ export default function ViewerScreen() {
         pages: params.pages,
         imageUrls: params.imageUrls ?? '[]',
         coverUrl: coverUrl,
-      }).catch(() => {});
+      })
+        .then(() => console.log('[Viewer] Story saved successfully'))
+        .catch((err) => console.warn('[Viewer] Auto-save failed:', err));
     }
   }, [params.savedStoryId, params.pages, params.title]);
 
@@ -155,6 +161,14 @@ export default function ViewerScreen() {
   }).current;
 
   const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
+
+  // Web fallback: onViewableItemsChanged doesn't fire reliably on web
+  const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (Platform.OS !== 'web') return;
+    const offsetX = e.nativeEvent.contentOffset.x;
+    const page = Math.round(offsetX / width);
+    setCurrentPage(prev => prev !== page ? page : prev);
+  }, []);
 
   const playParentRecording = useCallback(async (pageIndex: number) => {
     const uri = await getRecordingForPage(storyId, pageIndex - 1);
@@ -183,7 +197,7 @@ export default function ViewerScreen() {
 
   const speakCurrentPage = useCallback(async (pageIndex: number) => {
     const page = allPages[pageIndex];
-    if (!page || page.type === 'cover') return;
+    if (!page) return;
 
     // Check for parent voice
     if (useParentVoice) {
@@ -218,7 +232,7 @@ export default function ViewerScreen() {
   }, [allPages, languageCode, ttsSpeed, bedtimeMode, voiceCharacter, useParentVoice, storyId, playParentRecording]);
 
   useEffect(() => {
-    if (autoPlay && currentPage > 0) {
+    if (autoPlay) {
       speakCurrentPage(currentPage);
     }
   }, [currentPage, autoPlay]);
@@ -435,6 +449,8 @@ export default function ViewerScreen() {
         showsHorizontalScrollIndicator={false}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
+        onScroll={handleScroll}
+        scrollEventThrottle={100}
         keyExtractor={(_, i) => i.toString()}
       />
 
@@ -442,7 +458,7 @@ export default function ViewerScreen() {
       <View style={[styles.navBar, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity
           style={[styles.navButton, bedtimeMode && styles.navButtonBedtime]}
-          onPress={() => { stopTTS(); router.back(); }}
+          onPress={() => { stopTTS(); router.replace('/(tabs)'); }}
           activeOpacity={0.7}
         >
           <Text style={styles.navButtonText}>{'\u2715'}</Text>
@@ -570,7 +586,7 @@ export default function ViewerScreen() {
 
       {/* Bottom Navigation */}
       <View style={[styles.bottomNav, { paddingBottom: insets.bottom + 20 }]}>
-        {currentPage > 0 && (
+        {currentPage > 0 ? (
           <TouchableOpacity
             style={[styles.arrowButton, bedtimeMode && styles.arrowButtonBedtime]}
             onPress={goToPrev}
@@ -578,25 +594,25 @@ export default function ViewerScreen() {
           >
             <Text style={styles.arrowText}>{'\u2190'}</Text>
           </TouchableOpacity>
+        ) : (
+          <View style={{ width: 52 }} />
         )}
 
-        {/* Play/Pause Button */}
-        {currentPage > 0 && (
-          <TouchableOpacity
-            style={styles.playButton}
-            onPress={handlePlayPause}
-            activeOpacity={0.85}
+        {/* Play/Pause Button — always visible */}
+        <TouchableOpacity
+          style={styles.playButton}
+          onPress={handlePlayPause}
+          activeOpacity={0.85}
+        >
+          <LinearGradient
+            colors={bedtimeMode ? ['#0f3460', '#1a1a2e'] : [COLORS.primary, '#FF8E53']}
+            style={styles.playButtonGradient}
           >
-            <LinearGradient
-              colors={bedtimeMode ? ['#0f3460', '#1a1a2e'] : [COLORS.primary, '#FF8E53']}
-              style={styles.playButtonGradient}
-            >
-              <Text style={styles.playButtonText}>
-                {isSpeaking ? '\u{23F8}\u{FE0F}' : '\u{25B6}\u{FE0F}'}
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        )}
+            <Text style={styles.playButtonText}>
+              {isSpeaking ? '\u{23F8}\u{FE0F}' : '\u{25B6}\u{FE0F}'}
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity>
 
         <View style={styles.dots}>
           {allPages.map((_, i) => (

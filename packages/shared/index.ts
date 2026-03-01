@@ -1,4 +1,7 @@
-export { supabase, getCurrentUser, signInWithEmail, signUpWithEmail, signOut, getUserProfile, getUserStories, getStoryById, saveStory, saveStoryPages, logUsage, getTodayUsageCount } from './services/supabase';
+export { supabase } from './services/supabase';
+export { getAuthUser, signInWithEmail, signUpWithEmail, signInAsGuest, signOut, isOnboardingDone, setOnboardingDone } from './services/auth';
+export { getSavedStories, saveStory, deleteStory, getStoryById } from './services/story-storage';
+export { canCreateStory, recordStoryCreation, getTodayStoryCount } from './services/usage-limiter';
 export { generateStoryText, generateStoryImage, generateCoverImage } from './services/ai-gateway';
 export { configureRevenueCat, checkSubscriptionStatus, getOfferings, purchasePackage, restorePurchases } from './services/revenue-cat';
 

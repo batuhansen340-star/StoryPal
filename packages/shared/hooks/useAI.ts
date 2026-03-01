@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { AgeGroup, StoryGenerationResponse, PersonalizationData } from '../types';
+import { recordStoryCreation } from '../services/usage-limiter';
 import { DEMO_STORIES_EN, INTERACTIVE_DEMO } from './demo-stories-en';
 import {
   DEMO_STORIES_TR,
@@ -71,7 +72,7 @@ function randomDelay(min: number, max: number): number {
   return min + Math.random() * (max - min);
 }
 
-const isDemoMode = !process.env.EXPO_PUBLIC_SUPABASE_URL || process.env.EXPO_PUBLIC_SUPABASE_URL === '';
+const isDemoMode = !process.env.EXPO_PUBLIC_OPENAI_API_KEY || process.env.EXPO_PUBLIC_OPENAI_API_KEY === '';
 
 export function useAI() {
   const [state, setState] = useState<AIState>({
@@ -172,12 +173,12 @@ export function useAI() {
           currentStep: '\uD83D\uDCD6 Your story is ready!',
         }));
 
+        recordStoryCreation().catch(() => {});
         return { story, imageUrls, coverUrl };
       }
 
       // Production mode: use real AI
-      const { generateStoryText } = await import('../services/ai-gateway');
-      const { generateCoverImage, generateStoryImage } = await import('../services/ai-gateway');
+      const { generateStoryText, generateCoverImage, generateStoryImage } = await import('../services/ai-gateway');
 
       const story = await generateStoryText(params);
       const totalImages = story.pages.length + 1;
@@ -234,6 +235,7 @@ export function useAI() {
         currentStep: '\uD83D\uDCD6 Story complete!',
       }));
 
+      recordStoryCreation().catch(() => {});
       return { story, imageUrls, coverUrl };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Something went wrong';
