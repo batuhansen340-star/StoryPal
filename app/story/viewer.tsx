@@ -626,6 +626,7 @@ const styles = StyleSheet.create({
   pageImage: {
     width: '100%',
     height: '100%',
+    borderRadius: 16,
   },
   imageOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -637,7 +638,7 @@ const styles = StyleSheet.create({
     opacity: 0.3,
   },
   placeholderEmoji: {
-    fontSize: 120,
+    fontSize: 140,
   },
   starsContainer: {
     position: 'absolute',

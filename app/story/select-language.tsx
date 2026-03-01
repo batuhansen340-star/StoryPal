@@ -15,7 +15,7 @@ import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
 import { LANGUAGES, type Language } from '../../constants/languages';
 
 const { width } = Dimensions.get('window');
-const CARD_SIZE = (width - SPACING.lg * 2 - SPACING.md * 2) / 3;
+const CARD_SIZE = (width - SPACING.lg * 2 - SPACING.md) / 2;
 const STORAGE_KEY = 'storypal_language';
 
 export default function SelectLanguageScreen() {
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     padding: SPACING.sm,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 100,
+    minHeight: 120,
     shadowColor: COLORS.cardShadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
@@ -207,11 +207,11 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.lg - 2,
   },
   langFlag: {
-    fontSize: 32,
+    fontSize: 40,
     marginBottom: SPACING.xs,
   },
   langNative: {
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: '800',
     color: COLORS.text,
     textAlign: 'center',
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
   langName: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.textMuted,
     textAlign: 'center',
     marginTop: 1,

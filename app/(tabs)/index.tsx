@@ -54,7 +54,7 @@ export default function HomeScreen() {
               <View style={styles.ctaContent}>
                 <Text style={styles.ctaEmoji}>✨</Text>
                 <Text style={styles.ctaTitle}>Create New Story</Text>
-                <Text style={styles.ctaSubtitle}>Pick a theme, choose a character, and let AI create magic!</Text>
+                <Text style={styles.ctaSubtitle}>Create personalized bedtime stories in 10 languages with AI illustration!</Text>
               </View>
               <View style={styles.ctaButton}>
                 <Text style={styles.ctaButtonText}>Start →</Text>
