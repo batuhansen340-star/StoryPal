@@ -51,6 +51,7 @@
 | Check | Result |
 |-------|--------|
 | Build (web export) | PASS — 0 errors |
+| TypeScript (`tsc --noEmit`) | PASS — 0 errors |
 | Import audit (9 files) | PASS — all imports resolve |
 | Barrel exports (index.ts) | PASS — 16 exports, all valid |
 | New dependencies | expo-print, expo-sharing (both SDK 55 compatible) |
@@ -90,7 +91,15 @@ bbb4c48 feat(wave3): enhanced story creation with child name personalization
 9a045f4 feat(wave3): story statistics screen with streak tracking
 1ab67f9 feat(wave3): PDF export and sharing for stories
 12c0370 feat(wave3): premium paywall integration in create flow
+e7d38f3 chore: add expo-sharing plugin to app.json
+0736c44 fix: resolve all TypeScript type errors
 ```
+
+### TypeScript Fixes (Post-Wave 3)
+- `story-engine.ts` — stale imports from supabase.ts replaced with correct modules (story-storage, usage-limiter)
+- `PaywallScreen.tsx` — `packageType` cast to string for comparison
+- `character-consistency.ts` — removed impossible `'skip'` comparison (gender type is `'girl' | 'boy'`)
+- `tsconfig.json` — excluded `supabase/functions/` (Deno runtime, not Node/React Native)
 
 ## Known Limitations / Future Work
 - `personalize.tsx` has `isPremium = true` hardcoded (beta mode) — wire to usePremium when RevenueCat is fully configured
