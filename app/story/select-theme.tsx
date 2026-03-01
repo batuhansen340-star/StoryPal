@@ -20,19 +20,19 @@ const CARD_WIDTH = (width - SPACING.lg * 2 - SPACING.md) / 2;
 export default function SelectThemeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { ageGroup, language } = useLocalSearchParams<{ ageGroup?: string; language?: string }>();
+  const { ageGroup, language, childName, childAge } = useLocalSearchParams<{ ageGroup?: string; language?: string; childName?: string; childAge?: string }>();
 
   const handleSelectTheme = (themeId: string) => {
     router.push({
       pathname: '/story/select-character',
-      params: { themeId, ageGroup: ageGroup ?? '3-5', language: language ?? 'en' },
+      params: { themeId, ageGroup: ageGroup ?? '3-5', language: language ?? 'en', childName: childName ?? '', childAge: childAge ?? '' },
     });
   };
 
   const handleCustomIdea = () => {
     router.push({
       pathname: '/story/custom-idea',
-      params: { ageGroup: ageGroup ?? '3-5', language: language ?? 'en' },
+      params: { ageGroup: ageGroup ?? '3-5', language: language ?? 'en', childName: childName ?? '', childAge: childAge ?? '' },
     });
   };
 

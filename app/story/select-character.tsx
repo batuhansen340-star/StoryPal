@@ -19,11 +19,13 @@ const { width } = Dimensions.get('window');
 export default function SelectCharacterScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { themeId, ageGroup, language, customPrompt } = useLocalSearchParams<{
+  const { themeId, ageGroup, language, customPrompt, childName, childAge } = useLocalSearchParams<{
     themeId: string;
     ageGroup: string;
     language: string;
     customPrompt: string;
+    childName: string;
+    childAge: string;
   }>();
 
   const selectedTheme = THEMES.find(t => t.id === themeId);
@@ -37,6 +39,8 @@ export default function SelectCharacterScreen() {
         ageGroup: ageGroup ?? '3-5',
         language: language ?? 'en',
         customPrompt: customPrompt ?? '',
+        childName: childName ?? '',
+        childAge: childAge ?? '',
       },
     });
   };

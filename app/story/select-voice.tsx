@@ -21,7 +21,7 @@ const CARD_WIDTH = (width - SPACING.lg * 2 - SPACING.md) / 2;
 export default function SelectVoiceScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { themeId, characterId, ageGroup, language, personalization, customPrompt } =
+  const { themeId, characterId, ageGroup, language, personalization, customPrompt, childName, childAge } =
     useLocalSearchParams<{
       themeId: string;
       characterId: string;
@@ -29,6 +29,8 @@ export default function SelectVoiceScreen() {
       language: string;
       personalization: string;
       customPrompt: string;
+      childName: string;
+      childAge: string;
     }>();
 
   const [selectedVoice, setSelectedVoice] = useState('narrator');
@@ -63,6 +65,8 @@ export default function SelectVoiceScreen() {
         personalization: personalization ?? '',
         customPrompt: customPrompt ?? '',
         voiceCharacterId: selectedVoice,
+        childName: childName ?? '',
+        childAge: childAge ?? '',
       },
     });
   };
@@ -78,6 +82,8 @@ export default function SelectVoiceScreen() {
         language: language ?? 'en',
         personalization: personalization ?? '',
         customPrompt: customPrompt ?? '',
+        childName: childName ?? '',
+        childAge: childAge ?? '',
       },
     });
   };

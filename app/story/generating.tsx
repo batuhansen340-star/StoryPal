@@ -11,7 +11,7 @@ export default function GeneratingScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const hasStarted = useRef(false);
-  const { themeId, characterId, ageGroup, language, personalization, customPrompt, voiceCharacterId } =
+  const { themeId, characterId, ageGroup, language, personalization, customPrompt, voiceCharacterId, childName, childAge } =
     useLocalSearchParams<{
       themeId: string;
       characterId: string;
@@ -20,6 +20,8 @@ export default function GeneratingScreen() {
       personalization: string;
       customPrompt: string;
       voiceCharacterId: string;
+      childName: string;
+      childAge: string;
     }>();
 
   const {
@@ -53,6 +55,8 @@ export default function GeneratingScreen() {
         language: language ?? 'en',
         personalization: parsedPersonalization,
         customPrompt: customPrompt || undefined,
+        childName: childName || undefined,
+        childAge: childAge ? parseInt(childAge, 10) : undefined,
       });
     }
   }, [themeId, characterId, ageGroup]);

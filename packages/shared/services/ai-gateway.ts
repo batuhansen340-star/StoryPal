@@ -25,6 +25,8 @@ export async function generateStoryText(params: {
   language: string;
   personalization?: PersonalizationData;
   customPrompt?: string;
+  childName?: string;
+  childAge?: number;
 }): Promise<StoryGenerationResponse> {
   const openai = getClient();
   const config = AGE_CONFIG[params.ageGroup] ?? AGE_CONFIG['3-5'];
@@ -37,6 +39,10 @@ export async function generateStoryText(params: {
   if (params.personalization?.name) {
     characterDesc = `Character: ${params.personalization.name} (a ${params.personalization.gender ?? 'child'} with ${params.personalization.hairColor} hair and ${params.personalization.skinTone} skin${params.personalization.hasGlasses ? ', wearing glasses' : ''})`;
   }
+
+  const childPart = params.childName
+    ? `\nThis story is for a child named "${params.childName}"${params.childAge ? ` who is ${params.childAge} years old` : ''}. Include their name as the main character or a special friend in the story.`
+    : '';
 
   const customPart = params.customPrompt
     ? `\nSpecial request from the child: "${params.customPrompt}"`
@@ -67,7 +73,7 @@ Respond ONLY with valid JSON in this exact format:
 
   const userPrompt = `Theme: ${params.theme}
 ${characterDesc}
-Age group: ${params.ageGroup} years old${customPart}
+Age group: ${params.ageGroup} years old${childPart}${customPart}
 
 Create a ${config.pages}-page story. Each page max ${config.maxWords} words.`;
 

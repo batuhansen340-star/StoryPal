@@ -28,9 +28,11 @@ const IDEA_STARTERS = [
 export default function CustomIdeaScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { ageGroup, language } = useLocalSearchParams<{
+  const { ageGroup, language, childName, childAge } = useLocalSearchParams<{
     ageGroup?: string;
     language?: string;
+    childName?: string;
+    childAge?: string;
   }>();
 
   const [idea, setIdea] = useState('');
@@ -46,6 +48,8 @@ export default function CustomIdeaScreen() {
         customPrompt: idea.trim(),
         ageGroup: ageGroup ?? '3-5',
         language: language ?? 'en',
+        childName: childName ?? '',
+        childAge: childAge ?? '',
       },
     });
   };

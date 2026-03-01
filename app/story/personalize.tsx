@@ -44,12 +44,14 @@ const GENDERS = [
 export default function PersonalizeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { themeId, characterId, ageGroup, language, customPrompt } = useLocalSearchParams<{
+  const { themeId, characterId, ageGroup, language, customPrompt, childName, childAge } = useLocalSearchParams<{
     themeId: string;
     characterId: string;
     ageGroup: string;
     language: string;
     customPrompt: string;
+    childName: string;
+    childAge: string;
   }>();
 
   const [name, setName] = useState('');
@@ -112,6 +114,8 @@ export default function PersonalizeScreen() {
         language: language ?? 'en',
         personalization,
         customPrompt: customPrompt ?? '',
+        childName: childName ?? '',
+        childAge: childAge ?? '',
       },
     });
   };
@@ -125,6 +129,8 @@ export default function PersonalizeScreen() {
         ageGroup: ageGroup ?? '3-5',
         language: language ?? 'en',
         customPrompt: customPrompt ?? '',
+        childName: childName ?? '',
+        childAge: childAge ?? '',
       },
     });
   };

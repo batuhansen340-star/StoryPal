@@ -93,6 +93,8 @@ export function useAI() {
     language: string;
     personalization?: PersonalizationData;
     customPrompt?: string;
+    childName?: string;
+    childAge?: number;
   }) => {
     setState({
       status: 'generating-text',
