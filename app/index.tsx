@@ -1,39 +1,33 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { Redirect } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { isOnboardingDone, getAuthUser } from '../packages/shared/services/auth';
 import { COLORS } from '../packages/shared/types';
 
-type Target = '/(tabs)' | '/onboarding' | '/auth';
-
 export default function IndexScreen() {
-  const [target, setTarget] = useState<Target | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     (async () => {
       const done = await isOnboardingDone();
       if (!done) {
-        setTarget('/onboarding');
+        router.replace('/onboarding');
         return;
       }
       const user = await getAuthUser();
       if (!user) {
-        setTarget('/auth');
+        router.replace('/auth');
         return;
       }
-      setTarget('/(tabs)');
+      router.replace('/(tabs)');
     })();
   }, []);
 
-  if (!target) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-      </View>
-    );
-  }
-
-  return <Redirect href={target} />;
+  return (
+    <View style={styles.loading}>
+      <ActivityIndicator size="large" color={COLORS.primary} />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
