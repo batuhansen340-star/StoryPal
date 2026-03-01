@@ -10,6 +10,7 @@ export { configureRevenueCat, checkSubscriptionStatus, getOfferings, purchasePac
 export { useSubscription } from './hooks/useSubscription';
 export { useAI } from './hooks/useAI';
 export { useStats } from './hooks/useStats';
+export { usePremium } from './hooks/usePremium';
 
 export { PaywallScreen } from './components/PaywallScreen';
 export { OnboardingFlow } from './components/OnboardingFlow';

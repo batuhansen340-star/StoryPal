@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,6 +14,9 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
 import { AGE_GROUPS } from '../../apps/storypal/constants/themes';
 import type { AgeGroup } from '../../packages/shared/types';
+import { usePremium } from '../../packages/shared/hooks/usePremium';
+import { PaywallScreen } from '../../packages/shared/components/PaywallScreen';
+import { getAuthUser } from '../../packages/shared/services/auth';
 
 const AGE_GROUP_EMOJIS: Record<AgeGroup, string> = {
   '3-5': '🍼',
@@ -29,8 +33,14 @@ const AGE_GROUP_GRADIENTS: Record<AgeGroup, [string, string]> = {
 export default function CreateScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { isPremium, canCreate, dailyRemaining, refresh } = usePremium();
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const handleSelectAge = (ageGroup: AgeGroup) => {
+    if (!canCreate) {
+      setShowPaywall(true);
+      return;
+    }
     router.push({
       pathname: '/story/select-language',
       params: { ageGroup },
@@ -107,8 +117,47 @@ export default function CreateScreen() {
           </View>
         </Animated.View>
 
+        {/* Usage Badge */}
+        {!isPremium && (
+          <Animated.View entering={FadeInDown.duration(400).delay(600)} style={styles.usageCard}>
+            <View style={styles.usageGlass}>
+              <Text style={styles.usageEmoji}>{canCreate ? '\u{1F4A1}' : '\u{1F512}'}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.usageText}>
+                  {canCreate
+                    ? `${dailyRemaining} free ${dailyRemaining === 1 ? 'story' : 'stories'} left today`
+                    : 'Daily limit reached'}
+                </Text>
+                {!canCreate && (
+                  <Text style={styles.usageSubtext}>Upgrade for unlimited stories!</Text>
+                )}
+              </View>
+              {!canCreate && (
+                <TouchableOpacity
+                  style={styles.upgradeBadge}
+                  onPress={() => setShowPaywall(true)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.upgradeBadgeText}>{'\u{1F451}'} Upgrade</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </Animated.View>
+        )}
+
         <View style={{ height: 120 }} />
       </ScrollView>
+
+      {/* Paywall Modal */}
+      <Modal visible={showPaywall} animationType="slide">
+        <PaywallScreen
+          onClose={() => setShowPaywall(false)}
+          onSuccess={() => {
+            setShowPaywall(false);
+            refresh();
+          }}
+        />
+      </Modal>
     </View>
   );
 }
@@ -208,4 +257,25 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     lineHeight: 22,
   },
+  usageCard: { marginTop: SPACING.md },
+  usageGlass: {
+    backgroundColor: COLORS.glass,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    borderColor: COLORS.glassBorder,
+    padding: SPACING.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  usageEmoji: { fontSize: 24 },
+  usageText: { fontSize: 14, fontWeight: '700', color: COLORS.text },
+  usageSubtext: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
+  upgradeBadge: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderRadius: RADIUS.full,
+  },
+  upgradeBadgeText: { color: '#fff', fontSize: 12, fontWeight: '800' },
 });
