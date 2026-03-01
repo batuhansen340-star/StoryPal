@@ -116,3 +116,52 @@ Honey (bear cub), Zorp (friendly alien)
 - All image prompts MUST include: "safe for children, no violence, no scary elements"
 - Negative prompt MUST include: "scary, violent, dark, horror, blood, weapon, nsfw"
 - Story content must be positive, uplifting, age-appropriate
+
+---
+
+## Quality Control Patterns
+
+### Pattern 1: Confidence Check
+Before starting implementation, answer 5 questions:
+1. Does this change conflict with existing code? (duplicate check)
+2. Does it fit the project architecture?
+3. Is the API/library documentation verified?
+4. Did I find a similar working example?
+5. Did I identify the root cause? (if bug fix)
+
+Scoring: Each question = 20 points. Total >=90 → PROCEED. 70-89 → OFFER ALTERNATIVE. <70 → STOP, review plan.
+
+### Pattern 2: Hallucination Guard (4-Question Test)
+Before claiming "done", answer these 4 questions:
+1. Does the build pass? → Show `npx expo export --platform web` output
+2. Are all requirements met? → List each one
+3. Did I make assumptions? → Show documentation or code evidence
+4. Did I test it? → Show test result
+
+Red flags (NEVER do these):
+- Say "Tests pass" without showing output
+- Say "Everything works" without evidence
+- Say "Implementation complete" while build fails
+- Skip or hide error/warning messages
+
+### Pattern 3: Wave → Checkpoint → Wave (Parallel Execution)
+Read/edit independent files in PARALLEL. Sequence:
+- Wave 1: Read all relevant files in parallel
+- Wave 2: Edit independent files in parallel
+- Checkpoint: Build check
+- Wave 3: Edit dependent files sequentially
+
+### Pattern 4: Reflexion (Error Memory)
+When an error occurs:
+1. Check if similar error happened before → check memory files
+2. If found → apply known solution (0 token waste)
+3. If new → research, fix, record in memory for future reference
+
+Error document format: What happened? Root cause? Why missed? Fix applied? Prevention checklist.
+
+### Pattern 5: Token Efficiency (Symbol System)
+Activate when context window is >75% full or during long operations:
+- Status: completed/failed/warning/in-progress/pending
+- Flow: then/therefore/back/and
+- Abbreviations: cfg=config, impl=implementation, deps=dependencies, val=validation
+- Goal: 30-50% token savings while maintaining >=95% information quality
