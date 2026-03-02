@@ -11,12 +11,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
+import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 import { AGE_GROUPS } from '../../apps/storypal/constants/themes';
 import type { AgeGroup } from '../../packages/shared/types';
 import { usePremium } from '../../packages/shared/hooks/usePremium';
 import { PaywallScreen } from '../../packages/shared/components/PaywallScreen';
 import { getAuthUser } from '../../packages/shared/services/auth';
+import { selection } from '../../packages/shared/services/haptics';
 
 const AGE_GROUP_EMOJIS: Record<AgeGroup, string> = {
   '3-5': '🍼',
@@ -25,9 +26,9 @@ const AGE_GROUP_EMOJIS: Record<AgeGroup, string> = {
 };
 
 const AGE_GROUP_GRADIENTS: Record<AgeGroup, [string, string]> = {
-  '3-5': ['#FF6B6B', '#FF8E53'],
-  '5-7': ['#4ECDC4', '#44B09E'],
-  '7-10': ['#A18CD1', '#FBC2EB'],
+  '3-5': GRADIENTS.primary,
+  '5-7': GRADIENTS.accent,
+  '7-10': GRADIENTS.purple,
 };
 
 export default function CreateScreen() {
@@ -37,6 +38,7 @@ export default function CreateScreen() {
   const [showPaywall, setShowPaywall] = useState(false);
 
   const handleSelectAge = (ageGroup: AgeGroup) => {
+    selection();
     if (!canCreate) {
       setShowPaywall(true);
       return;
@@ -70,6 +72,8 @@ export default function CreateScreen() {
                 <TouchableOpacity
                   activeOpacity={0.85}
                   onPress={() => handleSelectAge(key)}
+                  accessibilityLabel={`${config.label} age group`}
+                  accessibilityRole="button"
                 >
                   <LinearGradient
                     colors={AGE_GROUP_GRADIENTS[key]}

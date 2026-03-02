@@ -11,7 +11,7 @@ import Animated, {
   Easing,
   interpolate,
 } from 'react-native-reanimated';
-import { COLORS, SPACING, RADIUS } from '../types';
+import { COLORS, SPACING, RADIUS, GRADIENTS } from '../types';
 
 const { width } = Dimensions.get('window');
 
@@ -145,7 +145,7 @@ export function LoadingAI({ progress, totalSteps, currentStep, status }: Loading
         <Animated.View style={[styles.emojiContainer, bounceStyle]}>
           <Animated.View style={pulseStyle}>
             <LinearGradient
-              colors={[COLORS.primary, '#FF8E53']}
+              colors={GRADIENTS.primary}
               style={styles.emojiCircle}
             >
               <Text style={styles.mainEmoji}>{loadingMessage.emoji}</Text>

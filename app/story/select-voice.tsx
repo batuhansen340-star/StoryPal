@@ -11,7 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
-import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
+import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 import { VOICE_CHARACTERS } from '../../constants/voice-characters';
 import { speak, stop as stopTTS, getSpeechLanguageCode } from '../../packages/shared/services/tts';
 
@@ -160,7 +160,7 @@ export default function SelectVoiceScreen() {
         <Animated.View entering={FadeInDown.duration(500).delay(500)} style={styles.buttonSection}>
           <TouchableOpacity activeOpacity={0.85} onPress={handleContinue}>
             <LinearGradient
-              colors={[COLORS.primary, '#FF8E53']}
+              colors={GRADIENTS.primary}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.continueButton}

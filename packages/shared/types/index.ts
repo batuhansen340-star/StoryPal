@@ -134,6 +134,7 @@ export const COLORS = {
   primary: '#FF6B6B',
   primaryLight: '#FF8E8E',
   primaryDark: '#E55A5A',
+  secondary: '#FF8E53',
   background: '#FFF8F0',
   backgroundDark: '#FFF0E0',
   text: '#2D2D2D',
@@ -149,6 +150,13 @@ export const COLORS = {
   overlay: 'rgba(0, 0, 0, 0.5)',
   glass: 'rgba(255, 255, 255, 0.85)',
   glassBorder: 'rgba(255, 255, 255, 0.3)',
+  switchTrack: '#E0E0E0',
+} as const;
+
+export const GRADIENTS = {
+  primary: [COLORS.primary, COLORS.secondary] as [string, string],
+  accent: [COLORS.accent, '#44B09E'] as [string, string],
+  purple: ['#A18CD1', '#FBC2EB'] as [string, string],
 } as const;
 
 export const SPACING = {

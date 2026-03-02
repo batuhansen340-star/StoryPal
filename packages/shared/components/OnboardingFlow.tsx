@@ -16,7 +16,7 @@ import Animated, {
   withTiming,
   interpolate,
 } from 'react-native-reanimated';
-import { COLORS, SPACING, RADIUS } from '../types';
+import { COLORS, SPACING, RADIUS, GRADIENTS } from '../types';
 
 const { width, height } = Dimensions.get('window');
 
@@ -32,13 +32,13 @@ const SLIDES: OnboardingSlide[] = [
     emoji: '📚',
     title: 'Welcome to StoryPal!',
     description: 'Create magical stories for your little ones with the power of AI',
-    gradient: ['#FF6B6B', '#FF8E53'],
+    gradient: GRADIENTS.primary,
   },
   {
     emoji: '🎨',
     title: 'Pick a Theme & Character',
     description: 'Choose from enchanting themes like space, ocean, or fairy tales and adorable characters',
-    gradient: ['#4ECDC4', '#44B09E'],
+    gradient: GRADIENTS.accent,
   },
   {
     emoji: '✨',
@@ -134,7 +134,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={[COLORS.primary, '#FF8E53']}
+              colors={GRADIENTS.primary}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.nextButtonGradient}

@@ -13,7 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
+import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 import {
   getChildProfiles,
   createChildProfile,
@@ -168,7 +168,7 @@ export default function SelectProfileScreen() {
               </TouchableOpacity>
               <TouchableOpacity activeOpacity={0.85} onPress={handleCreate}>
                 <LinearGradient
-                  colors={[COLORS.primary, '#FF8E53']}
+                  colors={GRADIENTS.primary}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={styles.createButton}

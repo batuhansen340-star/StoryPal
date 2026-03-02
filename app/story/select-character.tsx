@@ -13,6 +13,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
 import { CHARACTERS, THEMES } from '../../apps/storypal/constants/themes';
+import { selection } from '../../packages/shared/services/haptics';
 
 const { width } = Dimensions.get('window');
 
@@ -31,6 +32,7 @@ export default function SelectCharacterScreen() {
   const selectedTheme = THEMES.find(t => t.id === themeId);
 
   const handleSelectCharacter = (characterId: string) => {
+    selection();
     router.push({
       pathname: '/story/personalize',
       params: {
@@ -97,6 +99,7 @@ export default function SelectCharacterScreen() {
                 style={styles.characterCard}
                 activeOpacity={0.85}
                 onPress={() => handleSelectCharacter(char.id)}
+                accessibilityLabel={char.name + ', ' + char.trait}
               >
                 <View style={styles.characterEmojiContainer}>
                   <Text style={styles.characterEmoji}>{char.emoji}</Text>

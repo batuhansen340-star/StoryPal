@@ -14,7 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
+import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 import { pickPhoto, takePhoto, analyzeFaceDemo, buildCharacterPrompt } from '../../packages/shared/services/face-analysis';
 import type { FaceDescription } from '../../packages/shared/services/face-analysis';
 
@@ -158,7 +158,7 @@ export default function PersonalizeScreen() {
             </Text>
             <TouchableOpacity activeOpacity={0.85} style={styles.unlockButton}>
               <LinearGradient
-                colors={[COLORS.primary, '#FF8E53']}
+                colors={GRADIENTS.primary}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.unlockGradient}
@@ -369,7 +369,7 @@ export default function PersonalizeScreen() {
         <Animated.View entering={FadeInDown.duration(500).delay(700)} style={styles.buttonSection}>
           <TouchableOpacity activeOpacity={0.85} onPress={handleContinue}>
             <LinearGradient
-              colors={[COLORS.primary, '#FF8E53']}
+              colors={GRADIENTS.primary}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.continueButton}

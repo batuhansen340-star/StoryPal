@@ -11,8 +11,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
-import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
+import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 import { THEMES } from '../../apps/storypal/constants/themes';
+import { selection } from '../../packages/shared/services/haptics';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - SPACING.lg * 2 - SPACING.md) / 2;
@@ -23,6 +24,7 @@ export default function SelectThemeScreen() {
   const { ageGroup, language, childName, childAge } = useLocalSearchParams<{ ageGroup?: string; language?: string; childName?: string; childAge?: string }>();
 
   const handleSelectTheme = (themeId: string) => {
+    selection();
     router.push({
       pathname: '/story/select-character',
       params: { themeId, ageGroup: ageGroup ?? '3-5', language: language ?? 'en', childName: childName ?? '', childAge: childAge ?? '' },
@@ -72,7 +74,7 @@ export default function SelectThemeScreen() {
         <Animated.View entering={FadeInUp.duration(400)}>
           <TouchableOpacity activeOpacity={0.85} onPress={handleCustomIdea}>
             <LinearGradient
-              colors={['#A18CD1', '#FBC2EB']}
+              colors={GRADIENTS.purple}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.customIdeaCard}
@@ -96,6 +98,7 @@ export default function SelectThemeScreen() {
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={() => handleSelectTheme(theme.id)}
+                accessibilityLabel={theme.name + ' theme'}
               >
                 <LinearGradient
                   colors={theme.gradient}

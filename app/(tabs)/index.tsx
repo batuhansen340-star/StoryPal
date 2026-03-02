@@ -15,8 +15,9 @@ import Animated, {
   FadeInDown,
   FadeInRight,
 } from 'react-native-reanimated';
-import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
+import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 import { THEMES, CHARACTERS } from '../../apps/storypal/constants/themes';
+import { impact } from '../../packages/shared/services/haptics';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.7;
@@ -43,10 +44,15 @@ export default function HomeScreen() {
         <Animated.View entering={FadeInDown.duration(600).delay(150)}>
           <TouchableOpacity
             activeOpacity={0.9}
-            onPress={() => router.push('/(tabs)/create')}
+            onPress={() => {
+              impact('light');
+              router.push('/(tabs)/create');
+            }}
+            accessibilityLabel="Create a new story"
+            accessibilityRole="button"
           >
             <LinearGradient
-              colors={[COLORS.primary, '#FF8E53']}
+              colors={GRADIENTS.primary}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.ctaCard}

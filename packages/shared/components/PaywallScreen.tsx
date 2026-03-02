@@ -11,7 +11,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import type { PurchasesPackage } from 'react-native-purchases';
 import { useSubscription } from '../hooks/useSubscription';
-import { COLORS, SPACING, RADIUS } from '../types';
+import { COLORS, SPACING, RADIUS, GRADIENTS } from '../types';
 
 const { width } = Dimensions.get('window');
 

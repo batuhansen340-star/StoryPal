@@ -16,7 +16,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
-import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
+import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 import type { StoryChoice } from '../../packages/shared/types';
 import { THEMES } from '../../apps/storypal/constants/themes';
 import { speak, stop as stopTTS, type TTSSpeed } from '../../packages/shared/services/tts';
@@ -397,7 +397,7 @@ export default function ViewerScreen() {
                             colors={
                               choice.id === 'purple' ? ['#A18CD1', '#FBC2EB'] :
                               choice.id === 'green' ? ['#52B788', '#95D5B2'] :
-                              [COLORS.primary, '#FF8E53']
+                              GRADIENTS.primary
                             }
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 0 }}
@@ -641,7 +641,7 @@ export default function ViewerScreen() {
           activeOpacity={0.85}
         >
           <LinearGradient
-            colors={bedtimeMode ? ['#0f3460', '#1a1a2e'] : [COLORS.primary, '#FF8E53']}
+            colors={bedtimeMode ? ['#0f3460', '#1a1a2e'] : GRADIENTS.primary}
             style={styles.playButtonGradient}
           >
             <Text style={styles.playButtonText}>
@@ -690,7 +690,7 @@ export default function ViewerScreen() {
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={bedtimeMode ? ['#0f3460', '#1a1a2e'] : [COLORS.primary, '#FF8E53']}
+              colors={bedtimeMode ? ['#0f3460', '#1a1a2e'] : GRADIENTS.primary}
               style={styles.doneButtonGradient}
             >
               <Text style={styles.doneButtonText}>

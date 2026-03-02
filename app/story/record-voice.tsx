@@ -10,7 +10,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
+import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 import {
   startRecording,
   stopRecording,
@@ -124,7 +124,7 @@ export default function RecordVoiceScreen() {
               activeOpacity={0.85}
             >
               <LinearGradient
-                colors={[COLORS.primary, '#FF8E53']}
+                colors={GRADIENTS.primary}
                 style={styles.doneButtonGradient}
               >
                 <Text style={styles.doneButtonText}>Done {'\u{2728}'}</Text>
@@ -215,7 +215,7 @@ export default function RecordVoiceScreen() {
             activeOpacity={0.85}
           >
             <LinearGradient
-              colors={isRecording ? ['#FF3B30', '#FF6B6B'] : ['#FF6B6B', '#FF8E53']}
+              colors={isRecording ? ['#FF3B30', '#FF6B6B'] : GRADIENTS.primary}
               style={[styles.micButtonGradient, isRecording && styles.micButtonRecording]}
             >
               <Text style={styles.micEmoji}>

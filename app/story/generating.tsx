@@ -6,6 +6,7 @@ import { useAI } from '../../packages/shared/hooks/useAI';
 import { LoadingAI } from '../../packages/shared/components/LoadingAI';
 import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
 import type { AgeGroup } from '../../packages/shared/types';
+import { notification } from '../../packages/shared/services/haptics';
 
 export default function GeneratingScreen() {
   const insets = useSafeAreaInsets();
@@ -63,6 +64,7 @@ export default function GeneratingScreen() {
 
   useEffect(() => {
     if (status === 'complete' && story) {
+      notification('success');
       const timer = setTimeout(() => {
         router.replace({
           pathname: '/story/viewer',
@@ -81,6 +83,12 @@ export default function GeneratingScreen() {
       return () => clearTimeout(timer);
     }
   }, [status]);
+
+  useEffect(() => {
+    if (error) {
+      notification('error');
+    }
+  }, [error]);
 
   if (error) {
     return (

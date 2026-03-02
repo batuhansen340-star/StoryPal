@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StyleSheet } from 'react-native';
 import { COLORS } from '../packages/shared/types';
+import { NetworkBanner } from '../packages/shared/components/NetworkBanner';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -16,6 +17,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <StatusBar style="dark" />
+      <NetworkBanner />
       <Stack
         screenOptions={{
           headerShown: false,

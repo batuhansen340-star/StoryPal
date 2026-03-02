@@ -12,7 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
+import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 
 const { width } = Dimensions.get('window');
 
@@ -131,7 +131,7 @@ export default function CustomIdeaScreen() {
             onPress={isValid ? handleContinue : undefined}
           >
             <LinearGradient
-              colors={isValid ? [COLORS.primary, '#FF8E53'] : ['#ccc', '#ddd']}
+              colors={isValid ? GRADIENTS.primary : ['#ccc', '#ddd']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.continueButton}

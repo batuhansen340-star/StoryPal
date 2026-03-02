@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
+import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 import { getLanguageByCode } from '../../constants/languages';
 import { type AuthUser, getAuthUser, signOut } from '../../packages/shared/services/auth';
 
@@ -89,7 +89,7 @@ export default function SettingsScreen() {
         <Animated.View entering={FadeInDown.duration(500).delay(100)}>
           <TouchableOpacity activeOpacity={0.85}>
             <LinearGradient
-              colors={[COLORS.primary, '#FF8E53']}
+              colors={GRADIENTS.primary}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.profileCard}
@@ -122,7 +122,7 @@ export default function SettingsScreen() {
                 <Switch
                   value={notificationsEnabled}
                   onValueChange={setNotificationsEnabled}
-                  trackColor={{ false: '#ddd', true: COLORS.primaryLight }}
+                  trackColor={{ false: COLORS.switchTrack, true: COLORS.primaryLight }}
                   thumbColor={notificationsEnabled ? COLORS.primary : '#f4f4f4'}
                 />
               }

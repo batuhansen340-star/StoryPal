@@ -11,6 +11,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
 import { useStats } from '../../packages/shared/hooks/useStats';
 import { THEMES, CHARACTERS } from '../../apps/storypal/constants/themes';
+import { EmptyState } from '../../packages/shared/components/EmptyState';
 
 const THEME_MAP: Record<string, { name: string; emoji: string }> = {};
 for (const t of THEMES) {
@@ -57,11 +58,11 @@ export default function StatsScreen() {
           contentContainerStyle={styles.emptyContainer}
           refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} />}
         >
-          <Animated.View entering={FadeInDown.duration(600)} style={styles.emptyContent}>
-            <Text style={styles.emptyEmoji}>{'\u{1F4CA}'}</Text>
-            <Text style={styles.emptyTitle}>No Stats Yet</Text>
-            <Text style={styles.emptyText}>Create your first story to see your reading stats!</Text>
-          </Animated.View>
+          <EmptyState
+            emoji={'\u{1F4CA}'}
+            title="No Stats Yet"
+            subtitle="Create your first story to see your reading stats!"
+          />
         </ScrollView>
       </View>
     );
@@ -234,8 +235,4 @@ const styles = StyleSheet.create({
   barCount: { width: 24, fontSize: 13, fontWeight: '800', color: COLORS.text, textAlign: 'right' },
 
   emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: SPACING.xl },
-  emptyContent: { alignItems: 'center' },
-  emptyEmoji: { fontSize: 72, marginBottom: SPACING.md },
-  emptyTitle: { fontSize: 28, fontWeight: '900', color: COLORS.text, marginBottom: SPACING.sm },
-  emptyText: { fontSize: 16, color: COLORS.textLight, textAlign: 'center', lineHeight: 24 },
 });

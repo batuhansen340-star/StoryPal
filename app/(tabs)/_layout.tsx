@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { View, Text, StyleSheet, Platform } from 'react-native';
-import { COLORS, RADIUS } from '../../packages/shared/types';
+import Animated, { FadeIn } from 'react-native-reanimated';
+import { COLORS, RADIUS, SPACING } from '../../packages/shared/types';
 
 interface TabIconProps {
   emoji: string;
@@ -17,6 +18,9 @@ function TabIcon({ emoji, label, focused }: TabIconProps) {
       <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]}>
         {label}
       </Text>
+      {focused && (
+        <Animated.View entering={FadeIn.duration(200)} style={styles.tabDot} />
+      )}
     </View>
   );
 }
@@ -118,5 +122,12 @@ const styles = StyleSheet.create({
   tabLabelFocused: {
     color: COLORS.primary,
     fontWeight: '800',
+  },
+  tabDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: COLORS.primary,
+    marginTop: 3,
   },
 });

@@ -12,8 +12,8 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
-import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
-import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 import { THEMES } from '../../apps/storypal/constants/themes';
 import { getAuthUser } from '../../packages/shared/services/auth';
 import {
@@ -21,6 +21,9 @@ import {
   deleteStory,
   type SavedStory,
 } from '../../packages/shared/services/story-storage';
+import { EmptyState } from '../../packages/shared/components/EmptyState';
+import { SkeletonCard } from '../../packages/shared/components/SkeletonLoader';
+import { notification } from '../../packages/shared/services/haptics';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - SPACING.lg * 2 - SPACING.md) / 2;
@@ -52,6 +55,7 @@ export default function LibraryScreen() {
   const handleDelete = async (id: string, title: string) => {
     const doDelete = async () => {
       await deleteStory(id);
+      notification('success');
       const updated = await getSavedStories();
       setStories(updated);
       if (updated.length === 0) setState('empty');
@@ -102,6 +106,23 @@ export default function LibraryScreen() {
     return d.toLocaleDateString();
   };
 
+  // Loading state with skeleton
+  if (state === 'loading') {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={styles.headerArea}>
+          <Text style={styles.title}>My Library {'\u{1F4DA}'}</Text>
+        </View>
+        <View style={styles.skeletonGrid}>
+          <SkeletonCard style={{ width: CARD_WIDTH }} />
+          <SkeletonCard style={{ width: CARD_WIDTH }} />
+          <SkeletonCard style={{ width: CARD_WIDTH }} />
+          <SkeletonCard style={{ width: CARD_WIDTH }} />
+        </View>
+      </View>
+    );
+  }
+
   // Guest locked state
   if (state === 'guest-locked') {
     return (
@@ -109,26 +130,13 @@ export default function LibraryScreen() {
         <Animated.View entering={FadeInDown.duration(600)} style={styles.headerArea}>
           <Text style={styles.title}>My Library {'\u{1F4DA}'}</Text>
         </Animated.View>
-        <Animated.View entering={FadeInUp.duration(600).delay(200)} style={styles.lockState}>
-          <Text style={styles.lockEmoji}>{'\u{1F512}'}</Text>
-          <Text style={styles.lockTitle}>Sign In to Save Stories</Text>
-          <Text style={styles.lockText}>
-            Create an account to save your stories and access them anytime.
-          </Text>
-          <TouchableOpacity
-            onPress={() => router.push('/auth')}
-            activeOpacity={0.85}
-          >
-            <LinearGradient
-              colors={[COLORS.primary, '#FF8E53']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.lockButton}
-            >
-              <Text style={styles.lockButtonText}>Sign In {'\u{2728}'}</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </Animated.View>
+        <EmptyState
+          emoji={'\u{1F512}'}
+          title="Sign In to Save Stories"
+          subtitle="Create an account to save your stories and access them anytime."
+          buttonText="Sign In \u{2728}"
+          onPress={() => router.push('/auth')}
+        />
       </View>
     );
   }
@@ -141,26 +149,13 @@ export default function LibraryScreen() {
           <Text style={styles.title}>My Library {'\u{1F4DA}'}</Text>
           <Text style={styles.subtitle}>0 stories</Text>
         </Animated.View>
-        <Animated.View entering={FadeInUp.duration(600).delay(200)} style={styles.emptyState}>
-          <Text style={styles.emptyEmoji}>{'\u{1F4D6}'}</Text>
-          <Text style={styles.emptyTitle}>No stories yet!</Text>
-          <Text style={styles.emptyText}>
-            Create your first magical story and it will appear here
-          </Text>
-          <TouchableOpacity
-            onPress={() => router.push('/(tabs)/create')}
-            activeOpacity={0.85}
-          >
-            <LinearGradient
-              colors={[COLORS.primary, '#FF8E53']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.emptyButton}
-            >
-              <Text style={styles.emptyButtonText}>Create Story {'\u{2728}'}</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </Animated.View>
+        <EmptyState
+          emoji={'\u{1F4D6}'}
+          title="No stories yet!"
+          subtitle="Create your first magical story and it will appear here"
+          buttonText="Create Story \u{2728}"
+          onPress={() => router.push('/(tabs)/create')}
+        />
       </View>
     );
   }
@@ -191,6 +186,7 @@ export default function LibraryScreen() {
               activeOpacity={0.85}
               onPress={() => openStory(item)}
               onLongPress={() => handleDelete(item.id, item.title)}
+              accessibilityLabel={item.title}
             >
               <LinearGradient
                 colors={getThemeGradient(item.theme)}
@@ -244,81 +240,11 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     marginBottom: SPACING.lg,
   },
-  // Guest locked
-  lockState: {
-    alignItems: 'center',
-    paddingTop: 60,
-    paddingHorizontal: SPACING.xl,
-  },
-  lockEmoji: {
-    fontSize: 72,
-    marginBottom: SPACING.md,
-  },
-  lockTitle: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: COLORS.text,
-    marginBottom: SPACING.sm,
-  },
-  lockText: {
-    fontSize: 16,
-    color: COLORS.textLight,
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: SPACING.xl,
-  },
-  lockButton: {
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.xl,
-    borderRadius: RADIUS.lg,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  lockButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '800',
-  },
-  // Empty
-  emptyState: {
-    alignItems: 'center',
-    paddingTop: 60,
-  },
-  emptyEmoji: {
-    fontSize: 72,
-    marginBottom: SPACING.md,
-  },
-  emptyTitle: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: COLORS.text,
-    marginBottom: SPACING.sm,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: COLORS.textLight,
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: SPACING.xl,
-    paddingHorizontal: SPACING.xl,
-  },
-  emptyButton: {
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.xl,
-    borderRadius: RADIUS.lg,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  emptyButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '800',
+  skeletonGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.md,
+    paddingHorizontal: SPACING.lg,
   },
   // Story cards
   storyCard: {

@@ -14,7 +14,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { signInWithEmail, signUpWithEmail, signInAsGuest } from '../packages/shared/services/auth';
-import { COLORS, SPACING, RADIUS } from '../packages/shared/types';
+import { COLORS, SPACING, RADIUS, GRADIENTS } from '../packages/shared/types';
 
 export default function AuthScreen() {
   const insets = useSafeAreaInsets();
@@ -151,7 +151,7 @@ export default function AuthScreen() {
             disabled={loading}
           >
             <LinearGradient
-              colors={[COLORS.primary, '#FF8E53']}
+              colors={GRADIENTS.primary}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={[styles.submitButton, loading && styles.submitButtonDisabled]}

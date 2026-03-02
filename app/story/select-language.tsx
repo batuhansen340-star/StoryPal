@@ -13,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
 import { LANGUAGES, type Language } from '../../constants/languages';
+import { selection } from '../../packages/shared/services/haptics';
 
 const { width } = Dimensions.get('window');
 const CARD_SIZE = (width - SPACING.lg * 2 - SPACING.md) / 2;
@@ -33,6 +34,7 @@ export default function SelectLanguageScreen() {
   }, []);
 
   const handleSelectLanguage = async (lang: Language) => {
+    selection();
     setSelectedCode(lang.code);
     await AsyncStorage.setItem(STORAGE_KEY, lang.code);
 
@@ -84,6 +86,7 @@ export default function SelectLanguageScreen() {
                 <TouchableOpacity
                   activeOpacity={0.8}
                   onPress={() => handleSelectLanguage(lang)}
+                  accessibilityLabel={lang.name}
                   style={[
                     styles.langCard,
                     isSelected && styles.langCardSelected,

@@ -12,7 +12,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import { setOnboardingDone } from '../packages/shared/services/auth';
-import { COLORS, SPACING, RADIUS } from '../packages/shared/types';
+import { COLORS, SPACING, RADIUS, GRADIENTS } from '../packages/shared/types';
 
 const { width, height } = Dimensions.get('window');
 
@@ -28,13 +28,13 @@ const SLIDES: Slide[] = [
     emoji: '\u{1F4D6}',
     title: 'Welcome to StoryPal',
     subtitle: 'Create magical bedtime stories your child will love. Every story is unique, personalized, and beautifully illustrated.',
-    gradient: [COLORS.primary, '#FF8E53'],
+    gradient: GRADIENTS.primary,
   },
   {
     emoji: '\u{2728}',
     title: 'AI-Powered Stories',
     subtitle: 'Choose a theme, pick a character, and watch as AI writes a one-of-a-kind story just for your little one.',
-    gradient: ['#A18CD1', '#FBC2EB'],
+    gradient: GRADIENTS.purple,
   },
   {
     emoji: '\u{1F3A8}',
