@@ -12,10 +12,11 @@ import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
 import { useStats } from '../../packages/shared/hooks/useStats';
 import { THEMES, CHARACTERS } from '../../apps/storypal/constants/themes';
 import { EmptyState } from '../../packages/shared/components/EmptyState';
+import { useLanguage } from '../../constants/LanguageContext';
 
 const THEME_MAP: Record<string, { name: string; emoji: string }> = {};
-for (const t of THEMES) {
-  THEME_MAP[t.id] = { name: t.name, emoji: t.emoji };
+for (const th of THEMES) {
+  THEME_MAP[th.id] = { name: th.name, emoji: th.emoji };
 }
 
 const CHAR_MAP: Record<string, { name: string; emoji: string }> = {};
@@ -50,6 +51,7 @@ function BarItem({ label, emoji, count, max }: { label: string; emoji: string; c
 export default function StatsScreen() {
   const insets = useSafeAreaInsets();
   const { stats, loading, refresh } = useStats();
+  const { t } = useLanguage();
 
   if (!stats || (stats.totalStories === 0 && !loading)) {
     return (
@@ -60,8 +62,8 @@ export default function StatsScreen() {
         >
           <EmptyState
             emoji={'\u{1F4CA}'}
-            title="No Stats Yet"
-            subtitle="Create your first story to see your reading stats!"
+            title={t('noStatsYet')}
+            subtitle={t('noStatsText')}
           />
         </ScrollView>
       </View>
@@ -84,35 +86,35 @@ export default function StatsScreen() {
         refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} />}
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>Your Stats {'\u{1F4CA}'}</Text>
-          <Text style={styles.subtitle}>Your storytelling journey</Text>
+          <Text style={styles.title}>{t('yourStats')} {'\u{1F4CA}'}</Text>
+          <Text style={styles.subtitle}>{t('yourJourney')}</Text>
         </Animated.View>
 
         {/* Main Stats Grid */}
         <View style={styles.statsGrid}>
-          <StatCard emoji={'\u{1F4DA}'} label="Stories" value={stats.totalStories} delay={100} />
-          <StatCard emoji={'\u{1F4C4}'} label="Pages" value={stats.totalPages} delay={150} />
-          <StatCard emoji={'\u{1F525}'} label="Streak" value={`${stats.currentStreak}d`} delay={200} />
-          <StatCard emoji={'\u{1F3C6}'} label="Best Streak" value={`${stats.longestStreak}d`} delay={250} />
+          <StatCard emoji={'\u{1F4DA}'} label={t('stories')} value={stats.totalStories} delay={100} />
+          <StatCard emoji={'\u{1F4C4}'} label={t('pagesLabel')} value={stats.totalPages} delay={150} />
+          <StatCard emoji={'\u{1F525}'} label={t('streak')} value={`${stats.currentStreak}d`} delay={200} />
+          <StatCard emoji={'\u{1F3C6}'} label={t('bestStreak')} value={`${stats.longestStreak}d`} delay={250} />
         </View>
 
         {/* Activity */}
         <Animated.View entering={FadeInDown.duration(400).delay(300)} style={styles.section}>
-          <Text style={styles.sectionTitle}>{'\u{1F4C5}'} Activity</Text>
+          <Text style={styles.sectionTitle}>{'\u{1F4C5}'} {t('activity')}</Text>
           <View style={styles.activityRow}>
             <View style={styles.activityItem}>
               <Text style={styles.activityValue}>{stats.storiesThisWeek}</Text>
-              <Text style={styles.activityLabel}>This Week</Text>
+              <Text style={styles.activityLabel}>{t('thisWeek')}</Text>
             </View>
             <View style={styles.activityDivider} />
             <View style={styles.activityItem}>
               <Text style={styles.activityValue}>{stats.storiesThisMonth}</Text>
-              <Text style={styles.activityLabel}>This Month</Text>
+              <Text style={styles.activityLabel}>{t('thisMonth')}</Text>
             </View>
             <View style={styles.activityDivider} />
             <View style={styles.activityItem}>
               <Text style={styles.activityValue}>{stats.languagesUsed.length}</Text>
-              <Text style={styles.activityLabel}>Languages</Text>
+              <Text style={styles.activityLabel}>{t('languages')}</Text>
             </View>
           </View>
         </Animated.View>
@@ -120,19 +122,19 @@ export default function StatsScreen() {
         {/* Favorites */}
         {(favTheme || favChar) && (
           <Animated.View entering={FadeInDown.duration(400).delay(400)} style={styles.section}>
-            <Text style={styles.sectionTitle}>{'\u2B50'} Favorites</Text>
+            <Text style={styles.sectionTitle}>{'\u2B50'} {t('favorites')}</Text>
             <View style={styles.favoritesRow}>
               {favTheme && (
                 <View style={styles.favoriteCard}>
                   <Text style={styles.favoriteEmoji}>{favTheme.emoji}</Text>
-                  <Text style={styles.favoriteLabel}>Theme</Text>
+                  <Text style={styles.favoriteLabel}>{t('theme')}</Text>
                   <Text style={styles.favoriteName}>{favTheme.name}</Text>
                 </View>
               )}
               {favChar && (
                 <View style={styles.favoriteCard}>
                   <Text style={styles.favoriteEmoji}>{favChar.emoji}</Text>
-                  <Text style={styles.favoriteLabel}>Character</Text>
+                  <Text style={styles.favoriteLabel}>{t('character')}</Text>
                   <Text style={styles.favoriteName}>{favChar.name}</Text>
                 </View>
               )}
@@ -143,14 +145,14 @@ export default function StatsScreen() {
         {/* Theme Breakdown */}
         {themeEntries.length > 0 && (
           <Animated.View entering={FadeInDown.duration(400).delay(500)} style={styles.section}>
-            <Text style={styles.sectionTitle}>{'\u{1F3A8}'} Stories by Theme</Text>
+            <Text style={styles.sectionTitle}>{'\u{1F3A8}'} {t('storiesByTheme')}</Text>
             {themeEntries.map(([id, count]) => {
-              const t = THEME_MAP[id];
+              const tm = THEME_MAP[id];
               return (
                 <BarItem
                   key={id}
-                  label={t?.name ?? id}
-                  emoji={t?.emoji ?? '\u{1F3A8}'}
+                  label={tm?.name ?? id}
+                  emoji={tm?.emoji ?? '\u{1F3A8}'}
                   count={count}
                   max={maxTheme}
                 />
@@ -162,7 +164,7 @@ export default function StatsScreen() {
         {/* Character Breakdown */}
         {charEntries.length > 0 && (
           <Animated.View entering={FadeInDown.duration(400).delay(600)} style={styles.section}>
-            <Text style={styles.sectionTitle}>{'\u{1F31F}'} Stories by Character</Text>
+            <Text style={styles.sectionTitle}>{'\u{1F31F}'} {t('storiesByCharacter')}</Text>
             {charEntries.map(([id, count]) => {
               const c = CHAR_MAP[id];
               return (

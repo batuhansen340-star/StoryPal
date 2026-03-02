@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { COLORS, RADIUS, SPACING } from '../../packages/shared/types';
+import { useLanguage } from '../../constants/LanguageContext';
 
 interface TabIconProps {
   emoji: string;
@@ -26,6 +27,8 @@ function TabIcon({ emoji, label, focused }: TabIconProps) {
 }
 
 export default function TabLayout() {
+  const { t } = useLanguage();
+
   return (
     <Tabs
       screenOptions={{
@@ -40,7 +43,7 @@ export default function TabLayout() {
         name="index"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="🏠" label="Home" focused={focused} />
+            <TabIcon emoji="🏠" label={t('home')} focused={focused} />
           ),
         }}
       />
@@ -48,7 +51,7 @@ export default function TabLayout() {
         name="create"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="✨" label="Create" focused={focused} />
+            <TabIcon emoji="✨" label={t('create')} focused={focused} />
           ),
         }}
       />
@@ -56,7 +59,7 @@ export default function TabLayout() {
         name="library"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="📚" label="Library" focused={focused} />
+            <TabIcon emoji="📚" label={t('library')} focused={focused} />
           ),
         }}
       />
@@ -72,7 +75,7 @@ export default function TabLayout() {
         name="settings"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="⚙️" label="Settings" focused={focused} />
+            <TabIcon emoji="⚙️" label={t('settings')} focused={focused} />
           ),
         }}
       />

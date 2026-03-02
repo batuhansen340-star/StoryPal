@@ -15,8 +15,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { signInWithEmail, signUpWithEmail, signInAsGuest } from '../packages/shared/services/auth';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../packages/shared/types';
+import { useLanguage } from '../constants/LanguageContext';
 
 export default function AuthScreen() {
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [isSignUp, setIsSignUp] = useState(false);
@@ -128,7 +130,7 @@ export default function AuthScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               value={email}
-              onChangeText={(t) => { setEmail(t); setErrorMsg(''); }}
+              onChangeText={(val) => { setEmail(val); setErrorMsg(''); }}
             />
           </View>
 
@@ -140,7 +142,7 @@ export default function AuthScreen() {
               placeholderTextColor={COLORS.textMuted}
               secureTextEntry
               value={password}
-              onChangeText={(t) => { setPassword(t); setErrorMsg(''); }}
+              onChangeText={(val) => { setPassword(val); setErrorMsg(''); }}
             />
           </View>
 

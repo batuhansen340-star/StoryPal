@@ -18,6 +18,7 @@ import { usePremium } from '../../packages/shared/hooks/usePremium';
 import { PaywallScreen } from '../../packages/shared/components/PaywallScreen';
 import { getAuthUser } from '../../packages/shared/services/auth';
 import { selection } from '../../packages/shared/services/haptics';
+import { useLanguage } from '../../constants/LanguageContext';
 
 const AGE_GROUP_EMOJIS: Record<AgeGroup, string> = {
   '3-5': '🍼',
@@ -35,6 +36,7 @@ export default function CreateScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { isPremium, canCreate, dailyRemaining, refresh } = usePremium();
+  const { t } = useLanguage();
   const [showPaywall, setShowPaywall] = useState(false);
 
   const handleSelectAge = (ageGroup: AgeGroup) => {
@@ -56,9 +58,9 @@ export default function CreateScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>Create a Story ✨</Text>
+          <Text style={styles.title}>{t('createStory')} ✨</Text>
           <Text style={styles.subtitle}>
-            First, choose the age group for your story
+            {t('chooseAgeGroup')}
           </Text>
         </Animated.View>
 
@@ -90,12 +92,12 @@ export default function CreateScreen() {
                       <View style={styles.ageDetails}>
                         <View style={styles.ageBadge}>
                           <Text style={styles.ageBadgeText}>
-                            {config.pages} pages
+                            {config.pages} {t('pages')}
                           </Text>
                         </View>
                         <View style={styles.ageBadge}>
                           <Text style={styles.ageBadgeText}>
-                            ~{config.maxWordsPerPage} words/page
+                            ~{config.maxWordsPerPage} {t('wordsPerPage')}
                           </Text>
                         </View>
                       </View>
@@ -115,8 +117,7 @@ export default function CreateScreen() {
           <View style={styles.tipGlass}>
             <Text style={styles.tipEmoji}>💡</Text>
             <Text style={styles.tipText}>
-              Younger ages get simpler stories with bigger pictures.
-              Older ages get longer adventures with richer details!
+              {t('ageTip')}
             </Text>
           </View>
         </Animated.View>

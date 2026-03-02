@@ -7,10 +7,12 @@ import { LoadingAI } from '../../packages/shared/components/LoadingAI';
 import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
 import type { AgeGroup } from '../../packages/shared/types';
 import { notification } from '../../packages/shared/services/haptics';
+import { useLanguage } from '../../constants/LanguageContext';
 
 export default function GeneratingScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { t } = useLanguage();
   const hasStarted = useRef(false);
   const { themeId, characterId, ageGroup, language, personalization, customPrompt, voiceCharacterId, childName, childAge } =
     useLocalSearchParams<{
@@ -94,7 +96,7 @@ export default function GeneratingScreen() {
     return (
       <View style={[styles.errorContainer, { paddingTop: insets.top }]}>
         <Text style={styles.errorEmoji}>{'\u{1F614}'}</Text>
-        <Text style={styles.errorTitle}>Oops!</Text>
+        <Text style={styles.errorTitle}>{t('oops')}</Text>
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity
           style={styles.retryButton}
@@ -104,14 +106,14 @@ export default function GeneratingScreen() {
           }}
           activeOpacity={0.8}
         >
-          <Text style={styles.retryText}>Try Again {'\u{2728}'}</Text>
+          <Text style={styles.retryText}>{t('tryAgain')} {'\u{2728}'}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.goBackButton}
           onPress={() => router.back()}
           activeOpacity={0.7}
         >
-          <Text style={styles.goBackText}>Go Back</Text>
+          <Text style={styles.goBackText}>{t('goBack')}</Text>
         </TouchableOpacity>
       </View>
     );

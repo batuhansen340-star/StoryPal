@@ -24,6 +24,7 @@ import {
 import { EmptyState } from '../../packages/shared/components/EmptyState';
 import { SkeletonCard } from '../../packages/shared/components/SkeletonLoader';
 import { notification } from '../../packages/shared/services/haptics';
+import { useLanguage } from '../../constants/LanguageContext';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - SPACING.lg * 2 - SPACING.md) / 2;
@@ -33,6 +34,7 @@ type LibraryState = 'loading' | 'guest-locked' | 'empty' | 'stories';
 export default function LibraryScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { t } = useLanguage();
   const [stories, setStories] = useState<SavedStory[]>([]);
   const [state, setState] = useState<LibraryState>('loading');
 
@@ -111,7 +113,7 @@ export default function LibraryScreen() {
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.headerArea}>
-          <Text style={styles.title}>My Library {'\u{1F4DA}'}</Text>
+          <Text style={styles.title}>{t('myLibrary')} {'\u{1F4DA}'}</Text>
         </View>
         <View style={styles.skeletonGrid}>
           <SkeletonCard style={{ width: CARD_WIDTH }} />
@@ -128,7 +130,7 @@ export default function LibraryScreen() {
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <Animated.View entering={FadeInDown.duration(600)} style={styles.headerArea}>
-          <Text style={styles.title}>My Library {'\u{1F4DA}'}</Text>
+          <Text style={styles.title}>{t('myLibrary')} {'\u{1F4DA}'}</Text>
         </Animated.View>
         <EmptyState
           emoji={'\u{1F512}'}
@@ -146,13 +148,13 @@ export default function LibraryScreen() {
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <Animated.View entering={FadeInDown.duration(600)} style={styles.headerArea}>
-          <Text style={styles.title}>My Library {'\u{1F4DA}'}</Text>
-          <Text style={styles.subtitle}>0 stories</Text>
+          <Text style={styles.title}>{t('myLibrary')} {'\u{1F4DA}'}</Text>
+          <Text style={styles.subtitle}>0 {t('storiesCreated')}</Text>
         </Animated.View>
         <EmptyState
           emoji={'\u{1F4D6}'}
-          title="No stories yet!"
-          subtitle="Create your first magical story and it will appear here"
+          title={t('noStoriesYet')}
+          subtitle={t('noStoriesText')}
           buttonText="Create Story \u{2728}"
           onPress={() => router.push('/(tabs)/create')}
         />
@@ -172,9 +174,9 @@ export default function LibraryScreen() {
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={
           <Animated.View entering={FadeInDown.duration(600)}>
-            <Text style={styles.title}>My Library {'\u{1F4DA}'}</Text>
+            <Text style={styles.title}>{t('myLibrary')} {'\u{1F4DA}'}</Text>
             <Text style={styles.subtitle}>
-              {stories.length} {stories.length === 1 ? 'story' : 'stories'}
+              {stories.length} {t('storiesCreated')}
             </Text>
           </Animated.View>
         }

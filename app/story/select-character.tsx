@@ -14,12 +14,14 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
 import { CHARACTERS, THEMES } from '../../apps/storypal/constants/themes';
 import { selection } from '../../packages/shared/services/haptics';
+import { useLanguage } from '../../constants/LanguageContext';
 
 const { width } = Dimensions.get('window');
 
 export default function SelectCharacterScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { t } = useLanguage();
   const { themeId, ageGroup, language, customPrompt, childName, childAge } = useLocalSearchParams<{
     themeId: string;
     ageGroup: string;
@@ -56,7 +58,7 @@ export default function SelectCharacterScreen() {
           onPress={() => router.back()}
           activeOpacity={0.7}
         >
-          <Text style={styles.backText}>← Back</Text>
+          <Text style={styles.backText}>{'← ' + t('back')}</Text>
         </TouchableOpacity>
         <View style={styles.stepIndicator}>
           <View style={[styles.stepDot, styles.stepDotCompleted]} />
@@ -73,8 +75,8 @@ export default function SelectCharacterScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>Choose a Character 🌟</Text>
-          <Text style={styles.subtitle}>Who will be the hero of your story?</Text>
+          <Text style={styles.title}>{t('chooseCharacter')} 🌟</Text>
+          <Text style={styles.subtitle}>{t('characterSubtitle')}</Text>
 
           {selectedTheme && (
             <View style={styles.selectedTheme}>

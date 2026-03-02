@@ -5,9 +5,9 @@ const SAFETY_POSITIVE = 'safe for children, friendly, colorful, whimsical, story
 const SAFETY_NEGATIVE = 'scary, violent, dark, horror, blood, weapon, nsfw, realistic, photograph';
 
 const AGE_CONFIG: Record<AgeGroup, { pages: number; maxWords: number }> = {
-  '3-5': { pages: 5, maxWords: 30 },
-  '5-7': { pages: 8, maxWords: 50 },
-  '7-10': { pages: 10, maxWords: 80 },
+  '3-5': { pages: 6, maxWords: 50 },
+  '5-7': { pages: 10, maxWords: 80 },
+  '7-10': { pages: 12, maxWords: 120 },
 };
 
 function getClient(): OpenAI {
@@ -48,16 +48,30 @@ export async function generateStoryText(params: {
     ? `\nSpecial request from the child: "${params.customPrompt}"`
     : '';
 
-  const systemPrompt = `You are a world-class children's storybook author. Create a magical, age-appropriate story.
+  const systemPrompt = `You are a world-class children's storybook author — think Julia Donaldson, Mo Willems, and Oliver Jeffers combined. Create a magical, age-appropriate story that children will BEG to hear again.
 
-RULES:
-- The story must be positive, uplifting, and safe for children
-- NO scary, violent, or dark content
+STORY STRUCTURE:
+- Clear three-act structure: Setup (introduce character + world), Conflict (challenge/adventure), Resolution (growth + satisfying ending)
+- The character must CHANGE or LEARN something by the end
+- Include at least one moment of genuine emotion (wonder, friendship, bravery, kindness)
+- End with warmth — the child should feel happy and safe
+
+WRITING CRAFT:
+- Use vivid sensory details (what does the place SMELL like? What does a laugh SOUND like?)
+- Include dialogue between characters — make each voice distinct
+- Use rhythm and repetition where appropriate (children love patterns)
+- Sprinkle in gentle humor
+- Use onomatopoeia where it fits (whoosh, splish-splash, crackle)
+- Each page should end at a natural turning point that makes kids want the next page
+
+CONTENT RULES:
+- Positive, uplifting, safe for children — NO scary, violent, or dark content
+- Weave in a gentle moral lesson naturally — never preach
 - ${config.pages} pages exactly
-- Each page MAXIMUM ${config.maxWords} words
+- Each page: aim for ${Math.round(config.maxWords * 0.8)} to ${config.maxWords} words (use the full allowance for rich storytelling)
 - Each page needs a vivid imagePrompt for illustration (in English, always)
 - imagePrompt must include: "${SAFETY_POSITIVE}"
-- imagePrompt must describe the scene vividly for an illustrator
+- imagePrompt must describe the scene with specific details: character expression, body language, environment, lighting, colors
 - ${languageInstruction}
 
 Respond ONLY with valid JSON in this exact format:
@@ -83,8 +97,8 @@ Create a ${config.pages}-page story. Each page max ${config.maxWords} words.`;
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
     ],
-    temperature: 0.8,
-    max_tokens: 2000,
+    temperature: 0.9,
+    max_tokens: 4000,
     response_format: { type: 'json_object' },
   });
 

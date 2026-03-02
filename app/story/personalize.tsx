@@ -17,6 +17,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 import { pickPhoto, takePhoto, analyzeFaceDemo, buildCharacterPrompt } from '../../packages/shared/services/face-analysis';
 import type { FaceDescription } from '../../packages/shared/services/face-analysis';
+import { useLanguage } from '../../constants/LanguageContext';
 
 const { width } = Dimensions.get('window');
 
@@ -44,6 +45,7 @@ const GENDERS = [
 export default function PersonalizeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { t } = useLanguage();
   const { themeId, characterId, ageGroup, language, customPrompt, childName, childAge } = useLocalSearchParams<{
     themeId: string;
     characterId: string;
@@ -145,16 +147,16 @@ export default function PersonalizeScreen() {
             onPress={() => router.back()}
             activeOpacity={0.7}
           >
-            <Text style={styles.backText}>{'\u2190'} Back</Text>
+            <Text style={styles.backText}>{'\u2190 ' + t('back')}</Text>
           </TouchableOpacity>
         </Animated.View>
 
         <View style={styles.lockedContainer}>
           <Animated.View entering={FadeInDown.duration(600)} style={styles.lockedContent}>
             <Text style={styles.lockedEmoji}>{'\u{1F512}'}</Text>
-            <Text style={styles.lockedTitle}>Premium Feature</Text>
+            <Text style={styles.lockedTitle}>{t('premiumFeature')}</Text>
             <Text style={styles.lockedText}>
-              Unlock personalization {'\u2014'} make YOUR child the hero!
+              {t('unlockPersonalization')}
             </Text>
             <TouchableOpacity activeOpacity={0.85} style={styles.unlockButton}>
               <LinearGradient
@@ -187,7 +189,7 @@ export default function PersonalizeScreen() {
           onPress={() => router.back()}
           activeOpacity={0.7}
         >
-          <Text style={styles.backText}>{'\u2190'} Back</Text>
+          <Text style={styles.backText}>{'\u2190 ' + t('back')}</Text>
         </TouchableOpacity>
         <View style={styles.stepIndicator}>
           <View style={[styles.stepDot, styles.stepDotCompleted]} />
@@ -205,8 +207,8 @@ export default function PersonalizeScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>Make It Personal {'\u{2728}'}</Text>
-          <Text style={styles.subtitle}>Put your child in the story!</Text>
+          <Text style={styles.title}>{t('personalize')} {'\u{2728}'}</Text>
+          <Text style={styles.subtitle}>{t('personalizeSubtitle')}</Text>
         </Animated.View>
 
         {/* Photo Upload Section */}
@@ -272,10 +274,10 @@ export default function PersonalizeScreen() {
 
         {/* Name Input */}
         <Animated.View entering={FadeInDown.duration(500).delay(200)}>
-          <Text style={styles.sectionLabel}>Child's Name</Text>
+          <Text style={styles.sectionLabel}>{t('childName')}</Text>
           <TextInput
             style={styles.nameInput}
-            placeholder="Enter name..."
+            placeholder={t('childNamePlaceholder')}
             placeholderTextColor={COLORS.textMuted}
             value={name}
             onChangeText={setName}
@@ -286,7 +288,7 @@ export default function PersonalizeScreen() {
 
         {/* Gender */}
         <Animated.View entering={FadeInDown.duration(500).delay(300)}>
-          <Text style={styles.sectionLabel}>Gender</Text>
+          <Text style={styles.sectionLabel}>{t('gender')}</Text>
           <View style={styles.optionRow}>
             {GENDERS.map(g => (
               <TouchableOpacity
@@ -297,7 +299,7 @@ export default function PersonalizeScreen() {
               >
                 <Text style={styles.genderEmoji}>{g.emoji}</Text>
                 <Text style={[styles.genderLabel, gender === g.id && styles.optionLabelSelected]}>
-                  {g.id === 'girl' ? 'Girl' : g.id === 'boy' ? 'Boy' : 'Skip'}
+                  {g.id === 'girl' ? t('genderGirl') : g.id === 'boy' ? t('genderBoy') : t('genderPreferNot')}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -306,7 +308,7 @@ export default function PersonalizeScreen() {
 
         {/* Hair Color */}
         <Animated.View entering={FadeInDown.duration(500).delay(400)}>
-          <Text style={styles.sectionLabel}>Hair Color</Text>
+          <Text style={styles.sectionLabel}>{t('hairColor')}</Text>
           <View style={styles.colorRow}>
             {HAIR_COLORS.map(h => (
               <TouchableOpacity
@@ -325,7 +327,7 @@ export default function PersonalizeScreen() {
 
         {/* Skin Tone */}
         <Animated.View entering={FadeInDown.duration(500).delay(500)}>
-          <Text style={styles.sectionLabel}>Skin Tone</Text>
+          <Text style={styles.sectionLabel}>{t('skinTone')}</Text>
           <View style={styles.colorRow}>
             {SKIN_TONES.map(s => (
               <TouchableOpacity
@@ -344,7 +346,7 @@ export default function PersonalizeScreen() {
 
         {/* Glasses */}
         <Animated.View entering={FadeInDown.duration(500).delay(600)}>
-          <Text style={styles.sectionLabel}>Glasses</Text>
+          <Text style={styles.sectionLabel}>{t('glasses')}</Text>
           <View style={styles.optionRow}>
             <TouchableOpacity
               style={[styles.glassesCard, !hasGlasses && styles.optionSelected]}
@@ -352,7 +354,7 @@ export default function PersonalizeScreen() {
               activeOpacity={0.8}
             >
               <Text style={styles.glassesEmoji}>{'\u{1F60A}'}</Text>
-              <Text style={[styles.genderLabel, !hasGlasses && styles.optionLabelSelected]}>No</Text>
+              <Text style={[styles.genderLabel, !hasGlasses && styles.optionLabelSelected]}>{t('glassesNo')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.glassesCard, hasGlasses && styles.optionSelected]}
@@ -360,7 +362,7 @@ export default function PersonalizeScreen() {
               activeOpacity={0.8}
             >
               <Text style={styles.glassesEmoji}>{'\u{1F913}'}</Text>
-              <Text style={[styles.genderLabel, hasGlasses && styles.optionLabelSelected]}>Yes</Text>
+              <Text style={[styles.genderLabel, hasGlasses && styles.optionLabelSelected]}>{t('glassesYes')}</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>
@@ -374,7 +376,7 @@ export default function PersonalizeScreen() {
               end={{ x: 1, y: 0 }}
               style={styles.continueButton}
             >
-              <Text style={styles.continueText}>Continue {'\u2192'}</Text>
+              <Text style={styles.continueText}>{t('continueBtn')} {'\u2192'}</Text>
             </LinearGradient>
           </TouchableOpacity>
 

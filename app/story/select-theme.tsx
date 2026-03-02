@@ -14,6 +14,7 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 import { THEMES } from '../../apps/storypal/constants/themes';
 import { selection } from '../../packages/shared/services/haptics';
+import { useLanguage } from '../../constants/LanguageContext';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - SPACING.lg * 2 - SPACING.md) / 2;
@@ -21,6 +22,7 @@ const CARD_WIDTH = (width - SPACING.lg * 2 - SPACING.md) / 2;
 export default function SelectThemeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { t } = useLanguage();
   const { ageGroup, language, childName, childAge } = useLocalSearchParams<{ ageGroup?: string; language?: string; childName?: string; childAge?: string }>();
 
   const handleSelectTheme = (themeId: string) => {
@@ -47,7 +49,7 @@ export default function SelectThemeScreen() {
           onPress={() => router.back()}
           activeOpacity={0.7}
         >
-          <Text style={styles.backText}>← Back</Text>
+          <Text style={styles.backText}>{'← ' + t('back')}</Text>
         </TouchableOpacity>
         <View style={styles.stepIndicator}>
           <View style={[styles.stepDot, styles.stepDotCompleted]} />
@@ -64,9 +66,9 @@ export default function SelectThemeScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>Pick a Theme 🎨</Text>
+          <Text style={styles.title}>{t('pickTheme')} 🎨</Text>
           <Text style={styles.subtitle}>
-            Where should your adventure take place?
+            {t('themeSubtitle')}
           </Text>
         </Animated.View>
 
@@ -81,7 +83,7 @@ export default function SelectThemeScreen() {
             >
               <Text style={styles.customIdeaEmoji}>{'\u{1FA84}'}</Text>
               <View style={styles.customIdeaContent}>
-                <Text style={styles.customIdeaTitle}>YOUR IDEA</Text>
+                <Text style={styles.customIdeaTitle}>{t('yourIdea')}</Text>
                 <Text style={styles.customIdeaDesc}>Write your own story idea!</Text>
               </View>
               <Text style={styles.customIdeaArrow}>{'\u2192'}</Text>

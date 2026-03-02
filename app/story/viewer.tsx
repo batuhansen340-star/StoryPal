@@ -26,6 +26,7 @@ import { getRecordingForPage } from '../../packages/shared/services/audio-record
 import { Audio } from 'expo-av';
 import { saveStory, getStoryById } from '../../packages/shared/services/story-storage';
 import { shareStoryPDF } from '../../packages/shared/services/story-export';
+import { useLanguage } from '../../constants/LanguageContext';
 
 const { width, height } = Dimensions.get('window');
 
@@ -39,6 +40,7 @@ const BEDTIME_BG = '#1a1a2e';
 const BEDTIME_TEXT = '#E8E8F0';
 
 export default function ViewerScreen() {
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const params = useLocalSearchParams<{
@@ -86,7 +88,7 @@ export default function ViewerScreen() {
 
   const voiceCharacterId = params.voiceCharacterId;
   const voiceCharacter = voiceCharacterId ? getVoiceCharacterById(voiceCharacterId) : undefined;
-  const selectedTheme = THEMES.find(t => t.id === themeId);
+  const selectedTheme = THEMES.find(th => th.id === themeId);
   const themeGradient = selectedTheme?.gradient ?? [COLORS.primary, COLORS.accent];
   const storyId = params.storyId ?? params.savedStoryId ?? 'demo';
 
@@ -365,7 +367,7 @@ export default function ViewerScreen() {
             {isCover ? (
               <>
                 <Text style={styles.coverTitle}>{item.text}</Text>
-                <Text style={styles.coverSubtitle}>A StoryPal Adventure</Text>
+                <Text style={styles.coverSubtitle}>{t('aStoryPalAdventure')}</Text>
               </>
             ) : (
               <>
@@ -444,7 +446,7 @@ export default function ViewerScreen() {
         >
           <Animated.View entering={FadeIn.duration(2000)} style={styles.sweetDreamsContent}>
             <Text style={styles.sweetDreamsMoon}>{'\u{1F319}'}</Text>
-            <Text style={styles.sweetDreamsText}>Sweet dreams...</Text>
+            <Text style={styles.sweetDreamsText}>{t('sweetDreams')}</Text>
             <Text style={styles.sweetDreamsStars}>{'\u2B50'} {'\u{2728}'} {'\u{1F31F}'}</Text>
           </Animated.View>
           <TouchableOpacity
@@ -527,7 +529,7 @@ export default function ViewerScreen() {
           >
             <Text style={styles.controlEmoji}>{bedtimeMode ? '\u{1F319}' : '\u{2600}\u{FE0F}'}</Text>
             <Text style={[styles.controlLabel, bedtimeMode && styles.controlLabelBedtime]}>
-              Bedtime Mode
+              {t('bedtimeMode')}
             </Text>
             <View style={[styles.toggleTrack, bedtimeMode && styles.toggleTrackActive]}>
               <View style={[styles.toggleThumb, bedtimeMode && styles.toggleThumbActive]} />
@@ -542,7 +544,7 @@ export default function ViewerScreen() {
           >
             <Text style={styles.controlEmoji}>{'\u{1F504}'}</Text>
             <Text style={[styles.controlLabel, bedtimeMode && styles.controlLabelBedtime]}>
-              Auto-Play
+              {t('autoPlay')}
             </Text>
             <View style={[styles.toggleTrack, autoPlay && styles.toggleTrackActive]}>
               <View style={[styles.toggleThumb, autoPlay && styles.toggleThumbActive]} />
@@ -557,11 +559,11 @@ export default function ViewerScreen() {
           >
             <Text style={styles.controlEmoji}>{'\u{23E9}'}</Text>
             <Text style={[styles.controlLabel, bedtimeMode && styles.controlLabelBedtime]}>
-              Speed
+              {t('speed')}
             </Text>
             <View style={styles.speedBadge}>
               <Text style={styles.speedBadgeText}>
-                {ttsSpeed === 'slow' ? 'Slow' : ttsSpeed === 'fast' ? 'Fast' : 'Normal'}
+                {ttsSpeed === 'slow' ? t('slow') : ttsSpeed === 'fast' ? t('fast') : t('normal')}
               </Text>
             </View>
           </TouchableOpacity>
@@ -598,7 +600,7 @@ export default function ViewerScreen() {
           >
             <Text style={styles.controlEmoji}>{'\u{1F3A4}'}</Text>
             <Text style={[styles.controlLabel, bedtimeMode && styles.controlLabelBedtime]}>
-              Record Voice
+              {t('recordVoice')}
             </Text>
             <Text style={styles.controlArrow}>{'\u2192'}</Text>
           </TouchableOpacity>
@@ -694,7 +696,7 @@ export default function ViewerScreen() {
               style={styles.doneButtonGradient}
             >
               <Text style={styles.doneButtonText}>
-                {bedtimeMode ? '\u{1F319}' : 'Done \u{2728}'}
+                {bedtimeMode ? '\u{1F319}' : `${t('done')} \u{2728}`}
               </Text>
             </LinearGradient>
           </TouchableOpacity>

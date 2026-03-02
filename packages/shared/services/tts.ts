@@ -28,15 +28,25 @@ export interface TTSOptions {
 let currentSound: Audio.Sound | null = null;
 let currentWebAudio: HTMLAudioElement | null = null;
 
+function prepareTextForTTS(text: string): string {
+  return text
+    .replace(/\.\s/g, '... ')
+    .replace(/!\s/g, '!... ')
+    .replace(/\?\s/g, '?... ');
+}
+
 async function elevenLabsSpeak(text: string, options: TTSOptions): Promise<boolean> {
   if (!ELEVENLABS_API_KEY) return false;
 
   try {
-    const stability = options.isBedtimeMode ? 0.8 : 0.5;
-    const similarityBoost = 0.75;
+    const stability = options.isBedtimeMode ? 0.65 : 0.35;
+    const similarityBoost = 0.65;
+    const style = options.isBedtimeMode ? 0.4 : 0.6;
+    const voiceId = options.voiceCharacter?.elevenLabsVoiceId ?? ELEVENLABS_VOICE_ID;
+    const preparedText = prepareTextForTTS(text);
 
     const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`,
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
       {
         method: 'POST',
         headers: {
@@ -44,12 +54,12 @@ async function elevenLabsSpeak(text: string, options: TTSOptions): Promise<boole
           'xi-api-key': ELEVENLABS_API_KEY,
         },
         body: JSON.stringify({
-          text,
+          text: preparedText,
           model_id: 'eleven_multilingual_v2',
           voice_settings: {
             stability,
             similarity_boost: similarityBoost,
-            style: 0.3,
+            style,
             use_speaker_boost: true,
           },
         }),

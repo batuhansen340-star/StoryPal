@@ -18,6 +18,7 @@ import Animated, {
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 import { THEMES, CHARACTERS } from '../../apps/storypal/constants/themes';
 import { impact } from '../../packages/shared/services/haptics';
+import { useLanguage } from '../../constants/LanguageContext';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.7;
@@ -25,6 +26,7 @@ const CARD_WIDTH = width * 0.7;
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { t } = useLanguage();
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -35,8 +37,8 @@ export default function HomeScreen() {
         {/* Header */}
         <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
           <View>
-            <Text style={styles.greeting}>Hello there! 👋</Text>
-            <Text style={styles.title}>What story shall{'\n'}we create today?</Text>
+            <Text style={styles.greeting}>{t('greeting')} 👋</Text>
+            <Text style={styles.title}>{t('homeTitle')}</Text>
           </View>
         </Animated.View>
 
@@ -59,11 +61,11 @@ export default function HomeScreen() {
             >
               <View style={styles.ctaContent}>
                 <Text style={styles.ctaEmoji}>✨</Text>
-                <Text style={styles.ctaTitle}>Create New Story</Text>
-                <Text style={styles.ctaSubtitle}>Create personalized bedtime stories in 10 languages with AI illustration!</Text>
+                <Text style={styles.ctaTitle}>{t('createNewStory')}</Text>
+                <Text style={styles.ctaSubtitle}>{t('ctaSubtitle')}</Text>
               </View>
               <View style={styles.ctaButton}>
-                <Text style={styles.ctaButtonText}>Start →</Text>
+                <Text style={styles.ctaButtonText}>{t('start')} →</Text>
               </View>
             </LinearGradient>
           </TouchableOpacity>
@@ -71,7 +73,7 @@ export default function HomeScreen() {
 
         {/* Popular Themes */}
         <Animated.View entering={FadeInDown.duration(600).delay(300)}>
-          <Text style={styles.sectionTitle}>Popular Themes</Text>
+          <Text style={styles.sectionTitle}>{t('popularThemes')}</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -104,7 +106,7 @@ export default function HomeScreen() {
 
         {/* Characters */}
         <Animated.View entering={FadeInDown.duration(600).delay(450)}>
-          <Text style={styles.sectionTitle}>Meet the Characters</Text>
+          <Text style={styles.sectionTitle}>{t('meetCharacters')}</Text>
           <View style={styles.characterGrid}>
             {CHARACTERS.slice(0, 6).map((char, index) => (
               <Animated.View
@@ -129,17 +131,17 @@ export default function HomeScreen() {
             <View style={styles.statsGlass}>
               <View style={styles.statItem}>
                 <Text style={styles.statNumber}>2</Text>
-                <Text style={styles.statLabel}>Free stories{'\n'}today</Text>
+                <Text style={styles.statLabel}>{t('freeStoriesToday')}</Text>
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
                 <Text style={styles.statNumber}>10</Text>
-                <Text style={styles.statLabel}>Themes{'\n'}available</Text>
+                <Text style={styles.statLabel}>{t('themesAvailable')}</Text>
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
                 <Text style={styles.statNumber}>10</Text>
-                <Text style={styles.statLabel}>Characters{'\n'}to choose</Text>
+                <Text style={styles.statLabel}>{t('charactersToChoose')}</Text>
               </View>
             </View>
           </View>

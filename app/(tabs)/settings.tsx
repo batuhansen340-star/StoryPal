@@ -16,6 +16,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 import { getLanguageByCode } from '../../constants/languages';
 import { type AuthUser, getAuthUser, signOut } from '../../packages/shared/services/auth';
+import { useLanguage } from '../../constants/LanguageContext';
 
 interface SettingsRowProps {
   emoji: string;
@@ -50,6 +51,7 @@ function SettingsRow({ emoji, title, subtitle, onPress, rightElement }: Settings
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { t } = useLanguage();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [currentLang, setCurrentLang] = useState('en');
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
@@ -82,7 +84,7 @@ export default function SettingsScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>Settings ⚙️</Text>
+          <Text style={styles.title}>{t('settingsTitle')} ⚙️</Text>
         </Animated.View>
 
         {/* Profile Card */}
@@ -112,12 +114,12 @@ export default function SettingsScreen() {
 
         {/* General */}
         <Animated.View entering={FadeInDown.duration(500).delay(200)}>
-          <Text style={styles.sectionLabel}>General</Text>
+          <Text style={styles.sectionLabel}>{t('general')}</Text>
           <View style={styles.settingsCard}>
             <SettingsRow
               emoji="🔔"
-              title="Notifications"
-              subtitle="Story reminders"
+              title={t('notifications')}
+              subtitle={t('storyReminders')}
               rightElement={
                 <Switch
                   value={notificationsEnabled}
@@ -130,14 +132,14 @@ export default function SettingsScreen() {
             <View style={styles.divider} />
             <SettingsRow
               emoji={getLanguageByCode(currentLang).flag}
-              title="Language"
+              title={t('language')}
               subtitle={getLanguageByCode(currentLang).nativeName}
               onPress={() => router.push('/story/select-language')}
             />
             <View style={styles.divider} />
             <SettingsRow
               emoji="👶"
-              title="Default Age Group"
+              title={t('defaultAgeGroup')}
               subtitle="3-5 Years"
               onPress={() => {}}
             />
@@ -146,17 +148,17 @@ export default function SettingsScreen() {
 
         {/* Subscription */}
         <Animated.View entering={FadeInDown.duration(500).delay(300)}>
-          <Text style={styles.sectionLabel}>Subscription</Text>
+          <Text style={styles.sectionLabel}>{t('subscription')}</Text>
           <View style={styles.settingsCard}>
             <SettingsRow
               emoji="👑"
-              title="Manage Subscription"
+              title={t('manageSubscription')}
               onPress={() => {}}
             />
             <View style={styles.divider} />
             <SettingsRow
               emoji="🔄"
-              title="Restore Purchases"
+              title={t('restorePurchases')}
               onPress={() => Alert.alert('Restore', 'Checking for previous purchases...')}
             />
           </View>
@@ -164,29 +166,29 @@ export default function SettingsScreen() {
 
         {/* Support */}
         <Animated.View entering={FadeInDown.duration(500).delay(400)}>
-          <Text style={styles.sectionLabel}>Support</Text>
+          <Text style={styles.sectionLabel}>{t('support')}</Text>
           <View style={styles.settingsCard}>
             <SettingsRow
               emoji="❓"
-              title="Help Center"
+              title={t('helpCenter')}
               onPress={() => {}}
             />
             <View style={styles.divider} />
             <SettingsRow
               emoji="📧"
-              title="Contact Us"
+              title={t('contactUs')}
               onPress={() => {}}
             />
             <View style={styles.divider} />
             <SettingsRow
               emoji="⭐"
-              title="Rate StoryPal"
+              title={t('rateStoryPal')}
               onPress={() => {}}
             />
             <View style={styles.divider} />
             <SettingsRow
               emoji="📜"
-              title="Privacy Policy"
+              title={t('privacyPolicy')}
               onPress={() => {}}
             />
           </View>
@@ -194,11 +196,11 @@ export default function SettingsScreen() {
 
         {/* Account */}
         <Animated.View entering={FadeInDown.duration(500).delay(500)}>
-          <Text style={styles.sectionLabel}>Account</Text>
+          <Text style={styles.sectionLabel}>{t('account')}</Text>
           <View style={styles.settingsCard}>
             <SettingsRow
               emoji={'\u{1F6AA}'}
-              title="Sign Out"
+              title={t('signOut')}
               onPress={handleSignOut}
             />
           </View>

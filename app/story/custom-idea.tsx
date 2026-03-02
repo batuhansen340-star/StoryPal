@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
+import { useLanguage } from '../../constants/LanguageContext';
 
 const { width } = Dimensions.get('window');
 
@@ -28,6 +29,7 @@ const IDEA_STARTERS = [
 export default function CustomIdeaScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { t } = useLanguage();
   const { ageGroup, language, childName, childAge } = useLocalSearchParams<{
     ageGroup?: string;
     language?: string;
@@ -62,7 +64,7 @@ export default function CustomIdeaScreen() {
           onPress={() => router.back()}
           activeOpacity={0.7}
         >
-          <Text style={styles.backText}>{'\u2190'} Back</Text>
+          <Text style={styles.backText}>{'\u2190 ' + t('back')}</Text>
         </TouchableOpacity>
         <View style={styles.stepIndicator}>
           <View style={[styles.stepDot, styles.stepDotCompleted]} />
@@ -80,7 +82,7 @@ export default function CustomIdeaScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>Your Story Idea {'\u{1F4A1}'}</Text>
+          <Text style={styles.title}>{t('yourIdea')} {'\u{1F4A1}'}</Text>
           <Text style={styles.subtitle}>
             Tell us what your story should be about!
           </Text>
@@ -136,7 +138,7 @@ export default function CustomIdeaScreen() {
               end={{ x: 1, y: 0 }}
               style={styles.continueButton}
             >
-              <Text style={styles.continueText}>Continue {'\u2192'}</Text>
+              <Text style={styles.continueText}>{t('continueBtn')} {'\u2192'}</Text>
             </LinearGradient>
           </TouchableOpacity>
         </Animated.View>

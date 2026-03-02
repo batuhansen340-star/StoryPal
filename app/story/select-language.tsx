@@ -14,6 +14,7 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
 import { LANGUAGES, type Language } from '../../constants/languages';
 import { selection } from '../../packages/shared/services/haptics';
+import { useLanguage } from '../../constants/LanguageContext';
 
 const { width } = Dimensions.get('window');
 const CARD_SIZE = (width - SPACING.lg * 2 - SPACING.md) / 2;
@@ -22,6 +23,7 @@ const STORAGE_KEY = 'storypal_language';
 export default function SelectLanguageScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { t } = useLanguage();
   const { ageGroup } = useLocalSearchParams<{ ageGroup?: string }>();
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
 
@@ -52,7 +54,7 @@ export default function SelectLanguageScreen() {
           onPress={() => router.back()}
           activeOpacity={0.7}
         >
-          <Text style={styles.backText}>{'\u2190'} Back</Text>
+          <Text style={styles.backText}>{'\u2190 ' + t('back')}</Text>
         </TouchableOpacity>
         <View style={styles.stepIndicator}>
           <View style={[styles.stepDot, styles.stepDotActive]} />
@@ -69,9 +71,9 @@ export default function SelectLanguageScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>Choose Language {'\u{1F30D}'}</Text>
+          <Text style={styles.title}>{t('selectLanguage')} {'\u{1F30D}'}</Text>
           <Text style={styles.subtitle}>
-            What language should your story be in?
+            {t('languageSubtitle')}
           </Text>
         </Animated.View>
 

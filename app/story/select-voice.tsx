@@ -14,6 +14,7 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 import { VOICE_CHARACTERS } from '../../constants/voice-characters';
 import { speak, stop as stopTTS, getSpeechLanguageCode } from '../../packages/shared/services/tts';
+import { useLanguage } from '../../constants/LanguageContext';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - SPACING.lg * 2 - SPACING.md) / 2;
@@ -21,6 +22,7 @@ const CARD_WIDTH = (width - SPACING.lg * 2 - SPACING.md) / 2;
 export default function SelectVoiceScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { t } = useLanguage();
   const { themeId, characterId, ageGroup, language, personalization, customPrompt, childName, childAge } =
     useLocalSearchParams<{
       themeId: string;
@@ -96,7 +98,7 @@ export default function SelectVoiceScreen() {
           onPress={() => { stopTTS(); router.back(); }}
           activeOpacity={0.7}
         >
-          <Text style={styles.backText}>{'\u2190'} Back</Text>
+          <Text style={styles.backText}>{'\u2190 ' + t('back')}</Text>
         </TouchableOpacity>
         <View style={styles.stepIndicator}>
           <View style={[styles.stepDot, styles.stepDotCompleted]} />
@@ -113,7 +115,7 @@ export default function SelectVoiceScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>Choose a Voice {'\u{1F3A4}'}</Text>
+          <Text style={styles.title}>{t('chooseVoice')} {'\u{1F3A4}'}</Text>
           <Text style={styles.subtitle}>
             Tap a card to preview the voice!
           </Text>
@@ -165,7 +167,7 @@ export default function SelectVoiceScreen() {
               end={{ x: 1, y: 0 }}
               style={styles.continueButton}
             >
-              <Text style={styles.continueText}>Continue {'\u2192'}</Text>
+              <Text style={styles.continueText}>{t('continueBtn')} {'\u2192'}</Text>
             </LinearGradient>
           </TouchableOpacity>
 

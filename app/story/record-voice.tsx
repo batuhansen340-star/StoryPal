@@ -17,10 +17,12 @@ import {
   playRecording,
   saveRecordingForPage,
 } from '../../packages/shared/services/audio-recorder';
+import { useLanguage } from '../../constants/LanguageContext';
 
 const { width } = Dimensions.get('window');
 
 export default function RecordVoiceScreen() {
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { title, pages, storyId } = useLocalSearchParams<{
@@ -127,7 +129,7 @@ export default function RecordVoiceScreen() {
                 colors={GRADIENTS.primary}
                 style={styles.doneButtonGradient}
               >
-                <Text style={styles.doneButtonText}>Done {'\u{2728}'}</Text>
+                <Text style={styles.doneButtonText}>{t('done')} {'\u{2728}'}</Text>
               </LinearGradient>
             </TouchableOpacity>
           </Animated.View>
@@ -151,7 +153,7 @@ export default function RecordVoiceScreen() {
           >
             <Text style={styles.closeText}>{'\u2715'}</Text>
           </TouchableOpacity>
-          <Text style={styles.navTitle}>{title ?? 'Record Voice'}</Text>
+          <Text style={styles.navTitle}>{title ?? t('recordVoice')}</Text>
           <View style={{ width: 44 }} />
         </View>
 

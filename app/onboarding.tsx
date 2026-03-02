@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import { setOnboardingDone } from '../packages/shared/services/auth';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../packages/shared/types';
+import { useLanguage } from '../constants/LanguageContext';
 
 const { width, height } = Dimensions.get('window');
 
@@ -51,6 +52,7 @@ const SLIDES: Slide[] = [
 ];
 
 export default function OnboardingScreen() {
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const flatListRef = useRef<FlatList>(null);
