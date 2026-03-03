@@ -130,11 +130,11 @@ export default function CreateScreen() {
               <View style={{ flex: 1 }}>
                 <Text style={styles.usageText}>
                   {canCreate
-                    ? `${dailyRemaining} free ${dailyRemaining === 1 ? 'story' : 'stories'} left today`
-                    : 'Daily limit reached'}
+                    ? `${dailyRemaining} ${t('freeStoriesLeft')}`
+                    : t('dailyLimitReached')}
                 </Text>
                 {!canCreate && (
-                  <Text style={styles.usageSubtext}>Upgrade for unlimited stories!</Text>
+                  <Text style={styles.usageSubtext}>{t('upgradeUnlimited')}</Text>
                 )}
               </View>
               {!canCreate && (
@@ -143,7 +143,7 @@ export default function CreateScreen() {
                   onPress={() => setShowPaywall(true)}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.upgradeBadgeText}>{'\u{1F451}'} Upgrade</Text>
+                  <Text style={styles.upgradeBadgeText}>{'\u{1F451}'} {t('upgrade')}</Text>
                 </TouchableOpacity>
               )}
             </View>

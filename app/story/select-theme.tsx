@@ -84,7 +84,7 @@ export default function SelectThemeScreen() {
               <Text style={styles.customIdeaEmoji}>{'\u{1FA84}'}</Text>
               <View style={styles.customIdeaContent}>
                 <Text style={styles.customIdeaTitle}>{t('yourIdea')}</Text>
-                <Text style={styles.customIdeaDesc}>Write your own story idea!</Text>
+                <Text style={styles.customIdeaDesc}>{t('writeOwnIdea')}</Text>
               </View>
               <Text style={styles.customIdeaArrow}>{'\u2192'}</Text>
             </LinearGradient>

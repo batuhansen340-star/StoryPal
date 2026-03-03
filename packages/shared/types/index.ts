@@ -21,6 +21,7 @@ export interface Character {
   emoji: string;
   trait: string;
   description: string;
+  region?: string;
 }
 
 export interface StoryPage {

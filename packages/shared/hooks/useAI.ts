@@ -95,6 +95,7 @@ export function useAI() {
     customPrompt?: string;
     childName?: string;
     childAge?: number;
+    characterDescription?: string;
   }) => {
     setState({
       status: 'generating-text',

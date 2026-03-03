@@ -17,19 +17,19 @@ import { useLanguage } from '../../constants/LanguageContext';
 
 const { width } = Dimensions.get('window');
 
-const IDEA_STARTERS = [
-  { emoji: '\u{1F680}', text: 'A child who discovers a secret door in their school...' },
-  { emoji: '\u{1F40B}', text: 'A talking whale who wants to learn to fly...' },
-  { emoji: '\u{1F319}', text: 'The moon decides to visit Earth for one night...' },
-  { emoji: '\u{1F382}', text: 'A birthday cake that comes to life...' },
-  { emoji: '\u{1F308}', text: 'A rainbow bridge that leads to a land of candy...' },
-  { emoji: '\u{1F984}', text: 'A unicorn who lost its sparkle...' },
-];
-
 export default function CustomIdeaScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { t } = useLanguage();
+
+  const ideaStarters = [
+    { emoji: '\u{1F680}', text: t('ideaStarter1') },
+    { emoji: '\u{1F40B}', text: t('ideaStarter2') },
+    { emoji: '\u{1F319}', text: t('ideaStarter3') },
+    { emoji: '\u{1F382}', text: t('ideaStarter4') },
+    { emoji: '\u{1F308}', text: t('ideaStarter5') },
+    { emoji: '\u{1F984}', text: t('ideaStarter6') },
+  ];
   const { ageGroup, language, childName, childAge } = useLocalSearchParams<{
     ageGroup?: string;
     language?: string;
@@ -84,14 +84,14 @@ export default function CustomIdeaScreen() {
         <Animated.View entering={FadeInDown.duration(600)}>
           <Text style={styles.title}>{t('yourIdea')} {'\u{1F4A1}'}</Text>
           <Text style={styles.subtitle}>
-            Tell us what your story should be about!
+            {t('tellUsIdea')}
           </Text>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.duration(500).delay(100)}>
           <TextInput
             style={styles.ideaInput}
-            placeholder="Write your story idea here..."
+            placeholder={t('ideaPlaceholder')}
             placeholderTextColor={COLORS.textMuted}
             value={idea}
             onChangeText={setIdea}
@@ -105,9 +105,9 @@ export default function CustomIdeaScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.duration(500).delay(200)}>
-          <Text style={styles.sectionLabel}>Need inspiration?</Text>
+          <Text style={styles.sectionLabel}>{t('needInspiration')}</Text>
           <View style={styles.starterGrid}>
-            {IDEA_STARTERS.map((starter, index) => (
+            {ideaStarters.map((starter, index) => (
               <Animated.View
                 key={index}
                 entering={FadeInDown.duration(400).delay(300 + index * 60)}

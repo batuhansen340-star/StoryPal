@@ -15,7 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
-import { pickPhoto, takePhoto, analyzeFaceDemo, buildCharacterPrompt } from '../../packages/shared/services/face-analysis';
+import { pickPhoto, takePhoto, analyzeFace, buildCharacterPrompt } from '../../packages/shared/services/face-analysis';
 import type { FaceDescription } from '../../packages/shared/services/face-analysis';
 import { useLanguage } from '../../constants/LanguageContext';
 
@@ -74,9 +74,7 @@ export default function PersonalizeScreen() {
     setPhotoUri(uri);
     setIsAnalyzing(true);
 
-    await new Promise(r => setTimeout(r, 1500));
-
-    const face = analyzeFaceDemo();
+    const face = await analyzeFace(uri);
     setFaceDesc(face);
     setIsAnalyzing(false);
     setPhotoAdded(true);
@@ -165,7 +163,7 @@ export default function PersonalizeScreen() {
                 end={{ x: 1, y: 0 }}
                 style={styles.unlockGradient}
               >
-                <Text style={styles.unlockText}>{'\u{1F451}'} Unlock Premium</Text>
+                <Text style={styles.unlockText}>{'\u{1F451}'} {t('unlockPremium')}</Text>
               </LinearGradient>
             </TouchableOpacity>
             <TouchableOpacity
@@ -173,7 +171,7 @@ export default function PersonalizeScreen() {
               onPress={handleSkip}
               activeOpacity={0.7}
             >
-              <Text style={styles.skipText}>Skip for now</Text>
+              <Text style={styles.skipText}>{t('skipForNow')}</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
@@ -222,21 +220,21 @@ export default function PersonalizeScreen() {
             {isAnalyzing && (
               <View style={styles.analyzingOverlay}>
                 <ActivityIndicator color="#fff" size="small" />
-                <Text style={styles.analyzingText}>{'\u{2728}'} Analyzing...</Text>
+                <Text style={styles.analyzingText}>{'\u{2728}'} {t('analyzing')}</Text>
               </View>
             )}
             {photoAdded && !isAnalyzing && (
               <View style={styles.photoAddedBadge}>
-                <Text style={styles.photoAddedText}>{'\u{1F4F8}'} Photo Added!</Text>
+                <Text style={styles.photoAddedText}>{'\u{1F4F8}'} {t('photoAdded')}</Text>
               </View>
             )}
           </View>
           <View style={styles.photoButtons}>
             <TouchableOpacity style={styles.photoBtn} onPress={handleTakePhoto} activeOpacity={0.8}>
-              <Text style={styles.photoBtnText}>{'\u{1F4F7}'} Take Photo</Text>
+              <Text style={styles.photoBtnText}>{'\u{1F4F7}'} {t('takePhoto')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.photoBtn} onPress={handlePickPhoto} activeOpacity={0.8}>
-              <Text style={styles.photoBtnText}>{'\u{1F5BC}\u{FE0F}'} Gallery</Text>
+              <Text style={styles.photoBtnText}>{'\u{1F5BC}\u{FE0F}'} {t('gallery')}</Text>
             </TouchableOpacity>
           </View>
           {faceDesc && (
@@ -385,7 +383,7 @@ export default function PersonalizeScreen() {
             onPress={handleSkip}
             activeOpacity={0.7}
           >
-            <Text style={styles.skipText}>Skip personalization</Text>
+            <Text style={styles.skipText}>{t('skipPersonalization')}</Text>
           </TouchableOpacity>
         </Animated.View>
 

@@ -8,6 +8,8 @@ import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
 import type { AgeGroup } from '../../packages/shared/types';
 import { notification } from '../../packages/shared/services/haptics';
 import { useLanguage } from '../../constants/LanguageContext';
+import { CHARACTERS } from '../../apps/storypal/constants/themes';
+import { REGIONAL_CHARACTERS } from '../../apps/storypal/constants/regional-characters';
 
 export default function GeneratingScreen() {
   const insets = useSafeAreaInsets();
@@ -51,15 +53,19 @@ export default function GeneratingScreen() {
         // ignore parse errors
       }
 
+      const allChars = [...CHARACTERS, ...REGIONAL_CHARACTERS];
+      const charInfo = allChars.find(c => c.id === characterId);
+
       generateFullStory({
         theme: themeId,
-        character: characterId,
+        character: charInfo?.name ?? characterId,
         ageGroup: (ageGroup as AgeGroup) ?? '3-5',
         language: language ?? 'en',
         personalization: parsedPersonalization,
         customPrompt: customPrompt || undefined,
         childName: childName || undefined,
         childAge: childAge ? parseInt(childAge, 10) : undefined,
+        characterDescription: charInfo?.description,
       });
     }
   }, [themeId, characterId, ageGroup]);

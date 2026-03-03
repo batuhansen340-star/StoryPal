@@ -22,10 +22,12 @@ import {
   ageToAgeGroup,
   type ChildProfile,
 } from '../../packages/shared/services/child-profiles';
+import { useLanguage } from '../../constants/LanguageContext';
 
 export default function SelectProfileScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { t } = useLanguage();
   const { language } = useLocalSearchParams<{ language?: string }>();
 
   const [profiles, setProfiles] = useState<ChildProfile[]>([]);
@@ -81,8 +83,8 @@ export default function SelectProfileScreen() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>Who is this story for? {'\u{1F9D2}'}</Text>
-          <Text style={styles.subtitle}>Select a child or skip to continue</Text>
+          <Text style={styles.title}>{t('whoIsStoryFor')} {'\u{1F9D2}'}</Text>
+          <Text style={styles.subtitle}>{t('selectChildSkip')}</Text>
         </Animated.View>
 
         {profiles.map((p, i) => (
@@ -111,12 +113,12 @@ export default function SelectProfileScreen() {
             onPress={() => setShowModal(true)}
           >
             <Text style={styles.addIcon}>+</Text>
-            <Text style={styles.addText}>Add Child</Text>
+            <Text style={styles.addText}>{t('addChild')}</Text>
           </TouchableOpacity>
         </Animated.View>
 
         <TouchableOpacity style={styles.skipButton} onPress={handleSkip} activeOpacity={0.7}>
-          <Text style={styles.skipText}>Skip {'\u2192'}</Text>
+          <Text style={styles.skipText}>{t('skip')} {'\u2192'}</Text>
         </TouchableOpacity>
 
         <View style={{ height: 40 }} />
@@ -126,19 +128,19 @@ export default function SelectProfileScreen() {
       <Modal visible={showModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>New Child {'\u{1F31F}'}</Text>
+            <Text style={styles.modalTitle}>{t('newChild')} {'\u{1F31F}'}</Text>
 
-            <Text style={styles.inputLabel}>Name</Text>
+            <Text style={styles.inputLabel}>{t('name')}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Child's name"
+              placeholder={t('childName')}
               placeholderTextColor={COLORS.textMuted}
               value={newName}
               onChangeText={setNewName}
               autoFocus
             />
 
-            <Text style={styles.inputLabel}>Age</Text>
+            <Text style={styles.inputLabel}>{t('age')}</Text>
             <TextInput
               style={styles.input}
               placeholder="1-12"
@@ -149,7 +151,7 @@ export default function SelectProfileScreen() {
               maxLength={2}
             />
 
-            <Text style={styles.inputLabel}>Avatar</Text>
+            <Text style={styles.inputLabel}>{t('avatar')}</Text>
             <View style={styles.avatarRow}>
               {avatarOptions.map(a => (
                 <TouchableOpacity
@@ -164,7 +166,7 @@ export default function SelectProfileScreen() {
 
             <View style={styles.modalButtons}>
               <TouchableOpacity style={styles.cancelButton} onPress={() => setShowModal(false)}>
-                <Text style={styles.cancelText}>Cancel</Text>
+                <Text style={styles.cancelText}>{t('cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity activeOpacity={0.85} onPress={handleCreate}>
                 <LinearGradient
@@ -173,7 +175,7 @@ export default function SelectProfileScreen() {
                   end={{ x: 1, y: 0 }}
                   style={styles.createButton}
                 >
-                  <Text style={styles.createText}>Add {'\u{2728}'}</Text>
+                  <Text style={styles.createText}>{t('add')} {'\u{2728}'}</Text>
                 </LinearGradient>
               </TouchableOpacity>
             </View>

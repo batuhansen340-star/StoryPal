@@ -389,7 +389,7 @@ export default function ViewerScreen() {
                     {item.choices.map((choice, ci) => (
                       <React.Fragment key={choice.id}>
                         {ci > 0 && (
-                          <Text style={styles.choiceOr}>or</Text>
+                          <Text style={styles.choiceOr}>{t('or')}</Text>
                         )}
                         <TouchableOpacity
                           activeOpacity={0.85}
@@ -454,7 +454,7 @@ export default function ViewerScreen() {
             onPress={() => router.replace('/(tabs)')}
             activeOpacity={0.7}
           >
-            <Text style={styles.sweetDreamsCloseText}>Close</Text>
+            <Text style={styles.sweetDreamsCloseText}>{t('close')}</Text>
           </TouchableOpacity>
         </LinearGradient>
       </View>
@@ -579,10 +579,10 @@ export default function ViewerScreen() {
             <Text style={styles.controlEmoji}>{'\u{1F3A4}'}</Text>
             <View style={{ flex: 1 }}>
               <Text style={[styles.controlLabel, bedtimeMode && styles.controlLabelBedtime]}>
-                Parent Voice
+                {t('parentVoice')}
               </Text>
               {!hasParentRecording && (
-                <Text style={styles.controlHint}>Record to enable</Text>
+                <Text style={styles.controlHint}>{t('recordToEnable')}</Text>
               )}
             </View>
             {hasParentRecording && (
@@ -615,7 +615,7 @@ export default function ViewerScreen() {
           >
             <Text style={styles.controlEmoji}>{isExporting ? '\u{23F3}' : '\u{1F4E4}'}</Text>
             <Text style={[styles.controlLabel, bedtimeMode && styles.controlLabelBedtime]}>
-              {isExporting ? 'Exporting...' : 'Share as PDF'}
+              {isExporting ? t('exporting') : t('shareAsPdf')}
             </Text>
             <Text style={styles.controlArrow}>{'\u2192'}</Text>
           </TouchableOpacity>
@@ -679,27 +679,48 @@ export default function ViewerScreen() {
             </TouchableOpacity>
           )
         ) : (
-          <TouchableOpacity
-            style={styles.doneButton}
-            onPress={() => {
-              stopTTS();
-              if (bedtimeMode) {
-                setShowSweetDreams(true);
-              } else {
-                router.replace('/(tabs)');
-              }
-            }}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={bedtimeMode ? ['#0f3460', '#1a1a2e'] : GRADIENTS.primary}
-              style={styles.doneButtonGradient}
+          <View style={styles.endButtons}>
+            {!bedtimeMode && allPages.length > 0 && (
+              <TouchableOpacity
+                style={styles.gamesButton}
+                onPress={() => {
+                  stopTTS();
+                  router.push({
+                    pathname: '/story/games',
+                    params: {
+                      pages: JSON.stringify(allPages.map(p => p.text)),
+                      title: title,
+                      language: languageCode,
+                    },
+                  });
+                }}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.gamesButtonText}>{'\u{1F3AE}'}</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={styles.doneButton}
+              onPress={() => {
+                stopTTS();
+                if (bedtimeMode) {
+                  setShowSweetDreams(true);
+                } else {
+                  router.replace('/(tabs)');
+                }
+              }}
+              activeOpacity={0.8}
             >
-              <Text style={styles.doneButtonText}>
-                {bedtimeMode ? '\u{1F319}' : `${t('done')} \u{2728}`}
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
+              <LinearGradient
+                colors={bedtimeMode ? ['#0f3460', '#1a1a2e'] : GRADIENTS.primary}
+                style={styles.doneButtonGradient}
+              >
+                <Text style={styles.doneButtonText}>
+                  {bedtimeMode ? '\u{1F319}' : `${t('done')} \u{2728}`}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
         )}
       </View>
     </View>
@@ -1047,6 +1068,22 @@ const styles = StyleSheet.create({
   },
   dotActiveBedtime: {
     backgroundColor: 'rgba(255,255,255,0.6)',
+  },
+  endButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  gamesButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gamesButtonText: {
+    fontSize: 20,
   },
   doneButton: {
     borderRadius: RADIUS.full,

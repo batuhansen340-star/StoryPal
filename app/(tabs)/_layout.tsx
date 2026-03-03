@@ -67,7 +67,7 @@ export default function TabLayout() {
         name="stats"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="📊" label="Stats" focused={focused} />
+            <TabIcon emoji="📊" label={t('stats')} focused={focused} />
           ),
         }}
       />

@@ -73,7 +73,7 @@ export default function SettingsScreen() {
       await signOut();
       router.replace('/');
     } catch {
-      setSignOutError('Sign out failed. Please try again.');
+      setSignOutError(t('signOutFailed'));
     }
   };
 
@@ -100,13 +100,13 @@ export default function SettingsScreen() {
                 <Text style={styles.avatarEmoji}>{authUser?.isGuest ? '\u{1F47B}' : '\u{1F9D2}'}</Text>
               </View>
               <View style={styles.profileInfo}>
-                <Text style={styles.profileName}>{authUser?.displayName ?? 'Story Explorer'}</Text>
+                <Text style={styles.profileName}>{authUser?.displayName ?? t('storyExplorer')}</Text>
                 <Text style={styles.profilePlan}>
-                  {authUser?.isGuest ? 'Guest' : authUser?.email ?? 'Free Plan'} {'\u00B7'} 2 stories/day
+                  {authUser?.isGuest ? t('guest') : authUser?.email ?? t('freePlan')} {'\u00B7'} {t('storiesPerDay')}
                 </Text>
               </View>
               <View style={styles.upgradeBadge}>
-                <Text style={styles.upgradeBadgeText}>Upgrade {'\u{1F451}'}</Text>
+                <Text style={styles.upgradeBadgeText}>{t('upgrade')} {'\u{1F451}'}</Text>
               </View>
             </LinearGradient>
           </TouchableOpacity>
@@ -140,7 +140,7 @@ export default function SettingsScreen() {
             <SettingsRow
               emoji="👶"
               title={t('defaultAgeGroup')}
-              subtitle="3-5 Years"
+              subtitle="3-5"
               onPress={() => {}}
             />
           </View>
@@ -159,7 +159,7 @@ export default function SettingsScreen() {
             <SettingsRow
               emoji="🔄"
               title={t('restorePurchases')}
-              onPress={() => Alert.alert('Restore', 'Checking for previous purchases...')}
+              onPress={() => Alert.alert(t('restore'), t('checkingPurchases'))}
             />
           </View>
         </Animated.View>

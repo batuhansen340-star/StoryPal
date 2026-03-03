@@ -46,7 +46,7 @@ export default function SelectVoiceScreen() {
     setIsPreviewPlaying(true);
 
     await stopTTS();
-    await speak('Once upon a time, in a magical land far away...', {
+    await speak(t('voicePreview'), {
       language: getSpeechLanguageCode(language ?? 'en'),
       speed: 'normal',
       isBedtimeMode: false,
@@ -117,7 +117,7 @@ export default function SelectVoiceScreen() {
         <Animated.View entering={FadeInDown.duration(600)}>
           <Text style={styles.title}>{t('chooseVoice')} {'\u{1F3A4}'}</Text>
           <Text style={styles.subtitle}>
-            Tap a card to preview the voice!
+            {t('tapToPreview')}
           </Text>
         </Animated.View>
 
@@ -176,7 +176,7 @@ export default function SelectVoiceScreen() {
             onPress={handleSkip}
             activeOpacity={0.7}
           >
-            <Text style={styles.skipText}>Skip voice selection</Text>
+            <Text style={styles.skipText}>{t('skipVoice')}</Text>
           </TouchableOpacity>
         </Animated.View>
 

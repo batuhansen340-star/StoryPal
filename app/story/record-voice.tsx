@@ -116,9 +116,9 @@ export default function RecordVoiceScreen() {
         >
           <Animated.View entering={FadeIn.duration(1000)} style={styles.doneContent}>
             <Text style={styles.doneEmoji}>{'\u{1F389}'}</Text>
-            <Text style={styles.doneTitle}>All Pages Recorded!</Text>
+            <Text style={styles.doneTitle}>{t('allPagesRecorded')}</Text>
             <Text style={styles.doneSubtitle}>
-              Your voice will play when reading the story
+              {t('voicePlayInfo')}
             </Text>
             <TouchableOpacity
               style={styles.doneButton}
@@ -169,7 +169,7 @@ export default function RecordVoiceScreen() {
             </Text>
           </TouchableOpacity>
           <Text style={styles.pageLabel}>
-            Page {currentPageIdx + 1} / {totalPages}
+            {t('page')} {currentPageIdx + 1} / {totalPages}
             {savedPages.has(currentPageIdx) ? ' \u2713' : ''}
           </Text>
           <TouchableOpacity
@@ -227,17 +227,17 @@ export default function RecordVoiceScreen() {
           </TouchableOpacity>
 
           <Text style={styles.micHint}>
-            {isRecording ? 'Tap to stop' : 'Tap to record'}
+            {isRecording ? t('tapToStop') : t('tapToRecord')}
           </Text>
 
           {/* Action Buttons */}
           {lastRecordingUri && !isRecording && (
             <Animated.View entering={FadeIn.duration(300)} style={styles.actionButtons}>
               <TouchableOpacity style={styles.actionBtn} onPress={handlePlayback} activeOpacity={0.8}>
-                <Text style={styles.actionBtnText}>{'\u{25B6}\u{FE0F}'} Play</Text>
+                <Text style={styles.actionBtnText}>{'\u{25B6}\u{FE0F}'} {t('play')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionBtn} onPress={handleStartRecording} activeOpacity={0.8}>
-                <Text style={styles.actionBtnText}>{'\u{1F504}'} Re-record</Text>
+                <Text style={styles.actionBtnText}>{'\u{1F504}'} {t('reRecord')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.actionBtn, styles.saveBtn]}
@@ -245,7 +245,7 @@ export default function RecordVoiceScreen() {
                 activeOpacity={0.85}
               >
                 <Text style={styles.saveBtnText}>
-                  {'\u2713'} {currentPageIdx < totalPages - 1 ? 'Save & Next' : 'Save'}
+                  {'\u2713'} {currentPageIdx < totalPages - 1 ? t('saveNext') : t('save')}
                 </Text>
               </TouchableOpacity>
             </Animated.View>

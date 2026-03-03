@@ -11,6 +11,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
 import { useStats } from '../../packages/shared/hooks/useStats';
 import { THEMES, CHARACTERS } from '../../apps/storypal/constants/themes';
+import { REGIONAL_CHARACTERS } from '../../apps/storypal/constants/regional-characters';
 import { EmptyState } from '../../packages/shared/components/EmptyState';
 import { useLanguage } from '../../constants/LanguageContext';
 
@@ -20,7 +21,7 @@ for (const th of THEMES) {
 }
 
 const CHAR_MAP: Record<string, { name: string; emoji: string }> = {};
-for (const c of CHARACTERS) {
+for (const c of [...CHARACTERS, ...REGIONAL_CHARACTERS]) {
   CHAR_MAP[c.id] = { name: c.name, emoji: c.emoji };
 }
 

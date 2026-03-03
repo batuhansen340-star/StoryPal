@@ -33,15 +33,15 @@ export default function AuthScreen() {
     setSuccessMsg('');
 
     if (!email.trim() || !password.trim()) {
-      setErrorMsg('Please enter your email and password.');
+      setErrorMsg(t('enterEmailPassword'));
       return;
     }
     if (!email.includes('@')) {
-      setErrorMsg('Please enter a valid email address.');
+      setErrorMsg(t('invalidEmail'));
       return;
     }
     if (password.length < 6) {
-      setErrorMsg('Password must be at least 6 characters.');
+      setErrorMsg(t('passwordTooShort'));
       return;
     }
 
@@ -55,7 +55,7 @@ export default function AuthScreen() {
           router.replace('/(tabs)');
         } catch {
           // Email confirmation required — show success message
-          setSuccessMsg('Account created! Check your email to confirm, then sign in.');
+          setSuccessMsg(t('accountCreated'));
           setIsSignUp(false);
         }
       } else {
@@ -63,7 +63,7 @@ export default function AuthScreen() {
         router.replace('/(tabs)');
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      const message = err instanceof Error ? err.message : t('somethingWrong');
       setErrorMsg(message);
     } finally {
       setLoading(false);
@@ -78,7 +78,7 @@ export default function AuthScreen() {
       await signInAsGuest();
       router.replace('/(tabs)');
     } catch {
-      setErrorMsg('Something went wrong. Please try again.');
+      setErrorMsg(t('somethingWrong'));
     } finally {
       setLoading(false);
     }
@@ -102,7 +102,7 @@ export default function AuthScreen() {
           <Text style={styles.headerEmoji}>{'\u{1F4D6}'}</Text>
           <Text style={styles.headerTitle}>StoryPal</Text>
           <Text style={styles.headerSubtitle}>
-            {isSignUp ? 'Create your account' : 'Welcome back!'}
+            {isSignUp ? t('createYourAccount') : t('welcomeBack')}
           </Text>
         </Animated.View>
 
@@ -121,7 +121,7 @@ export default function AuthScreen() {
         {/* Form */}
         <Animated.View entering={FadeInUp.duration(600).delay(200)} style={styles.form}>
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Email</Text>
+            <Text style={styles.inputLabel}>{t('email')}</Text>
             <TextInput
               style={styles.input}
               placeholder="hello@storypal.app"
@@ -135,7 +135,7 @@ export default function AuthScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Password</Text>
+            <Text style={styles.inputLabel}>{t('password')}</Text>
             <TextInput
               style={styles.input}
               placeholder={'\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}'}
@@ -159,7 +159,7 @@ export default function AuthScreen() {
               style={[styles.submitButton, loading && styles.submitButtonDisabled]}
             >
               <Text style={styles.submitText}>
-                {loading ? 'Please wait...' : isSignUp ? 'Create Account' : 'Sign In'}
+                {loading ? t('pleaseWait') : isSignUp ? t('createAccount') : t('signIn')}
               </Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -171,9 +171,9 @@ export default function AuthScreen() {
             style={styles.toggleButton}
           >
             <Text style={styles.toggleText}>
-              {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
+              {isSignUp ? t('alreadyHaveAccount') : t('dontHaveAccount')}
               <Text style={styles.toggleTextBold}>
-                {isSignUp ? 'Sign In' : 'Sign Up'}
+                {isSignUp ? t('signIn') : t('signUp')}
               </Text>
             </Text>
           </TouchableOpacity>
@@ -182,7 +182,7 @@ export default function AuthScreen() {
         {/* Divider */}
         <Animated.View entering={FadeInUp.duration(600).delay(400)} style={styles.dividerContainer}>
           <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>or</Text>
+          <Text style={styles.dividerText}>{t('or')}</Text>
           <View style={styles.dividerLine} />
         </Animated.View>
 
@@ -195,10 +195,10 @@ export default function AuthScreen() {
             style={styles.guestButton}
           >
             <Text style={styles.guestEmoji}>{'\u{1F47B}'}</Text>
-            <Text style={styles.guestText}>Continue as Guest</Text>
+            <Text style={styles.guestText}>{t('continueAsGuest')}</Text>
           </TouchableOpacity>
           <Text style={styles.guestHint}>
-            Guest stories are saved on this device only
+            {t('guestNote')}
           </Text>
         </Animated.View>
       </ScrollView>

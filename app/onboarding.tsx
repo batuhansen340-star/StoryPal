@@ -24,42 +24,42 @@ interface Slide {
   gradient: [string, string];
 }
 
-const SLIDES: Slide[] = [
-  {
-    emoji: '\u{1F4D6}',
-    title: 'Welcome to StoryPal',
-    subtitle: 'Create magical bedtime stories your child will love. Every story is unique, personalized, and beautifully illustrated.',
-    gradient: GRADIENTS.primary,
-  },
-  {
-    emoji: '\u{2728}',
-    title: 'AI-Powered Stories',
-    subtitle: 'Choose a theme, pick a character, and watch as AI writes a one-of-a-kind story just for your little one.',
-    gradient: GRADIENTS.purple,
-  },
-  {
-    emoji: '\u{1F3A8}',
-    title: 'Beautiful Illustrations',
-    subtitle: 'Every page comes alive with colorful illustrations. Read along with text-to-speech in 10 languages.',
-    gradient: ['#4ECDC4', '#44CF6C'],
-  },
-  {
-    emoji: '\u{1F680}',
-    title: 'Ready to Begin?',
-    subtitle: 'Create 2 free stories every day. Unlock unlimited stories, premium themes, and more with StoryPal Premium.',
-    gradient: ['#667eea', '#764ba2'],
-  },
-];
-
 export default function OnboardingScreen() {
   const { t } = useLanguage();
+
+  const slides: Slide[] = [
+    {
+      emoji: '\u{1F4D6}',
+      title: t('welcomeTitle'),
+      subtitle: t('welcomeSubtitle'),
+      gradient: GRADIENTS.primary,
+    },
+    {
+      emoji: '\u{2728}',
+      title: t('aiStoriesTitle'),
+      subtitle: t('aiStoriesSubtitle'),
+      gradient: GRADIENTS.purple,
+    },
+    {
+      emoji: '\u{1F3A8}',
+      title: t('illustrationsTitle'),
+      subtitle: t('illustrationsSubtitle'),
+      gradient: ['#4ECDC4', '#44CF6C'],
+    },
+    {
+      emoji: '\u{1F680}',
+      title: t('readyTitle'),
+      subtitle: t('readySubtitle'),
+      gradient: ['#667eea', '#764ba2'],
+    },
+  ];
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleNext = async () => {
-    if (currentIndex < SLIDES.length - 1) {
+    if (currentIndex < slides.length - 1) {
       flatListRef.current?.scrollToIndex({ index: currentIndex + 1 });
     } else {
       await setOnboardingDone();
@@ -108,7 +108,7 @@ export default function OnboardingScreen() {
     <View style={styles.container}>
       <FlatList
         ref={flatListRef}
-        data={SLIDES}
+        data={slides}
         renderItem={renderSlide}
         horizontal
         pagingEnabled
@@ -124,12 +124,12 @@ export default function OnboardingScreen() {
       <View style={[styles.controls, { paddingBottom: insets.bottom + 20 }]}>
         {/* Skip */}
         <TouchableOpacity onPress={handleSkip} activeOpacity={0.7} style={styles.skipButton}>
-          <Text style={styles.skipText}>Skip</Text>
+          <Text style={styles.skipText}>{t('skip')}</Text>
         </TouchableOpacity>
 
         {/* Dots */}
         <View style={styles.dots}>
-          {SLIDES.map((_, i) => (
+          {slides.map((_, i) => (
             <View
               key={i}
               style={[styles.dot, i === currentIndex && styles.dotActive]}
@@ -144,7 +144,7 @@ export default function OnboardingScreen() {
             style={styles.nextButton}
           >
             <Text style={styles.nextText}>
-              {currentIndex === SLIDES.length - 1 ? 'Get Started' : 'Next'}
+              {currentIndex === slides.length - 1 ? t('getStarted') : t('next')}
             </Text>
           </LinearGradient>
         </TouchableOpacity>

@@ -27,6 +27,7 @@ export async function generateStoryText(params: {
   customPrompt?: string;
   childName?: string;
   childAge?: number;
+  characterDescription?: string;
 }): Promise<StoryGenerationResponse> {
   const openai = getClient();
   const config = AGE_CONFIG[params.ageGroup] ?? AGE_CONFIG['3-5'];
@@ -36,6 +37,9 @@ export async function generateStoryText(params: {
     : 'Write everything in English.';
 
   let characterDesc = `Character: ${params.character}`;
+  if (params.characterDescription) {
+    characterDesc += ` — ${params.characterDescription}`;
+  }
   if (params.personalization?.name) {
     characterDesc = `Character: ${params.personalization.name} (a ${params.personalization.gender ?? 'child'} with ${params.personalization.hairColor} hair and ${params.personalization.skinTone} skin${params.personalization.hasGlasses ? ', wearing glasses' : ''})`;
   }

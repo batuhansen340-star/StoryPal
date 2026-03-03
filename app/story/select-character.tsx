@@ -13,6 +13,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
 import { CHARACTERS, THEMES } from '../../apps/storypal/constants/themes';
+import { getCharactersForLanguage } from '../../apps/storypal/constants/regional-characters';
 import { selection } from '../../packages/shared/services/haptics';
 import { useLanguage } from '../../constants/LanguageContext';
 
@@ -21,7 +22,7 @@ const { width } = Dimensions.get('window');
 export default function SelectCharacterScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language: appLanguage } = useLanguage();
   const { themeId, ageGroup, language, customPrompt, childName, childAge } = useLocalSearchParams<{
     themeId: string;
     ageGroup: string;
@@ -31,7 +32,8 @@ export default function SelectCharacterScreen() {
     childAge: string;
   }>();
 
-  const selectedTheme = THEMES.find(t => t.id === themeId);
+  const selectedTheme = THEMES.find(th => th.id === themeId);
+  const characters = getCharactersForLanguage(CHARACTERS, appLanguage);
 
   const handleSelectCharacter = (characterId: string) => {
     selection();
@@ -92,7 +94,7 @@ export default function SelectCharacterScreen() {
         </Animated.View>
 
         <View style={styles.characterList}>
-          {CHARACTERS.map((char, index) => (
+          {characters.map((char, index) => (
             <Animated.View
               key={char.id}
               entering={FadeInUp.duration(400).delay(index * 60)}
@@ -107,7 +109,10 @@ export default function SelectCharacterScreen() {
                   <Text style={styles.characterEmoji}>{char.emoji}</Text>
                 </View>
                 <View style={styles.characterInfo}>
-                  <Text style={styles.characterName}>{char.name}</Text>
+                  <View style={styles.characterNameRow}>
+                    <Text style={styles.characterName}>{char.name}</Text>
+                    {char.region && <View style={styles.regionalBadge}><Text style={styles.regionalBadgeText}>{'\u{1F30D}'}</Text></View>}
+                  </View>
                   <Text style={styles.characterTrait}>{char.trait}</Text>
                   <Text style={styles.characterDesc}>{char.description}</Text>
                 </View>
@@ -228,10 +233,24 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: SPACING.md,
   },
+  characterNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   characterName: {
     fontSize: 18,
     fontWeight: '800',
     color: COLORS.text,
+  },
+  regionalBadge: {
+    backgroundColor: COLORS.backgroundDark,
+    borderRadius: 10,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+  },
+  regionalBadgeText: {
+    fontSize: 12,
   },
   characterTrait: {
     fontSize: 14,

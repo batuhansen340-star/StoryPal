@@ -64,13 +64,13 @@ export default function LibraryScreen() {
     };
 
     if (Platform.OS === 'web') {
-      if (window.confirm(`Delete "${title}"?`)) {
+      if (window.confirm(`${t('delete')} "${title}"?`)) {
         await doDelete();
       }
     } else {
-      Alert.alert('Delete Story', `Are you sure you want to delete "${title}"?`, [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: doDelete },
+      Alert.alert(t('deleteStory'), `${t('deleteStoryConfirm')} "${title}"?`, [
+        { text: t('cancel'), style: 'cancel' },
+        { text: t('delete'), style: 'destructive', onPress: doDelete },
       ]);
     }
   };
@@ -85,12 +85,12 @@ export default function LibraryScreen() {
   };
 
   const getThemeGradient = (themeId: string): [string, string] => {
-    const theme = THEMES.find(t => t.id === themeId);
+    const theme = THEMES.find(th => th.id === themeId);
     return theme?.gradient ?? [COLORS.primary, COLORS.accent];
   };
 
   const getThemeEmoji = (themeId: string): string => {
-    const theme = THEMES.find(t => t.id === themeId);
+    const theme = THEMES.find(th => th.id === themeId);
     return theme?.emoji ?? '\u{1F4D6}';
   };
 
@@ -99,12 +99,12 @@ export default function LibraryScreen() {
     const now = new Date();
     const diff = now.getTime() - d.getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'Just now';
-    if (mins < 60) return `${mins}m ago`;
+    if (mins < 1) return t('justNow');
+    if (mins < 60) return `${mins}${t('minutesAgo')}`;
     const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours}h ago`;
+    if (hours < 24) return `${hours}${t('hoursAgo')}`;
     const days = Math.floor(hours / 24);
-    if (days < 7) return `${days}d ago`;
+    if (days < 7) return `${days}${t('daysAgo')}`;
     return d.toLocaleDateString();
   };
 
@@ -134,9 +134,9 @@ export default function LibraryScreen() {
         </Animated.View>
         <EmptyState
           emoji={'\u{1F512}'}
-          title="Sign In to Save Stories"
-          subtitle="Create an account to save your stories and access them anytime."
-          buttonText="Sign In \u{2728}"
+          title={t('signInToSave')}
+          subtitle={t('signInToSaveText')}
+          buttonText={`${t('signIn')} \u{2728}`}
           onPress={() => router.push('/auth')}
         />
       </View>
@@ -155,7 +155,7 @@ export default function LibraryScreen() {
           emoji={'\u{1F4D6}'}
           title={t('noStoriesYet')}
           subtitle={t('noStoriesText')}
-          buttonText="Create Story \u{2728}"
+          buttonText={`${t('createNewStory')} \u{2728}`}
           onPress={() => router.push('/(tabs)/create')}
         />
       </View>
