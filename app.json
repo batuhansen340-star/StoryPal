@@ -12,6 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#FFF8F0"
     },
+    "privacyUrl": "https://batuhansen340-star.github.io/storypal-privacy/",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.storypal.app",

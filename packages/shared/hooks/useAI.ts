@@ -96,6 +96,7 @@ export function useAI() {
     childName?: string;
     childAge?: number;
     characterDescription?: string;
+    characterVisualDesc?: string;
   }) => {
     setState({
       status: 'generating-text',
@@ -198,7 +199,7 @@ export function useAI() {
       const coverUrl = await generateCoverImage({
         title: story.title,
         theme: params.theme,
-        character: params.character,
+        character: params.characterVisualDesc ?? params.character,
       });
 
       setState(prev => ({
@@ -215,7 +216,7 @@ export function useAI() {
           const url = await generateStoryImage({
             prompt: page.imagePrompt,
             theme: params.theme,
-            character: params.character,
+            character: params.characterVisualDesc ?? params.character,
           });
           imageUrls.push(url);
         } catch {

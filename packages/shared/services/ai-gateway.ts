@@ -28,6 +28,7 @@ export async function generateStoryText(params: {
   childName?: string;
   childAge?: number;
   characterDescription?: string;
+  characterVisualDesc?: string;
 }): Promise<StoryGenerationResponse> {
   const openai = getClient();
   const config = AGE_CONFIG[params.ageGroup] ?? AGE_CONFIG['3-5'];

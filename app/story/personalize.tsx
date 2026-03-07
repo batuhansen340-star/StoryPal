@@ -66,8 +66,8 @@ export default function PersonalizeScreen() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [photoAdded, setPhotoAdded] = useState(false);
 
-  // TODO: Replace with real subscription check when RevenueCat is fully configured
-  const isPremium = true; // Allow all users during beta
+  // V1: All features free. V2: const { isPremium } = useSubscription();
+  const isPremium = true;
 
   const handlePhotoResult = async (uri: string | null) => {
     if (!uri) return;
