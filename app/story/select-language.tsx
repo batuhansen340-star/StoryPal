@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
 import { LANGUAGES, type Language } from '../../constants/languages';
@@ -18,33 +17,47 @@ import { useLanguage } from '../../constants/LanguageContext';
 
 const { width } = Dimensions.get('window');
 const CARD_SIZE = (width - SPACING.lg * 2 - SPACING.md) / 2;
-const STORAGE_KEY = 'storypal_language';
 
 export default function SelectLanguageScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { t } = useLanguage();
-  const { ageGroup } = useLocalSearchParams<{ ageGroup?: string }>();
-  const [selectedCode, setSelectedCode] = useState<string | null>(null);
+  const { t, language, storyLanguage, setLanguage, setStoryLanguage } = useLanguage();
+  const { ageGroup, mode } = useLocalSearchParams<{ ageGroup?: string; mode?: string }>();
+
+  const isAppMode = mode === 'app';
+  const isStorySettingsMode = mode === 'story-settings';
+  const isSettingsMode = isAppMode || isStorySettingsMode;
+
+  const [selectedCode, setSelectedCode] = useState<string | null>(
+    isAppMode ? language : storyLanguage
+  );
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then(saved => {
-      if (saved) {
-        setSelectedCode(saved);
-      }
-    });
-  }, []);
+    if (isAppMode) setSelectedCode(language);
+    else setSelectedCode(storyLanguage);
+  }, [language, storyLanguage, isAppMode]);
 
-  const handleSelectLanguage = async (lang: Language) => {
+  const handleSelectLanguage = (lang: Language) => {
     selection();
     setSelectedCode(lang.code);
-    await AsyncStorage.setItem(STORAGE_KEY, lang.code);
 
-    router.push({
-      pathname: '/story/select-theme',
-      params: { language: lang.code, ageGroup: ageGroup ?? '3-5' },
-    });
+    if (isAppMode) {
+      setLanguage(lang.code);
+      router.back();
+    } else if (isStorySettingsMode) {
+      setStoryLanguage(lang.code);
+      router.back();
+    } else {
+      setStoryLanguage(lang.code);
+      router.push({
+        pathname: '/story/select-theme',
+        params: { language: lang.code, ageGroup: ageGroup ?? '3-5' },
+      });
+    }
   };
+
+  const pageTitle = isAppMode ? t('appLanguageLabel') : t('selectLanguage');
+  const pageSubtitle = isAppMode ? t('appLanguageDesc') : t('languageSubtitle');
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -56,14 +69,16 @@ export default function SelectLanguageScreen() {
         >
           <Text style={styles.backText}>{'\u2190 ' + t('back')}</Text>
         </TouchableOpacity>
-        <View style={styles.stepIndicator}>
-          <View style={[styles.stepDot, styles.stepDotActive]} />
-          <View style={styles.stepDot} />
-          <View style={styles.stepDot} />
-          <View style={styles.stepDot} />
-          <View style={styles.stepDot} />
-          <View style={styles.stepDot} />
-        </View>
+        {!isSettingsMode && (
+          <View style={styles.stepIndicator}>
+            <View style={[styles.stepDot, styles.stepDotActive]} />
+            <View style={styles.stepDot} />
+            <View style={styles.stepDot} />
+            <View style={styles.stepDot} />
+            <View style={styles.stepDot} />
+            <View style={styles.stepDot} />
+          </View>
+        )}
       </Animated.View>
 
       <ScrollView
@@ -71,9 +86,9 @@ export default function SelectLanguageScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>{t('selectLanguage')} {'\u{1F30D}'}</Text>
+          <Text style={styles.title}>{pageTitle} {'\u{1F30D}'}</Text>
           <Text style={styles.subtitle}>
-            {t('languageSubtitle')}
+            {pageSubtitle}
           </Text>
         </Animated.View>
 

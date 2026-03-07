@@ -16,8 +16,8 @@ const BEDTIME_RATE = 0.55;
 const PAUSE_AFTER_SENTENCE = 300;
 const PAUSE_AFTER_COMMA = 150;
 
-const ELEVENLABS_API_KEY = process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY ?? '';
-const ELEVENLABS_VOICE_ID = 'EXAVITQu4vr4xnSDxMaL'; // "Sarah" — warm, friendly female voice
+const OPENAI_API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY ?? '';
+const DEFAULT_VOICE = 'nova';
 
 export interface TTSOptions {
   language: string;
@@ -68,41 +68,32 @@ function prepareTextForTTS(text: string): string {
     .replace(/\?\s/g, '?... ');
 }
 
-async function elevenLabsSpeak(text: string, options: TTSOptions): Promise<boolean> {
-  if (!ELEVENLABS_API_KEY) return false;
+async function openaiTTSSpeak(text: string, options: TTSOptions): Promise<boolean> {
+  if (!OPENAI_API_KEY) return false;
 
   try {
-    const stability = options.isBedtimeMode ? 0.65 : 0.35;
-    const similarityBoost = 0.65;
-    const style = options.isBedtimeMode ? 0.4 : 0.6;
-    const voiceId = options.voiceCharacter?.elevenLabsVoiceId ?? ELEVENLABS_VOICE_ID;
+    const voice = options.voiceCharacter?.openaiVoice ?? DEFAULT_VOICE;
     const preparedText = prepareTextForTTS(text);
+    const speed = options.isBedtimeMode ? 0.85 : SPEED_RATES[options.speed];
 
-    const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'xi-api-key': ELEVENLABS_API_KEY,
-        },
-        body: JSON.stringify({
-          text: preparedText,
-          model_id: 'eleven_multilingual_v2',
-          voice_settings: {
-            stability,
-            similarity_boost: similarityBoost,
-            style,
-            use_speaker_boost: true,
-          },
-        }),
-      }
-    );
+    const response = await fetch('https://api.openai.com/v1/audio/speech', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'tts-1-hd',
+        input: preparedText,
+        voice,
+        speed,
+        response_format: 'mp3',
+      }),
+    });
 
     if (!response.ok) return false;
 
     if (Platform.OS === 'web') {
-      // Web: use HTML5 Audio with blob URL
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
 
@@ -172,8 +163,8 @@ async function elevenLabsSpeak(text: string, options: TTSOptions): Promise<boole
 export async function speak(text: string, options: TTSOptions): Promise<void> {
   await stop();
 
-  // Try ElevenLabs first
-  const success = await elevenLabsSpeak(text, options);
+  // Try OpenAI TTS first
+  const success = await openaiTTSSpeak(text, options);
   if (success) return;
 
   // Fallback to device speech

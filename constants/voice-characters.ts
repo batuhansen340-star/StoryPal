@@ -10,7 +10,7 @@ export const VOICE_CHARACTERS: VoiceCharacter[] = [
     rate: 1.0,
     gradient: ['#FF6B6B', '#FF8E53'],
     isPremium: false,
-    elevenLabsVoiceId: 'JBFqnCBsd6RMkjVDRZzb', // George — Warm, Captivating Storyteller
+    openaiVoice: 'nova',
   },
   {
     id: 'fairy',
@@ -21,7 +21,7 @@ export const VOICE_CHARACTERS: VoiceCharacter[] = [
     rate: 0.95,
     gradient: ['#C77DFF', '#E8A0FF'],
     isPremium: false,
-    elevenLabsVoiceId: 'cgSgspJ2msm6clMCkdW9', // Jessica — Playful, Bright, Warm
+    openaiVoice: 'shimmer',
   },
   {
     id: 'wizard',
@@ -32,7 +32,7 @@ export const VOICE_CHARACTERS: VoiceCharacter[] = [
     rate: 0.9,
     gradient: ['#1A1A6E', '#4A4AE0'],
     isPremium: true,
-    elevenLabsVoiceId: 'pqHfZKP75CvOlQylNhV4', // Bill — Wise, Mature, Balanced
+    openaiVoice: 'onyx',
   },
   {
     id: 'robot',
@@ -43,7 +43,7 @@ export const VOICE_CHARACTERS: VoiceCharacter[] = [
     rate: 1.05,
     gradient: ['#00B4D8', '#48CAE4'],
     isPremium: true,
-    elevenLabsVoiceId: 'TX3LPaxmHKxFdv7VOQHJ', // Liam — Energetic
+    openaiVoice: 'echo',
   },
   {
     id: 'pirate',
@@ -54,7 +54,7 @@ export const VOICE_CHARACTERS: VoiceCharacter[] = [
     rate: 0.95,
     gradient: ['#D4380D', '#FF7A45'],
     isPremium: true,
-    elevenLabsVoiceId: 'IKne3meq5aSn9XLyUdCD', // Charlie — Deep, Confident, Energetic
+    openaiVoice: 'fable',
   },
   {
     id: 'princess',
@@ -65,7 +65,7 @@ export const VOICE_CHARACTERS: VoiceCharacter[] = [
     rate: 0.95,
     gradient: ['#FF69B4', '#FFB6C1'],
     isPremium: true,
-    elevenLabsVoiceId: 'Xb7hH8MSUJpSbSDYk0k2', // Alice — Clear, Engaging
+    openaiVoice: 'shimmer',
   },
   {
     id: 'dragon',
@@ -76,7 +76,7 @@ export const VOICE_CHARACTERS: VoiceCharacter[] = [
     rate: 1.0,
     gradient: ['#52B788', '#95D5B2'],
     isPremium: true,
-    elevenLabsVoiceId: 'nPczCjzI2devNBz1zQrb', // Brian — Deep, Resonant and Comforting
+    openaiVoice: 'onyx',
   },
   {
     id: 'alien',
@@ -87,7 +87,7 @@ export const VOICE_CHARACTERS: VoiceCharacter[] = [
     rate: 1.05,
     gradient: ['#A8E6CF', '#DCEDC1'],
     isPremium: true,
-    elevenLabsVoiceId: 'N2lVS1w4EtoT3dr4eOWO', // Callum — Husky Trickster
+    openaiVoice: 'alloy',
   },
 ];
 

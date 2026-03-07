@@ -323,6 +323,11 @@ type TranslationKeys = {
   allCategories: string;
   classicCharacters: string;
   premiumCharacter: string;
+  // Language settings
+  appLanguageLabel: string;
+  storyLanguageLabel: string;
+  appLanguageDesc: string;
+  storyLanguageDesc: string;
 };
 
 const translations: Record<string, TranslationKeys> = {
@@ -622,6 +627,10 @@ const translations: Record<string, TranslationKeys> = {
     allCategories: 'All',
     classicCharacters: 'Classic Characters',
     premiumCharacter: 'Premium',
+    appLanguageLabel: 'App Language',
+    storyLanguageLabel: 'Story Language',
+    appLanguageDesc: 'Language for menus and buttons',
+    storyLanguageDesc: 'Language for AI stories and narration',
   },
   tr: {
     home: 'Ana Sayfa',
@@ -918,6 +927,10 @@ const translations: Record<string, TranslationKeys> = {
     allCategories: 'Tümü',
     classicCharacters: 'Klasik Kahramanlar',
     premiumCharacter: 'Premium',
+    appLanguageLabel: 'Uygulama Dili',
+    storyLanguageLabel: 'Hikaye Dili',
+    appLanguageDesc: 'Menüler ve butonlar için dil',
+    storyLanguageDesc: 'Yapay zeka hikayeleri ve seslendirme için dil',
   },
   es: {
     home: 'Inicio',
@@ -1214,6 +1227,10 @@ const translations: Record<string, TranslationKeys> = {
     allCategories: 'Todos',
     classicCharacters: 'Personajes Clásicos',
     premiumCharacter: 'Premium',
+    appLanguageLabel: 'Idioma de la App',
+    storyLanguageLabel: 'Idioma del Cuento',
+    appLanguageDesc: 'Idioma para menús y botones',
+    storyLanguageDesc: 'Idioma para cuentos e narración con IA',
   },
   ar: {
     home: '\u0627\u0644\u0631\u0626\u064A\u0633\u064A\u0629',
@@ -1510,6 +1527,10 @@ const translations: Record<string, TranslationKeys> = {
     allCategories: 'الكل',
     classicCharacters: 'الشخصيات الكلاسيكية',
     premiumCharacter: 'مميز',
+    appLanguageLabel: 'لغة التطبيق',
+    storyLanguageLabel: 'لغة القصة',
+    appLanguageDesc: 'لغة القوائم والأزرار',
+    storyLanguageDesc: 'لغة قصص الذكاء الاصطناعي والسرد',
   },
   ja: {
     home: '\u30DB\u30FC\u30E0',
@@ -1806,6 +1827,10 @@ const translations: Record<string, TranslationKeys> = {
     allCategories: 'すべて',
     classicCharacters: 'クラシックキャラクター',
     premiumCharacter: 'プレミアム',
+    appLanguageLabel: 'アプリの言語',
+    storyLanguageLabel: '物語の言語',
+    appLanguageDesc: 'メニューとボタンの言語',
+    storyLanguageDesc: 'AI物語とナレーションの言語',
   },
   fr: {
     home: 'Accueil',
@@ -2102,6 +2127,10 @@ const translations: Record<string, TranslationKeys> = {
     allCategories: 'Tous',
     classicCharacters: 'Personnages Classiques',
     premiumCharacter: 'Premium',
+    appLanguageLabel: 'Langue de l\'appli',
+    storyLanguageLabel: 'Langue des histoires',
+    appLanguageDesc: 'Langue des menus et boutons',
+    storyLanguageDesc: 'Langue des histoires IA et narration',
   },
   de: {
     home: 'Startseite',
@@ -2398,6 +2427,10 @@ const translations: Record<string, TranslationKeys> = {
     allCategories: 'Alle',
     classicCharacters: 'Klassische Charaktere',
     premiumCharacter: 'Premium',
+    appLanguageLabel: 'App-Sprache',
+    storyLanguageLabel: 'Geschichte-Sprache',
+    appLanguageDesc: 'Sprache für Menüs und Buttons',
+    storyLanguageDesc: 'Sprache für KI-Geschichten und Erzählung',
   },
   pt: {
     home: 'Inicio',
@@ -2694,6 +2727,10 @@ const translations: Record<string, TranslationKeys> = {
     allCategories: 'Todos',
     classicCharacters: 'Personagens Clássicos',
     premiumCharacter: 'Premium',
+    appLanguageLabel: 'Idioma do App',
+    storyLanguageLabel: 'Idioma da História',
+    appLanguageDesc: 'Idioma para menus e botões',
+    storyLanguageDesc: 'Idioma para histórias e narração com IA',
   },
   ko: {
     home: '\uD648',
@@ -2990,6 +3027,10 @@ const translations: Record<string, TranslationKeys> = {
     allCategories: '전체',
     classicCharacters: '클래식 캐릭터',
     premiumCharacter: '프리미엄',
+    appLanguageLabel: '앱 언어',
+    storyLanguageLabel: '이야기 언어',
+    appLanguageDesc: '메뉴와 버튼 언어',
+    storyLanguageDesc: 'AI 이야기와 내레이션 언어',
   },
   hi: {
     home: '\u0939\u094B\u092E',
@@ -3286,6 +3327,10 @@ const translations: Record<string, TranslationKeys> = {
     allCategories: 'सभी',
     classicCharacters: 'क्लासिक पात्र',
     premiumCharacter: 'प्रीमियम',
+    appLanguageLabel: 'ऐप भाषा',
+    storyLanguageLabel: 'कहानी भाषा',
+    appLanguageDesc: 'मेनू और बटन के लिए भाषा',
+    storyLanguageDesc: 'AI कहानियों और कथन के लिए भाषा',
   },
 };
 

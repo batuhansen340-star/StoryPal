@@ -15,7 +15,7 @@ import { CHARACTER_CATEGORIES } from '../../constants/modern-characters';
 export default function GeneratingScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, storyLanguage } = useLanguage();
   const hasStarted = useRef(false);
   const { themeId, characterId, ageGroup, language, personalization, customPrompt, voiceCharacterId, childName, childAge } =
     useLocalSearchParams<{
@@ -64,7 +64,7 @@ export default function GeneratingScreen() {
           theme: themeId,
           character: modernChar.name,
           ageGroup: (ageGroup as AgeGroup) ?? '3-5',
-          language: language ?? 'en',
+          language: language ?? storyLanguage,
           personalization: parsedPersonalization,
           customPrompt: customPrompt || undefined,
           childName: childName || undefined,
@@ -80,7 +80,7 @@ export default function GeneratingScreen() {
           theme: themeId,
           character: charInfo?.name ?? characterId,
           ageGroup: (ageGroup as AgeGroup) ?? '3-5',
-          language: language ?? 'en',
+          language: language ?? storyLanguage,
           personalization: parsedPersonalization,
           customPrompt: customPrompt || undefined,
           childName: childName || undefined,

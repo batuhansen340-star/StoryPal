@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,6 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 import { getLanguageByCode } from '../../constants/languages';
@@ -51,16 +50,12 @@ function SettingsRow({ emoji, title, subtitle, onPress, rightElement }: Settings
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language, storyLanguage } = useLanguage();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [currentLang, setCurrentLang] = useState('en');
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
 
   useFocusEffect(
     useCallback(() => {
-      AsyncStorage.getItem('storypal_language').then(saved => {
-        if (saved) setCurrentLang(saved);
-      });
       getAuthUser().then(u => setAuthUser(u));
     }, [])
   );
@@ -131,10 +126,17 @@ export default function SettingsScreen() {
             />
             <View style={styles.divider} />
             <SettingsRow
-              emoji={getLanguageByCode(currentLang).flag}
-              title={t('language')}
-              subtitle={getLanguageByCode(currentLang).nativeName}
-              onPress={() => router.push('/story/select-language')}
+              emoji={getLanguageByCode(language).flag}
+              title={t('appLanguageLabel')}
+              subtitle={getLanguageByCode(language).nativeName}
+              onPress={() => router.push({ pathname: '/story/select-language', params: { mode: 'app' } })}
+            />
+            <View style={styles.divider} />
+            <SettingsRow
+              emoji={getLanguageByCode(storyLanguage).flag}
+              title={t('storyLanguageLabel')}
+              subtitle={getLanguageByCode(storyLanguage).nativeName}
+              onPress={() => router.push({ pathname: '/story/select-language', params: { mode: 'story-settings' } })}
             />
             <View style={styles.divider} />
             <SettingsRow
