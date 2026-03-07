@@ -96,15 +96,20 @@ export default function ViewerScreen() {
   useEffect(() => {
     if (!params.savedStoryId || params.pages) return;
     (async () => {
-      const saved = await getStoryById(params.savedStoryId as string);
-      if (!saved) { setIsLoadingSaved(false); return; }
-      setTitle(saved.title);
-      setThemeId(saved.theme);
-      setLanguageCode(saved.language);
-      setCoverUrl(saved.coverUrl);
-      try { setPages(JSON.parse(saved.pages)); } catch {}
-      try { setImageUrls(JSON.parse(saved.imageUrls)); } catch {}
-      setIsLoadingSaved(false);
+      try {
+        const saved = await getStoryById(params.savedStoryId as string);
+        if (!saved) return;
+        setTitle(saved.title);
+        setThemeId(saved.theme);
+        setLanguageCode(saved.language);
+        setCoverUrl(saved.coverUrl);
+        try { setPages(JSON.parse(saved.pages)); } catch {}
+        try { setImageUrls(JSON.parse(saved.imageUrls)); } catch {}
+      } catch {
+        // Storage read failed
+      } finally {
+        setIsLoadingSaved(false);
+      }
     })();
   }, [params.savedStoryId]);
 
@@ -172,28 +177,32 @@ export default function ViewerScreen() {
   }, []);
 
   const playParentRecording = useCallback(async (pageIndex: number) => {
-    const uri = await getRecordingForPage(storyId, pageIndex - 1);
-    if (!uri) return;
+    try {
+      const uri = await getRecordingForPage(storyId, pageIndex - 1);
+      if (!uri) return;
 
-    if (soundRef.current) {
-      await soundRef.current.unloadAsync();
-    }
-
-    const { sound } = await Audio.Sound.createAsync({ uri });
-    soundRef.current = sound;
-
-    setIsSpeaking(true);
-    sound.setOnPlaybackStatusUpdate((status) => {
-      if (status.isLoaded && status.didJustFinish) {
-        setIsSpeaking(false);
-        if (autoPlayRef.current && pageIndex < allPages.length - 1) {
-          setTimeout(() => {
-            flatListRef.current?.scrollToIndex({ index: pageIndex + 1 });
-          }, 800);
-        }
+      if (soundRef.current) {
+        await soundRef.current.unloadAsync();
       }
-    });
-    await sound.playAsync();
+
+      const { sound } = await Audio.Sound.createAsync({ uri });
+      soundRef.current = sound;
+
+      setIsSpeaking(true);
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          setIsSpeaking(false);
+          if (autoPlayRef.current && pageIndex < allPages.length - 1) {
+            setTimeout(() => {
+              flatListRef.current?.scrollToIndex({ index: pageIndex + 1 });
+            }, 800);
+          }
+        }
+      });
+      await sound.playAsync();
+    } catch {
+      setIsSpeaking(false);
+    }
   }, [allPages, storyId]);
 
   const speakCurrentPage = useCallback(async (pageIndex: number) => {
@@ -685,7 +694,7 @@ export default function ViewerScreen() {
                   router.push({
                     pathname: '/story/games',
                     params: {
-                      pages: JSON.stringify(allPages.map(p => p.text)),
+                      pages: JSON.stringify(allPages.filter(p => p.type === 'page').map(p => p.text)),
                       title: title,
                       language: languageCode,
                     },

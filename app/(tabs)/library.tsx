@@ -41,15 +41,18 @@ export default function LibraryScreen() {
   useFocusEffect(
     useCallback(() => {
       (async () => {
-        const user = await getAuthUser();
-        if (!user) {
-          setState('guest-locked');
-          return;
+        try {
+          const user = await getAuthUser();
+          if (!user) {
+            setState('guest-locked');
+            return;
+          }
+          const saved = await getSavedStories();
+          setStories(saved);
+          setState(saved.length > 0 ? 'stories' : 'empty');
+        } catch {
+          setState('empty');
         }
-        // Both logged-in and guest users can see their saved stories
-        const saved = await getSavedStories();
-        setStories(saved);
-        setState(saved.length > 0 ? 'stories' : 'empty');
       })();
     }, [])
   );

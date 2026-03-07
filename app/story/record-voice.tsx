@@ -76,27 +76,39 @@ export default function RecordVoiceScreen() {
     }
     setIsRecording(false);
 
-    const result = await stopRecording();
-    if (result) {
-      setLastRecordingUri(result.uri);
+    try {
+      const result = await stopRecording();
+      if (result) {
+        setLastRecordingUri(result.uri);
+      }
+    } catch {
+      // Recording stop failed
     }
   };
 
   const handleSaveAndNext = async () => {
-    if (lastRecordingUri) {
-      await saveRecordingForPage(sid, currentPageIdx, lastRecordingUri);
-      setSavedPages(prev => new Set(prev).add(currentPageIdx));
-      setLastRecordingUri(null);
-    }
+    try {
+      if (lastRecordingUri) {
+        await saveRecordingForPage(sid, currentPageIdx, lastRecordingUri);
+        setSavedPages(prev => new Set(prev).add(currentPageIdx));
+        setLastRecordingUri(null);
+      }
 
-    if (currentPageIdx < totalPages - 1) {
-      setCurrentPageIdx(prev => prev + 1);
+      if (currentPageIdx < totalPages - 1) {
+        setCurrentPageIdx(prev => prev + 1);
+      }
+    } catch {
+      // Save failed
     }
   };
 
   const handlePlayback = async () => {
-    if (lastRecordingUri) {
-      await playRecording(lastRecordingUri);
+    try {
+      if (lastRecordingUri) {
+        await playRecording(lastRecordingUri);
+      }
+    } catch {
+      // Playback failed
     }
   };
 

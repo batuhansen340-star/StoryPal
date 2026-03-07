@@ -37,10 +37,6 @@ export default function RootLayout() {
           name="story"
           options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
         />
-        <Stack.Screen
-          name="story/games"
-          options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
-        />
       </Stack>
       </LanguageProvider>
       </ErrorBoundary>

@@ -74,24 +74,37 @@ export default function PersonalizeScreen() {
     setPhotoUri(uri);
     setIsAnalyzing(true);
 
-    const face = await analyzeFace(uri);
-    setFaceDesc(face);
-    setIsAnalyzing(false);
-    setPhotoAdded(true);
+    try {
+      const face = await analyzeFace(uri);
+      setFaceDesc(face);
+      setPhotoAdded(true);
 
-    if (face.gender === 'girl' || face.gender === 'boy') {
-      setGender(face.gender);
+      if (face.gender === 'girl' || face.gender === 'boy') {
+        setGender(face.gender);
+      }
+    } catch {
+      // Face analysis failed — continue without face data
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
   const handlePickPhoto = async () => {
-    const uri = await pickPhoto();
-    handlePhotoResult(uri);
+    try {
+      const uri = await pickPhoto();
+      handlePhotoResult(uri);
+    } catch {
+      // Permission denied or picker failed
+    }
   };
 
   const handleTakePhoto = async () => {
-    const uri = await takePhoto();
-    handlePhotoResult(uri);
+    try {
+      const uri = await takePhoto();
+      handlePhotoResult(uri);
+    } catch {
+      // Permission denied or camera failed
+    }
   };
 
   const handleContinue = () => {

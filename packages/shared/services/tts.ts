@@ -6,12 +6,15 @@ import type { VoiceCharacter } from '../types';
 export type TTSSpeed = 'slow' | 'normal' | 'fast';
 
 const SPEED_RATES: Record<TTSSpeed, number> = {
-  slow: 0.7,
-  normal: 1.0,
-  fast: 1.3,
+  slow: 0.65,
+  normal: 0.88,
+  fast: 1.1,
 };
 
-const BEDTIME_RATE = 0.6;
+const BEDTIME_RATE = 0.55;
+
+const PAUSE_AFTER_SENTENCE = 300;
+const PAUSE_AFTER_COMMA = 150;
 
 const ELEVENLABS_API_KEY = process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY ?? '';
 const ELEVENLABS_VOICE_ID = 'EXAVITQu4vr4xnSDxMaL'; // "Sarah" — warm, friendly female voice
@@ -27,6 +30,36 @@ export interface TTSOptions {
 
 let currentSound: Audio.Sound | null = null;
 let currentWebAudio: HTMLAudioElement | null = null;
+let abortSpeech = false;
+
+function splitTextWithPauses(text: string): { text: string; pauseMs: number }[] {
+  const segments: { text: string; pauseMs: number }[] = [];
+  const parts = text.split(/(?<=[.!?،,])\s+/);
+
+  for (const part of parts) {
+    const trimmed = part.trim();
+    if (!trimmed) continue;
+
+    let pauseMs = 0;
+    if (/[.!?]$/.test(trimmed)) {
+      pauseMs = PAUSE_AFTER_SENTENCE;
+    } else if (/[,،]$/.test(trimmed)) {
+      pauseMs = PAUSE_AFTER_COMMA;
+    }
+
+    segments.push({ text: trimmed, pauseMs });
+  }
+
+  if (segments.length === 0 && text.trim()) {
+    segments.push({ text: text.trim(), pauseMs: 0 });
+  }
+
+  return segments;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 function prepareTextForTTS(text: string): string {
   return text
@@ -155,32 +188,39 @@ export async function speak(text: string, options: TTSOptions): Promise<void> {
     pitch = options.voiceCharacter.pitch;
   } else {
     rate = SPEED_RATES[options.speed];
-    pitch = 1.0;
+    pitch = 1.08;
   }
 
-  return new Promise<void>((resolve) => {
-    Speech.speak(text, {
-      language: options.language,
-      rate,
-      pitch,
-      onStart: () => {
-        options.onStart?.();
-      },
-      onDone: () => {
-        options.onDone?.();
-        resolve();
-      },
-      onError: () => {
-        resolve();
-      },
-      onStopped: () => {
-        resolve();
-      },
+  const segments = splitTextWithPauses(text);
+  abortSpeech = false;
+  options.onStart?.();
+
+  for (let i = 0; i < segments.length; i++) {
+    if (abortSpeech) break;
+
+    await new Promise<void>((resolve) => {
+      Speech.speak(segments[i].text, {
+        language: options.language,
+        rate,
+        pitch,
+        onDone: () => resolve(),
+        onError: () => resolve(),
+        onStopped: () => resolve(),
+      });
     });
-  });
+
+    if (i < segments.length - 1 && segments[i].pauseMs > 0 && !abortSpeech) {
+      await sleep(segments[i].pauseMs);
+    }
+  }
+
+  if (!abortSpeech) {
+    options.onDone?.();
+  }
 }
 
 export async function stop(): Promise<void> {
+  abortSpeech = true;
   if (currentWebAudio) {
     currentWebAudio.pause();
     currentWebAudio.currentTime = 0;
