@@ -135,12 +135,12 @@ export default function HomeScreen() {
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
-                <Text style={styles.statNumber}>10</Text>
+                <Text style={styles.statNumber}>{THEMES.length}</Text>
                 <Text style={styles.statLabel}>{t('themesAvailable')}</Text>
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
-                <Text style={styles.statNumber}>10</Text>
+                <Text style={styles.statNumber}>{CHARACTERS.length}</Text>
                 <Text style={styles.statLabel}>{t('charactersToChoose')}</Text>
               </View>
             </View>
