@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getLocales } from 'expo-localization';
 import { t as translate } from './i18n';
 
 type TranslationKey = Parameters<typeof translate>[0];
@@ -21,7 +22,15 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     AsyncStorage.getItem('storypal_language').then((lang) => {
-      if (lang) setLanguageState(lang);
+      if (lang) {
+        setLanguageState(lang);
+      } else {
+        const deviceLang = getLocales()[0]?.languageCode ?? 'en';
+        const supported = ['en', 'tr', 'es', 'ar', 'ja', 'fr', 'de', 'pt', 'ko', 'hi'];
+        if (supported.includes(deviceLang)) {
+          setLanguageState(deviceLang);
+        }
+      }
     });
   }, []);
 

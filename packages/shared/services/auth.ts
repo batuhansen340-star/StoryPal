@@ -70,7 +70,7 @@ export async function signUpWithEmail(email: string, password: string): Promise<
     id: user.id,
     email: user.email ?? email,
   }, { onConflict: 'id' });
-  if (profileErr) console.warn('[Auth] Profile creation failed:', profileErr.message);
+  // Profile creation is best-effort — user can still use the app
 
   return {
     id: user.id,

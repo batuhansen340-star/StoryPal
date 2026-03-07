@@ -134,7 +134,6 @@ export default function ViewerScreen() {
     if (hasSaved.current) return;
     if (!params.savedStoryId && params.pages && params.title) {
       hasSaved.current = true;
-      console.log('[Viewer] Auto-saving story:', params.title);
       saveStory({
         title: params.title,
         theme: themeId,
@@ -143,9 +142,7 @@ export default function ViewerScreen() {
         pages: params.pages,
         imageUrls: params.imageUrls ?? '[]',
         coverUrl: coverUrl,
-      })
-        .then(() => console.log('[Viewer] Story saved successfully'))
-        .catch((err) => console.warn('[Viewer] Auto-save failed:', err));
+      }).catch(() => {});
     }
   }, [params.savedStoryId, params.pages, params.title]);
 
@@ -308,7 +305,7 @@ export default function ViewerScreen() {
         coverUrl: coverUrl || undefined,
       });
     } catch (err) {
-      console.warn('[Viewer] PDF export failed:', err);
+      // PDF export failed silently
     } finally {
       setIsExporting(false);
     }

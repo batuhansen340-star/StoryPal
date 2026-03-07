@@ -240,6 +240,19 @@ type TranslationKeys = {
   noQuizQuestions: string;
   noStoryEvents: string;
   voicePreview: string;
+  // Age groups
+  ageLabel35: string;
+  ageLabel57: string;
+  ageLabel710: string;
+  ageDesc35: string;
+  ageDesc57: string;
+  ageDesc710: string;
+  // Error handling
+  errorBoundaryTitle: string;
+  errorBoundaryMessage: string;
+  restartApp: string;
+  noInternet: string;
+  checkConnection: string;
 };
 
 const translations: Record<string, TranslationKeys> = {
@@ -461,6 +474,17 @@ const translations: Record<string, TranslationKeys> = {
     noQuizQuestions: 'No quiz questions could be generated from this story.',
     noStoryEvents: 'No story events could be extracted.',
     voicePreview: 'Once upon a time, in a magical land far away...',
+    ageLabel35: '3-5 Years',
+    ageLabel57: '5-7 Years',
+    ageLabel710: '7-10 Years',
+    ageDesc35: 'Simple words, big pictures',
+    ageDesc57: 'Fun adventures with richer stories',
+    ageDesc710: 'Deeper tales with rich characters',
+    errorBoundaryTitle: 'Oops! Something went wrong',
+    errorBoundaryMessage: 'Please restart the app to continue.',
+    restartApp: 'Restart App',
+    noInternet: 'No Internet Connection',
+    checkConnection: 'Please check your connection and try again.',
   },
   tr: {
     home: 'Ana Sayfa',
@@ -679,6 +703,17 @@ const translations: Record<string, TranslationKeys> = {
     noQuizQuestions: 'Bu hikayeden soru oluşturulamadı.',
     noStoryEvents: 'Hikaye olayları çıkarılamadı.',
     voicePreview: 'Bir varmış bir yokmuş, uzak diyarlarda büyülü bir ülkede...',
+    ageLabel35: '3-5 Yaş',
+    ageLabel57: '5-7 Yaş',
+    ageLabel710: '7-10 Yaş',
+    ageDesc35: 'Basit kelimeler, büyük resimler',
+    ageDesc57: 'Zengin hikayelerle eğlenceli maceralar',
+    ageDesc710: 'Zengin karakterlerle derin masallar',
+    errorBoundaryTitle: 'Hay aksi! Bir şeyler ters gitti',
+    errorBoundaryMessage: 'Devam etmek için uygulamayı yeniden başlatın.',
+    restartApp: 'Yeniden Başlat',
+    noInternet: 'İnternet Bağlantısı Yok',
+    checkConnection: 'Bağlantınızı kontrol edip tekrar deneyin.',
   },
   es: {
     home: 'Inicio',
@@ -897,6 +932,17 @@ const translations: Record<string, TranslationKeys> = {
     noQuizQuestions: 'No se pudieron generar preguntas de esta historia.',
     noStoryEvents: 'No se pudieron extraer eventos de la historia.',
     voicePreview: 'Érase una vez, en una tierra mágica muy lejana...',
+    ageLabel35: '3-5 Años',
+    ageLabel57: '5-7 Años',
+    ageLabel710: '7-10 Años',
+    ageDesc35: 'Palabras simples, dibujos grandes',
+    ageDesc57: 'Aventuras divertidas con historias más ricas',
+    ageDesc710: 'Cuentos profundos con personajes ricos',
+    errorBoundaryTitle: '¡Ups! Algo salió mal',
+    errorBoundaryMessage: 'Reinicia la app para continuar.',
+    restartApp: 'Reiniciar App',
+    noInternet: 'Sin Conexión a Internet',
+    checkConnection: 'Revisa tu conexión e intenta de nuevo.',
   },
   ar: {
     home: '\u0627\u0644\u0631\u0626\u064A\u0633\u064A\u0629',
@@ -1115,6 +1161,17 @@ const translations: Record<string, TranslationKeys> = {
     noQuizQuestions: 'لم يتم إنشاء أسئلة من هذه القصة.',
     noStoryEvents: 'لم يتم استخراج أحداث القصة.',
     voicePreview: 'كان يا ما كان، في أرض سحرية بعيدة...',
+    ageLabel35: '٣-٥ سنوات',
+    ageLabel57: '٥-٧ سنوات',
+    ageLabel710: '٧-١٠ سنوات',
+    ageDesc35: 'كلمات بسيطة، صور كبيرة',
+    ageDesc57: 'مغامرات ممتعة مع قصص أغنى',
+    ageDesc710: 'حكايات عميقة مع شخصيات غنية',
+    errorBoundaryTitle: 'عذراً! حدث خطأ ما',
+    errorBoundaryMessage: 'أعد تشغيل التطبيق للمتابعة.',
+    restartApp: 'إعادة التشغيل',
+    noInternet: 'لا يوجد اتصال بالإنترنت',
+    checkConnection: 'تحقق من اتصالك وحاول مرة أخرى.',
   },
   ja: {
     home: '\u30DB\u30FC\u30E0',
@@ -1333,6 +1390,17 @@ const translations: Record<string, TranslationKeys> = {
     noQuizQuestions: 'このお話からクイズを作れませんでした。',
     noStoryEvents: 'お話の出来事を抽出できませんでした。',
     voicePreview: 'むかしむかし、遠い魔法の国に...',
+    ageLabel35: '3-5歳',
+    ageLabel57: '5-7歳',
+    ageLabel710: '7-10歳',
+    ageDesc35: 'やさしい言葉、大きな絵',
+    ageDesc57: '楽しい冒険と豊かなお話',
+    ageDesc710: '深い物語と豊かなキャラクター',
+    errorBoundaryTitle: 'おっと！問題が発生しました',
+    errorBoundaryMessage: 'アプリを再起動してください。',
+    restartApp: 'アプリを再起動',
+    noInternet: 'インターネット接続なし',
+    checkConnection: '接続を確認してもう一度お試しください。',
   },
   fr: {
     home: 'Accueil',
@@ -1551,6 +1619,17 @@ const translations: Record<string, TranslationKeys> = {
     noQuizQuestions: 'Aucune question n\'a pu être générée.',
     noStoryEvents: 'Aucun événement n\'a pu être extrait.',
     voicePreview: 'Il était une fois, dans un pays magique très lointain...',
+    ageLabel35: '3-5 Ans',
+    ageLabel57: '5-7 Ans',
+    ageLabel710: '7-10 Ans',
+    ageDesc35: 'Mots simples, grandes images',
+    ageDesc57: 'Aventures amusantes avec des histoires plus riches',
+    ageDesc710: 'Contes profonds avec des personnages riches',
+    errorBoundaryTitle: 'Oups ! Quelque chose a mal tourné',
+    errorBoundaryMessage: 'Redémarre l\'app pour continuer.',
+    restartApp: 'Redémarrer',
+    noInternet: 'Pas de Connexion Internet',
+    checkConnection: 'Vérifie ta connexion et réessaie.',
   },
   de: {
     home: 'Startseite',
@@ -1769,6 +1848,17 @@ const translations: Record<string, TranslationKeys> = {
     noQuizQuestions: 'Aus dieser Geschichte konnten keine Fragen erstellt werden.',
     noStoryEvents: 'Keine Ereignisse konnten extrahiert werden.',
     voicePreview: 'Es war einmal, in einem magischen Land weit weit weg...',
+    ageLabel35: '3-5 Jahre',
+    ageLabel57: '5-7 Jahre',
+    ageLabel710: '7-10 Jahre',
+    ageDesc35: 'Einfache Wörter, große Bilder',
+    ageDesc57: 'Lustige Abenteuer mit reicheren Geschichten',
+    ageDesc710: 'Tiefere Geschichten mit reichen Charakteren',
+    errorBoundaryTitle: 'Hoppla! Etwas ist schiefgelaufen',
+    errorBoundaryMessage: 'Bitte starte die App neu.',
+    restartApp: 'App Neustarten',
+    noInternet: 'Keine Internetverbindung',
+    checkConnection: 'Überprüfe deine Verbindung und versuche es erneut.',
   },
   pt: {
     home: 'Inicio',
@@ -1987,6 +2077,17 @@ const translations: Record<string, TranslationKeys> = {
     noQuizQuestions: 'Não foi possível gerar perguntas desta história.',
     noStoryEvents: 'Não foi possível extrair eventos da história.',
     voicePreview: 'Era uma vez, numa terra mágica muito distante...',
+    ageLabel35: '3-5 Anos',
+    ageLabel57: '5-7 Anos',
+    ageLabel710: '7-10 Anos',
+    ageDesc35: 'Palavras simples, figuras grandes',
+    ageDesc57: 'Aventuras divertidas com histórias mais ricas',
+    ageDesc710: 'Contos profundos com personagens ricos',
+    errorBoundaryTitle: 'Ops! Algo deu errado',
+    errorBoundaryMessage: 'Reinicie o app para continuar.',
+    restartApp: 'Reiniciar App',
+    noInternet: 'Sem Conexão com a Internet',
+    checkConnection: 'Verifique sua conexão e tente novamente.',
   },
   ko: {
     home: '\uD648',
@@ -2205,6 +2306,17 @@ const translations: Record<string, TranslationKeys> = {
     noQuizQuestions: '이 이야기에서 퀴즈를 만들 수 없었습니다.',
     noStoryEvents: '이야기 사건을 추출할 수 없었습니다.',
     voicePreview: '옛날 옛적에, 머나먼 마법의 땅에...',
+    ageLabel35: '3-5세',
+    ageLabel57: '5-7세',
+    ageLabel710: '7-10세',
+    ageDesc35: '쉬운 단어, 큰 그림',
+    ageDesc57: '더 풍부한 이야기로 재미있는 모험',
+    ageDesc710: '풍부한 캐릭터와 깊은 이야기',
+    errorBoundaryTitle: '이런! 문제가 발생했어요',
+    errorBoundaryMessage: '앱을 다시 시작해주세요.',
+    restartApp: '앱 재시작',
+    noInternet: '인터넷 연결 없음',
+    checkConnection: '연결을 확인하고 다시 시도해주세요.',
   },
   hi: {
     home: '\u0939\u094B\u092E',
@@ -2423,6 +2535,17 @@ const translations: Record<string, TranslationKeys> = {
     noQuizQuestions: 'इस कहानी से प्रश्न नहीं बनाए जा सके।',
     noStoryEvents: 'कहानी की घटनाएं निकाली नहीं जा सकीं।',
     voicePreview: 'एक समय की बात है, एक जादुई देश में बहुत दूर...',
+    ageLabel35: '3-5 साल',
+    ageLabel57: '5-7 साल',
+    ageLabel710: '7-10 साल',
+    ageDesc35: 'सरल शब्द, बड़ी तस्वीरें',
+    ageDesc57: 'समृद्ध कहानियों के साथ मजेदार रोमांच',
+    ageDesc710: 'समृद्ध पात्रों के साथ गहरी कहानियां',
+    errorBoundaryTitle: 'अरे! कुछ गलत हो गया',
+    errorBoundaryMessage: 'जारी रखने के लिए ऐप को फिर से शुरू करें।',
+    restartApp: 'ऐप रीस्टार्ट करें',
+    noInternet: 'इंटरनेट कनेक्शन नहीं',
+    checkConnection: 'अपना कनेक्शन जांचें और फिर से कोशिश करें।',
   },
 };
 

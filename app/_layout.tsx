@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StyleSheet } from 'react-native';
 import { COLORS } from '../packages/shared/types';
 import { NetworkBanner } from '../packages/shared/components/NetworkBanner';
+import { ErrorBoundary } from '../packages/shared/components/ErrorBoundary';
 import { LanguageProvider } from '../constants/LanguageContext';
 
 SplashScreen.preventAutoHideAsync();
@@ -17,6 +18,7 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={styles.container}>
+      <ErrorBoundary>
       <LanguageProvider>
       <StatusBar style="dark" />
       <NetworkBanner />
@@ -41,6 +43,7 @@ export default function RootLayout() {
         />
       </Stack>
       </LanguageProvider>
+      </ErrorBoundary>
     </GestureHandlerRootView>
   );
 }

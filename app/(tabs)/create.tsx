@@ -87,8 +87,8 @@ export default function CreateScreen() {
                       {AGE_GROUP_EMOJIS[key]}
                     </Text>
                     <View style={styles.ageInfo}>
-                      <Text style={styles.ageLabel}>{config.label}</Text>
-                      <Text style={styles.ageDesc}>{config.description}</Text>
+                      <Text style={styles.ageLabel}>{key === '3-5' ? t('ageLabel35') : key === '5-7' ? t('ageLabel57') : t('ageLabel710')}</Text>
+                      <Text style={styles.ageDesc}>{key === '3-5' ? t('ageDesc35') : key === '5-7' ? t('ageDesc57') : t('ageDesc710')}</Text>
                       <View style={styles.ageDetails}>
                         <View style={styles.ageBadge}>
                           <Text style={styles.ageBadgeText}>

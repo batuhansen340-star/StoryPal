@@ -152,7 +152,7 @@ export async function saveStory(story: Omit<SavedStory, 'id' | 'createdAt'>): Pr
         const parsed = JSON.parse(story.pages);
         if (Array.isArray(parsed)) pagesArr = parsed;
       } catch {
-        console.warn('[StoryStorage] Failed to parse story pages JSON');
+        // silently fallback to empty pages
       }
 
       let imgUrls: string[] = [];
@@ -160,7 +160,7 @@ export async function saveStory(story: Omit<SavedStory, 'id' | 'createdAt'>): Pr
         const parsed = JSON.parse(story.imageUrls);
         if (Array.isArray(parsed)) imgUrls = parsed;
       } catch {
-        console.warn('[StoryStorage] Failed to parse imageUrls JSON');
+        // silently fallback to empty images
       }
 
       if (pagesArr.length > 0) {
@@ -175,7 +175,7 @@ export async function saveStory(story: Omit<SavedStory, 'id' | 'createdAt'>): Pr
         await supabase.from('story_pages').insert(pageRows);
       }
     } catch (err) {
-      console.warn('[StoryStorage] Supabase sync failed, story saved locally:', err);
+      // Supabase sync failed — story is still saved locally
     }
   }
 
@@ -193,7 +193,7 @@ export async function deleteStory(id: string): Promise<void> {
       try {
         await supabase.from('stories').delete().eq('id', id);
       } catch (err) {
-        console.warn('[StoryStorage] Supabase delete failed:', err);
+        // Supabase delete failed — local delete succeeded
       }
     }
   }

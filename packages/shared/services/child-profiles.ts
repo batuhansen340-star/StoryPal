@@ -117,7 +117,7 @@ export async function createChildProfile(profile: { name: string; age: number; a
         avatar_id: profile.avatarId,
       });
     } catch (err) {
-      console.warn('[ChildProfiles] Supabase sync failed:', err);
+      // Supabase sync failed — profile saved locally
     }
   }
 
@@ -136,7 +136,7 @@ export async function deleteChildProfile(id: string): Promise<void> {
       try {
         await supabase.from('child_profiles').delete().eq('id', id);
       } catch (err) {
-        console.warn('[ChildProfiles] Supabase delete failed:', err);
+        // Supabase delete failed — local delete succeeded
       }
     }
   }
