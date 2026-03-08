@@ -73,7 +73,6 @@ export default function PaywallScreen() {
 
   const displayName = childName || t('paywallSubtitle').split(' ')[0];
   const paywallTitle = t('paywallTitle').replace('{name}', displayName);
-  const finishedTitle = t('storyFinishedTitle').replace('{name}', displayName);
 
   const handlePurchase = async (tierId: string) => {
     const success = await purchasePackage(tierId);
@@ -133,11 +132,11 @@ export default function PaywallScreen() {
                   >
                     {tier.badgeKey && (
                       <View style={styles.badge}>
-                        <Text style={styles.badgeText}>{t(tier.badgeKey)}</Text>
+                        <Text style={styles.badgeText}>{t(tier.badgeKey as any)}</Text>
                       </View>
                     )}
                     <Text style={styles.tierEmoji}>{tier.emoji}</Text>
-                    <Text style={styles.tierName}>{t(tier.nameKey)}</Text>
+                    <Text style={styles.tierName}>{t(tier.nameKey as any)}</Text>
                     <Text style={styles.tierPrice}>{tier.price}<Text style={styles.tierPeriod}>{t('perMonth')}</Text></Text>
                     <View style={styles.tierFeatures}>
                       {tier.features.map((f, i) => (
