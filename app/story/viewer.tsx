@@ -23,7 +23,8 @@ import { speak, stop as stopTTS, type TTSSpeed } from '../../packages/shared/ser
 import { getSpeechLanguageCode } from '../../packages/shared/services/tts';
 import { getVoiceCharacterById } from '../../constants/voice-characters';
 import { getRecordingForPage } from '../../packages/shared/services/audio-recorder';
-import { Audio } from 'expo-av';
+import { createAudioPlayer } from 'expo-audio';
+import type { AudioPlayer } from 'expo-audio';
 import { saveStory, getStoryById } from '../../packages/shared/services/story-storage';
 import { shareStoryPDF } from '../../packages/shared/services/story-export';
 import { useLanguage } from '../../constants/LanguageContext';
@@ -69,7 +70,7 @@ export default function ViewerScreen() {
   const [isExporting, setIsExporting] = useState(false);
   const flatListRef = useRef<FlatList>(null);
   const autoPlayRef = useRef(false);
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const soundRef = useRef<AudioPlayer | null>(null);
   const hasSaved = useRef(false);
 
   // Story data as state — initialized from params, updated from storage for saved stories
@@ -130,7 +131,7 @@ export default function ViewerScreen() {
   useEffect(() => {
     return () => {
       stopTTS();
-      soundRef.current?.unloadAsync();
+      soundRef.current?.remove();
     };
   }, []);
 
@@ -182,15 +183,15 @@ export default function ViewerScreen() {
       if (!uri) return;
 
       if (soundRef.current) {
-        await soundRef.current.unloadAsync();
+        soundRef.current.remove();
       }
 
-      const { sound } = await Audio.Sound.createAsync({ uri });
-      soundRef.current = sound;
+      const player = createAudioPlayer({ uri });
+      soundRef.current = player;
 
       setIsSpeaking(true);
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded && status.didJustFinish) {
+      player.addListener('playbackStatusUpdate', (status) => {
+        if (status.didJustFinish) {
           setIsSpeaking(false);
           if (autoPlayRef.current && pageIndex < allPages.length - 1) {
             setTimeout(() => {
@@ -199,7 +200,7 @@ export default function ViewerScreen() {
           }
         }
       });
-      await sound.playAsync();
+      player.play();
     } catch {
       setIsSpeaking(false);
     }
@@ -251,7 +252,7 @@ export default function ViewerScreen() {
     if (isSpeaking) {
       await stopTTS();
       if (soundRef.current) {
-        await soundRef.current.stopAsync();
+        soundRef.current.pause();
       }
       setIsSpeaking(false);
     } else {

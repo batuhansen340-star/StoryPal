@@ -1,5 +1,6 @@
 import * as Speech from 'expo-speech';
-import { Audio } from 'expo-av';
+import { createAudioPlayer } from 'expo-audio';
+import type { AudioPlayer } from 'expo-audio';
 import { Platform } from 'react-native';
 import type { VoiceCharacter } from '../types';
 
@@ -28,7 +29,7 @@ export interface TTSOptions {
   onStart?: () => void;
 }
 
-let currentSound: Audio.Sound | null = null;
+let currentPlayer: AudioPlayer | null = null;
 let currentWebAudio: HTMLAudioElement | null = null;
 let abortSpeech = false;
 
@@ -123,7 +124,7 @@ async function openaiTTSSpeak(text: string, options: TTSOptions): Promise<boolea
       });
     }
 
-    // Native: use expo-av with base64
+    // Native: use expo-audio with base64
     const arrayBuffer = await response.arrayBuffer();
     const bytes = new Uint8Array(arrayBuffer);
     let binary = '';
@@ -132,28 +133,25 @@ async function openaiTTSSpeak(text: string, options: TTSOptions): Promise<boolea
     }
     const base64 = btoa(binary);
 
-    if (currentSound) {
-      await currentSound.unloadAsync().catch(() => {});
-      currentSound = null;
+    if (currentPlayer) {
+      currentPlayer.remove();
+      currentPlayer = null;
     }
 
-    const { sound } = await Audio.Sound.createAsync(
-      { uri: `data:audio/mpeg;base64,${base64}` },
-      { shouldPlay: false }
-    );
-    currentSound = sound;
+    const player = createAudioPlayer({ uri: `data:audio/mpeg;base64,${base64}` });
+    currentPlayer = player;
 
     options.onStart?.();
 
-    sound.setOnPlaybackStatusUpdate((status) => {
-      if (status.isLoaded && status.didJustFinish) {
+    player.addListener('playbackStatusUpdate', (status) => {
+      if (status.didJustFinish) {
         options.onDone?.();
-        sound.unloadAsync().catch(() => {});
-        if (currentSound === sound) currentSound = null;
+        player.remove();
+        if (currentPlayer === player) currentPlayer = null;
       }
     });
 
-    await sound.playAsync();
+    player.play();
     return true;
   } catch {
     return false;
@@ -217,10 +215,10 @@ export async function stop(): Promise<void> {
     currentWebAudio.currentTime = 0;
     currentWebAudio = null;
   }
-  if (currentSound) {
-    await currentSound.stopAsync().catch(() => {});
-    await currentSound.unloadAsync().catch(() => {});
-    currentSound = null;
+  if (currentPlayer) {
+    currentPlayer.pause();
+    currentPlayer.remove();
+    currentPlayer = null;
   }
   await Speech.stop();
 }

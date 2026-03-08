@@ -1,4 +1,11 @@
-import { Audio } from 'expo-av';
+import {
+  AudioModule,
+  RecordingPresets,
+  requestRecordingPermissionsAsync,
+  setAudioModeAsync,
+  createAudioPlayer,
+} from 'expo-audio';
+import type { AudioRecorder, AudioPlayer } from 'expo-audio';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const RECORDINGS_KEY_PREFIX = 'storypal_recording_';
@@ -8,30 +15,29 @@ export interface RecordingResult {
   duration: number;
 }
 
-let recording: Audio.Recording | null = null;
+let recorder: AudioRecorder | null = null;
 
 export async function startRecording(): Promise<void> {
-  await Audio.requestPermissionsAsync();
-  await Audio.setAudioModeAsync({
-    allowsRecordingIOS: true,
-    playsInSilentModeIOS: true,
+  await requestRecordingPermissionsAsync();
+  await setAudioModeAsync({
+    allowsRecording: true,
+    playsInSilentMode: true,
   });
 
-  const { recording: newRecording } = await Audio.Recording.createAsync(
-    Audio.RecordingOptionsPresets.HIGH_QUALITY,
-  );
-  recording = newRecording;
+  recorder = new AudioModule.AudioRecorder(RecordingPresets.HIGH_QUALITY);
+  await recorder.prepareToRecordAsync();
+  recorder.record();
 }
 
 export async function stopRecording(): Promise<RecordingResult | null> {
-  if (!recording) return null;
+  if (!recorder) return null;
 
-  await recording.stopAndUnloadAsync();
-  await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
+  await recorder.stop();
+  await setAudioModeAsync({ allowsRecording: false });
 
-  const uri = recording.getURI();
-  const status = await recording.getStatusAsync();
-  recording = null;
+  const uri = recorder.uri;
+  const status = recorder.getStatus();
+  recorder = null;
 
   if (!uri) return null;
 
@@ -41,10 +47,10 @@ export async function stopRecording(): Promise<RecordingResult | null> {
   };
 }
 
-export async function playRecording(uri: string): Promise<Audio.Sound> {
-  const { sound } = await Audio.Sound.createAsync({ uri });
-  await sound.playAsync();
-  return sound;
+export function playRecording(uri: string): AudioPlayer {
+  const player = createAudioPlayer({ uri });
+  player.play();
+  return player;
 }
 
 export async function saveRecordingForPage(
