@@ -121,6 +121,7 @@ export interface VoiceCharacter {
   gradient: [string, string];
   isPremium: boolean;
   openaiVoice?: string;
+  elevenLabsVoiceId?: string;
 }
 
 export interface SubscriptionPlan {

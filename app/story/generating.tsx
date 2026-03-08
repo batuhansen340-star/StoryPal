@@ -70,7 +70,8 @@ export default function GeneratingScreen() {
           childName: childName || undefined,
           childAge: childAge ? parseInt(childAge, 10) : undefined,
           characterDescription: modernChar.storyHook,
-          characterVisualDesc: modernChar.visualDesc,
+          characterVisualDesc: parsedPersonalization?.faceDescription
+            ?? modernChar.visualDesc,
         });
       } else {
         const allChars = [...CHARACTERS, ...REGIONAL_CHARACTERS];
@@ -86,6 +87,8 @@ export default function GeneratingScreen() {
           childName: childName || undefined,
           childAge: childAge ? parseInt(childAge, 10) : undefined,
           characterDescription: charInfo?.description,
+          characterVisualDesc: parsedPersonalization?.faceDescription
+            ?? charInfo?.description,
         });
       }
     }

@@ -18,6 +18,7 @@ const PAUSE_AFTER_SENTENCE = 300;
 const PAUSE_AFTER_COMMA = 150;
 
 const OPENAI_API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY ?? '';
+const ELEVENLABS_API_KEY = process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY ?? '';
 const DEFAULT_VOICE = 'nova';
 
 export interface TTSOptions {
@@ -67,6 +68,99 @@ function prepareTextForTTS(text: string): string {
     .replace(/\.\s/g, '... ')
     .replace(/!\s/g, '!... ')
     .replace(/\?\s/g, '?... ');
+}
+
+async function elevenLabsSpeak(text: string, options: TTSOptions): Promise<boolean> {
+  const voiceId = options.voiceCharacter?.elevenLabsVoiceId;
+  if (!ELEVENLABS_API_KEY || !voiceId) return false;
+
+  try {
+    const preparedText = prepareTextForTTS(text);
+    const isBedtime = options.isBedtimeMode;
+
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'xi-api-key': ELEVENLABS_API_KEY,
+        'Accept': 'audio/mpeg',
+      },
+      body: JSON.stringify({
+        text: preparedText,
+        model_id: 'eleven_multilingual_v2',
+        voice_settings: {
+          stability: isBedtime ? 0.65 : 0.4,
+          similarity_boost: 0.65,
+          style: isBedtime ? 0.3 : 0.5,
+          use_speaker_boost: true,
+        },
+      }),
+    });
+
+    if (!response.ok) return false;
+
+    if (Platform.OS === 'web') {
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+
+      if (currentWebAudio) {
+        currentWebAudio.pause();
+        currentWebAudio = null;
+      }
+
+      const audio = new window.Audio(url);
+      currentWebAudio = audio;
+
+      options.onStart?.();
+
+      return new Promise<boolean>((resolve) => {
+        audio.onended = () => {
+          options.onDone?.();
+          URL.revokeObjectURL(url);
+          if (currentWebAudio === audio) currentWebAudio = null;
+          resolve(true);
+        };
+        audio.onerror = () => {
+          URL.revokeObjectURL(url);
+          if (currentWebAudio === audio) currentWebAudio = null;
+          resolve(false);
+        };
+        audio.play().catch(() => resolve(false));
+      });
+    }
+
+    // Native: use expo-audio with base64
+    const arrayBuffer = await response.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    const base64 = btoa(binary);
+
+    if (currentPlayer) {
+      currentPlayer.remove();
+      currentPlayer = null;
+    }
+
+    const player = createAudioPlayer({ uri: `data:audio/mpeg;base64,${base64}` });
+    currentPlayer = player;
+
+    options.onStart?.();
+
+    player.addListener('playbackStatusUpdate', (status) => {
+      if (status.didJustFinish) {
+        options.onDone?.();
+        player.remove();
+        if (currentPlayer === player) currentPlayer = null;
+      }
+    });
+
+    player.play();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function openaiTTSSpeak(text: string, options: TTSOptions): Promise<boolean> {
@@ -161,7 +255,11 @@ async function openaiTTSSpeak(text: string, options: TTSOptions): Promise<boolea
 export async function speak(text: string, options: TTSOptions): Promise<void> {
   await stop();
 
-  // Try OpenAI TTS first
+  // Try ElevenLabs first (best multilingual quality)
+  const elevenLabsSuccess = await elevenLabsSpeak(text, options);
+  if (elevenLabsSuccess) return;
+
+  // Try OpenAI TTS as fallback
   const success = await openaiTTSSpeak(text, options);
   if (success) return;
 

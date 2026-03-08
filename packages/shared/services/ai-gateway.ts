@@ -41,7 +41,9 @@ export async function generateStoryText(params: {
   if (params.characterDescription) {
     characterDesc += ` — ${params.characterDescription}`;
   }
-  if (params.personalization?.name) {
+  if (params.personalization?.faceDescription) {
+    characterDesc = `Character: ${params.personalization.name ?? params.character} — ${params.personalization.faceDescription}`;
+  } else if (params.personalization?.name) {
     characterDesc = `Character: ${params.personalization.name} (a ${params.personalization.gender ?? 'child'} with ${params.personalization.hairColor} hair and ${params.personalization.skinTone} skin${params.personalization.hasGlasses ? ', wearing glasses' : ''})`;
   }
 

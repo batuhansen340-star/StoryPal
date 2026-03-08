@@ -16,6 +16,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 import type { StoryChoice } from '../../packages/shared/types';
 import { THEMES } from '../../apps/storypal/constants/themes';
@@ -29,7 +30,7 @@ import { saveStory, getStoryById } from '../../packages/shared/services/story-st
 import { shareStoryPDF } from '../../packages/shared/services/story-export';
 import { useLanguage } from '../../constants/LanguageContext';
 
-const { width, height } = Dimensions.get('window');
+const initialDims = Dimensions.get('window');
 
 interface StoryPageData {
   text: string;
@@ -57,6 +58,7 @@ export default function ViewerScreen() {
     savedStoryId?: string;
   }>();
 
+  const [dims, setDims] = useState(initialDims);
   const [currentPage, setCurrentPage] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [autoPlay, setAutoPlay] = useState(false);
@@ -129,9 +131,13 @@ export default function ViewerScreen() {
   }, [autoPlay]);
 
   useEffect(() => {
+    ScreenOrientation.unlockAsync();
+    const sub = Dimensions.addEventListener('change', ({ window }) => setDims(window));
     return () => {
       stopTTS();
       soundRef.current?.remove();
+      sub.remove();
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
     };
   }, []);
 
@@ -173,9 +179,9 @@ export default function ViewerScreen() {
   const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (Platform.OS !== 'web') return;
     const offsetX = e.nativeEvent.contentOffset.x;
-    const page = Math.round(offsetX / width);
+    const page = Math.round(offsetX / dims.width);
     setCurrentPage(prev => prev !== page ? page : prev);
-  }, []);
+  }, [dims.width]);
 
   const playParentRecording = useCallback(async (pageIndex: number) => {
     try {
@@ -332,7 +338,7 @@ export default function ViewerScreen() {
     const isCover = item.type === 'cover';
 
     return (
-      <View style={styles.page}>
+      <View style={[styles.page, { width: dims.width, height: dims.height }]}>
         <LinearGradient
           colors={isCover ? (themeGradient as [string, string]) : (bgColors as [string, string])}
           style={styles.pageGradient}
@@ -740,8 +746,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
   },
   page: {
-    width,
-    height,
+    width: initialDims.width,
+    height: initialDims.height,
   },
   pageGradient: {
     flex: 1,
@@ -852,7 +858,7 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.lg,
     borderRadius: RADIUS.lg,
-    minWidth: width * 0.65,
+    minWidth: initialDims.width * 0.65,
     shadowColor: 'rgba(0,0,0,0.2)',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,

@@ -11,6 +11,7 @@ export const VOICE_CHARACTERS: VoiceCharacter[] = [
     gradient: ['#FF6B6B', '#FF8E53'],
     isPremium: false,
     openaiVoice: 'nova',
+    elevenLabsVoiceId: '21m00Tcm4TlvDq8ikWAM',
   },
   {
     id: 'fairy',
@@ -22,6 +23,7 @@ export const VOICE_CHARACTERS: VoiceCharacter[] = [
     gradient: ['#C77DFF', '#E8A0FF'],
     isPremium: false,
     openaiVoice: 'shimmer',
+    elevenLabsVoiceId: 'MF3mGyEYCl7XYWbV9V6O',
   },
   {
     id: 'wizard',
@@ -33,6 +35,7 @@ export const VOICE_CHARACTERS: VoiceCharacter[] = [
     gradient: ['#1A1A6E', '#4A4AE0'],
     isPremium: true,
     openaiVoice: 'onyx',
+    elevenLabsVoiceId: 'pNInz6obpgDQGcFmaJgB',
   },
   {
     id: 'robot',
@@ -44,6 +47,7 @@ export const VOICE_CHARACTERS: VoiceCharacter[] = [
     gradient: ['#00B4D8', '#48CAE4'],
     isPremium: true,
     openaiVoice: 'echo',
+    elevenLabsVoiceId: 'VR6AewLTigWG4xSOukaG',
   },
   {
     id: 'pirate',
@@ -55,6 +59,7 @@ export const VOICE_CHARACTERS: VoiceCharacter[] = [
     gradient: ['#D4380D', '#FF7A45'],
     isPremium: true,
     openaiVoice: 'fable',
+    elevenLabsVoiceId: 'TxGEqnHWrfWFTfGW9XjX',
   },
   {
     id: 'princess',
@@ -66,6 +71,7 @@ export const VOICE_CHARACTERS: VoiceCharacter[] = [
     gradient: ['#FF69B4', '#FFB6C1'],
     isPremium: true,
     openaiVoice: 'shimmer',
+    elevenLabsVoiceId: 'MF3mGyEYCl7XYWbV9V6O',
   },
   {
     id: 'dragon',
@@ -77,6 +83,7 @@ export const VOICE_CHARACTERS: VoiceCharacter[] = [
     gradient: ['#52B788', '#95D5B2'],
     isPremium: true,
     openaiVoice: 'onyx',
+    elevenLabsVoiceId: 'pNInz6obpgDQGcFmaJgB',
   },
   {
     id: 'alien',
@@ -88,6 +95,7 @@ export const VOICE_CHARACTERS: VoiceCharacter[] = [
     gradient: ['#A8E6CF', '#DCEDC1'],
     isPremium: true,
     openaiVoice: 'alloy',
+    elevenLabsVoiceId: 'yoZ06aMxZJJ28mfd3POQ',
   },
 ];
 

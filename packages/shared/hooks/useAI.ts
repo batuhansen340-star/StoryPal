@@ -209,25 +209,27 @@ export function useAI() {
         currentStep: '\uD83D\uDD8C\uFE0F Drawing page illustrations...',
       }));
 
-      const imageUrls: string[] = [];
-      for (let i = 0; i < story.pages.length; i++) {
-        const page = story.pages[i];
-        try {
-          const url = await generateStoryImage({
+      const BATCH_SIZE = 4;
+      const imageUrls: string[] = new Array(story.pages.length).fill('');
+
+      for (let batch = 0; batch < story.pages.length; batch += BATCH_SIZE) {
+        const batchPages = story.pages.slice(batch, batch + BATCH_SIZE);
+        const batchPromises = batchPages.map((page) =>
+          generateStoryImage({
             prompt: page.imagePrompt,
             theme: params.theme,
             character: params.characterVisualDesc ?? params.character,
-          });
-          imageUrls.push(url);
-        } catch {
-          imageUrls.push('');
-        }
+          }).catch(() => '')
+        );
+
+        const results = await Promise.all(batchPromises);
+        results.forEach((url, idx) => { imageUrls[batch + idx] = url; });
 
         setState(prev => ({
           ...prev,
-          progress: i + 3,
+          progress: Math.min(batch + BATCH_SIZE, story.pages.length) + 2,
           imageUrls: [...imageUrls],
-          currentStep: `\uD83D\uDD8C\uFE0F Drawing page ${i + 1} of ${story.pages.length}...`,
+          currentStep: `\uD83D\uDD8C\uFE0F Drawing pages ${batch + 1}-${Math.min(batch + BATCH_SIZE, story.pages.length)} of ${story.pages.length}...`,
         }));
       }
 
