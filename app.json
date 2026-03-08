@@ -20,7 +20,8 @@
       "infoPlist": {
         "NSCameraUsageDescription": "StoryPal needs camera access to take your child's photo for personalized story characters.",
         "NSPhotoLibraryUsageDescription": "StoryPal needs photo library access to select your child's photo for personalized story characters.",
-        "NSMicrophoneUsageDescription": "StoryPal needs microphone access to record your voice for storytelling."
+        "NSMicrophoneUsageDescription": "StoryPal needs microphone access to record your voice for storytelling.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -37,7 +38,10 @@
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.READ_MEDIA_IMAGES",
         "android.permission.RECORD_AUDIO",
-        "android.permission.INTERNET"
+        "android.permission.INTERNET",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
       ]
     },
     "web": {
@@ -65,6 +69,13 @@
       "expo-localization",
       "expo-audio",
       "expo-screen-orientation"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7ac19d66-22ec-48be-8f15-84bf2a96c9c6"
+      }
+    },
+    "owner": "batuuhansen1"
   }
 }

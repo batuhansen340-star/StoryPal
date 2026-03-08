@@ -9,6 +9,9 @@ import { COLORS } from '../packages/shared/types';
 import { NetworkBanner } from '../packages/shared/components/NetworkBanner';
 import { ErrorBoundary } from '../packages/shared/components/ErrorBoundary';
 import { LanguageProvider } from '../constants/LanguageContext';
+import { SubscriptionProvider } from '../constants/SubscriptionContext';
+import { UsageProvider } from '../constants/UsageContext';
+import { configureRevenueCat } from '../packages/shared/services/revenue-cat';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -16,12 +19,15 @@ export default function RootLayout() {
   useEffect(() => {
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
     SplashScreen.hideAsync();
+    configureRevenueCat();
   }, []);
 
   return (
     <GestureHandlerRootView style={styles.container}>
       <ErrorBoundary>
       <LanguageProvider>
+      <SubscriptionProvider>
+      <UsageProvider>
       <StatusBar style="dark" />
       <NetworkBanner />
       <Stack
@@ -39,7 +45,10 @@ export default function RootLayout() {
           name="story"
           options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
         />
+        <Stack.Screen name="paywall" options={{ presentation: 'modal', headerShown: false, animation: 'slide_from_bottom' }} />
       </Stack>
+      </UsageProvider>
+      </SubscriptionProvider>
       </LanguageProvider>
       </ErrorBoundary>
     </GestureHandlerRootView>

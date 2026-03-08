@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,112 +6,286 @@ import {
   Dimensions,
   FlatList,
   TouchableOpacity,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Notifications from 'expo-notifications';
 import { setOnboardingDone } from '../packages/shared/services/auth';
+import { createChildProfile } from '../packages/shared/services/child-profiles';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../packages/shared/types';
 import { useLanguage } from '../constants/LanguageContext';
 
 const { width, height } = Dimensions.get('window');
 
-interface Slide {
-  emoji: string;
-  title: string;
-  subtitle: string;
-  gradient: [string, string];
-}
+type AgeGroupOption = '3-5' | '5-7' | '7-10';
+
+const STEP_COUNT = 4;
 
 export default function OnboardingScreen() {
   const { t } = useLanguage();
-
-  const slides: Slide[] = [
-    {
-      emoji: '\u{1F4D6}',
-      title: t('welcomeTitle'),
-      subtitle: t('welcomeSubtitle'),
-      gradient: GRADIENTS.primary,
-    },
-    {
-      emoji: '\u{2728}',
-      title: t('aiStoriesTitle'),
-      subtitle: t('aiStoriesSubtitle'),
-      gradient: GRADIENTS.purple,
-    },
-    {
-      emoji: '\u{1F3A8}',
-      title: t('illustrationsTitle'),
-      subtitle: t('illustrationsSubtitle'),
-      gradient: ['#4ECDC4', '#44CF6C'],
-    },
-    {
-      emoji: '\u{1F680}',
-      title: t('readyTitle'),
-      subtitle: t('readySubtitle'),
-      gradient: ['#667eea', '#764ba2'],
-    },
-  ];
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const handleNext = async () => {
-    if (currentIndex < slides.length - 1) {
-      flatListRef.current?.scrollToIndex({ index: currentIndex + 1 });
-    } else {
-      await setOnboardingDone();
-      router.replace('/auth');
-    }
-  };
+  const [childName, setChildName] = useState('');
+  const [ageGroup, setAgeGroup] = useState<AgeGroupOption | null>(null);
 
-  const handleSkip = async () => {
+  const finishOnboarding = useCallback(async () => {
+    if (childName.trim()) {
+      const ageMap: Record<AgeGroupOption, number> = { '3-5': 4, '5-7': 6, '7-10': 8 };
+      const age = ageGroup ? ageMap[ageGroup] : 4;
+      await createChildProfile({ name: childName.trim(), age, avatarId: 'child' });
+      await AsyncStorage.setItem('storypal_default_child_name', childName.trim());
+    }
+    if (ageGroup) {
+      await AsyncStorage.setItem('storypal_default_age_group', ageGroup);
+    }
     await setOnboardingDone();
     router.replace('/auth');
-  };
+  }, [childName, ageGroup, router]);
 
-  const renderSlide = ({ item, index }: { item: Slide; index: number }) => (
-    <View style={styles.slide}>
-      <LinearGradient
-        colors={item.gradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.slideGradient}
-      >
-        <View style={styles.slideContent}>
-          <Animated.Text
-            entering={FadeIn.duration(800)}
-            style={styles.slideEmoji}
+  const handleNext = useCallback(async () => {
+    if (currentIndex < STEP_COUNT - 1) {
+      flatListRef.current?.scrollToIndex({ index: currentIndex + 1 });
+    } else {
+      await finishOnboarding();
+    }
+  }, [currentIndex, finishOnboarding]);
+
+  const handleSkip = useCallback(async () => {
+    await finishOnboarding();
+  }, [finishOnboarding]);
+
+  const handleNotifAllow = useCallback(async () => {
+    try {
+      await Notifications.requestPermissionsAsync();
+    } catch {
+      // Permission denied or unavailable — continue
+    }
+    await finishOnboarding();
+  }, [finishOnboarding]);
+
+  const canProceedFromStep1 = childName.trim().length > 0 && ageGroup !== null;
+
+  const ageOptions: { key: AgeGroupOption; labelKey: string; emoji: string }[] = [
+    { key: '3-5', labelKey: 'onboardingAgeGroup35', emoji: '🍼' },
+    { key: '5-7', labelKey: 'onboardingAgeGroup57', emoji: '🎒' },
+    { key: '7-10', labelKey: 'onboardingAgeGroup710', emoji: '📚' },
+  ];
+
+  const renderStep = ({ index }: { item: number; index: number }) => {
+    if (index === 0) {
+      return (
+        <View style={styles.slide}>
+          <LinearGradient
+            colors={GRADIENTS.primary}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.slideGradient}
           >
-            {item.emoji}
-          </Animated.Text>
-          <Animated.Text
-            entering={FadeInUp.duration(600).delay(200)}
-            style={styles.slideTitle}
-          >
-            {item.title}
-          </Animated.Text>
-          <Animated.Text
-            entering={FadeInUp.duration(600).delay(400)}
-            style={styles.slideSubtitle}
-          >
-            {item.subtitle}
-          </Animated.Text>
+            <View style={styles.slideContent}>
+              <Animated.Text entering={FadeIn.duration(800)} style={styles.slideEmoji}>
+                📖
+              </Animated.Text>
+              <Animated.Text entering={FadeInUp.duration(600).delay(200)} style={styles.slideTitle}>
+                {t('onboardingWelcome')}
+              </Animated.Text>
+              <Animated.Text entering={FadeInUp.duration(600).delay(400)} style={styles.slideSubtitle}>
+                {t('onboardingWelcomeSubtitle')}
+              </Animated.Text>
+              <Animated.View entering={FadeInUp.duration(600).delay(600)}>
+                <TouchableOpacity onPress={handleNext} activeOpacity={0.85}>
+                  <LinearGradient
+                    colors={['rgba(255,255,255,0.35)', 'rgba(255,255,255,0.15)']}
+                    style={styles.startButton}
+                  >
+                    <Text style={styles.startButtonText}>{t('onboardingStart')}</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </Animated.View>
+            </View>
+          </LinearGradient>
         </View>
-      </LinearGradient>
-    </View>
-  );
+      );
+    }
+
+    if (index === 1) {
+      return (
+        <View style={styles.slide}>
+          <LinearGradient
+            colors={GRADIENTS.purple}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.slideGradient}
+          >
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+              style={styles.slideContent}
+            >
+              <Text style={styles.formEmoji}>🧒</Text>
+              <Text style={styles.formTitle}>{t('onboardingChildName')}</Text>
+              <TextInput
+                style={styles.nameInput}
+                placeholder={t('onboardingChildNamePlaceholder')}
+                placeholderTextColor="rgba(255,255,255,0.5)"
+                value={childName}
+                onChangeText={setChildName}
+                autoCapitalize="words"
+                returnKeyType="done"
+                maxLength={30}
+              />
+
+              <Text style={[styles.formTitle, { marginTop: SPACING.xl }]}>
+                {t('onboardingAgeGroup')}
+              </Text>
+              <View style={styles.ageRow}>
+                {ageOptions.map((opt) => (
+                  <TouchableOpacity
+                    key={opt.key}
+                    style={[
+                      styles.ageOption,
+                      ageGroup === opt.key && styles.ageOptionSelected,
+                    ]}
+                    onPress={() => setAgeGroup(opt.key)}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.ageEmoji}>{opt.emoji}</Text>
+                    <Text style={[
+                      styles.ageLabel,
+                      ageGroup === opt.key && styles.ageLabelSelected,
+                    ]}>
+                      {t(opt.labelKey)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <TouchableOpacity
+                onPress={handleNext}
+                activeOpacity={0.85}
+                disabled={!canProceedFromStep1}
+                style={{ opacity: canProceedFromStep1 ? 1 : 0.5 }}
+              >
+                <LinearGradient
+                  colors={['rgba(255,255,255,0.35)', 'rgba(255,255,255,0.15)']}
+                  style={styles.startButton}
+                >
+                  <Text style={styles.startButtonText}>{t('next')}</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </KeyboardAvoidingView>
+          </LinearGradient>
+        </View>
+      );
+    }
+
+    if (index === 2) {
+      const displayName = childName.trim() || '✨';
+      const giftTitle = t('onboardingGift').replace('{name}', displayName);
+
+      return (
+        <View style={styles.slide}>
+          <LinearGradient
+            colors={['#4ECDC4', '#44CF6C']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.slideGradient}
+          >
+            <View style={styles.slideContent}>
+              <Animated.Text entering={FadeIn.duration(800)} style={styles.slideEmoji}>
+                🎁
+              </Animated.Text>
+              <Animated.Text entering={FadeInUp.duration(600).delay(200)} style={styles.slideTitle}>
+                {giftTitle}
+              </Animated.Text>
+              <Animated.Text entering={FadeInUp.duration(600).delay(400)} style={styles.slideSubtitle}>
+                {t('onboardingGiftSubtitle')}
+              </Animated.Text>
+
+              <Animated.View entering={FadeInUp.duration(600).delay(500)} style={styles.featureList}>
+                {[
+                  { icon: '✨', key: 'onboardingGiftFeature1' },
+                  { icon: '🎨', key: 'onboardingGiftFeature2' },
+                  { icon: '🚀', key: 'onboardingGiftFeature3' },
+                ].map((f, i) => (
+                  <View key={i} style={styles.featureItem}>
+                    <Text style={styles.featureItemIcon}>{f.icon}</Text>
+                    <Text style={styles.featureItemText}>{t(f.key)}</Text>
+                  </View>
+                ))}
+              </Animated.View>
+
+              <Animated.View entering={FadeInUp.duration(600).delay(700)}>
+                <TouchableOpacity onPress={handleNext} activeOpacity={0.85}>
+                  <LinearGradient
+                    colors={['rgba(255,255,255,0.35)', 'rgba(255,255,255,0.15)']}
+                    style={styles.startButton}
+                  >
+                    <Text style={styles.startButtonText}>{t('next')}</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </Animated.View>
+            </View>
+          </LinearGradient>
+        </View>
+      );
+    }
+
+    // Step 3: Notification permission
+    return (
+      <View style={styles.slide}>
+        <LinearGradient
+          colors={['#667eea', '#764ba2']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.slideGradient}
+        >
+          <View style={styles.slideContent}>
+            <Animated.Text entering={FadeIn.duration(800)} style={styles.slideEmoji}>
+              🔔
+            </Animated.Text>
+            <Animated.Text entering={FadeInUp.duration(600).delay(200)} style={styles.slideTitle}>
+              {t('onboardingNotifTitle')}
+            </Animated.Text>
+            <Animated.Text entering={FadeInUp.duration(600).delay(400)} style={styles.slideSubtitle}>
+              {t('onboardingNotifSubtitle')}
+            </Animated.Text>
+
+            <Animated.View entering={FadeInUp.duration(600).delay(600)} style={styles.notifButtons}>
+              <TouchableOpacity onPress={handleNotifAllow} activeOpacity={0.85}>
+                <LinearGradient
+                  colors={['rgba(255,255,255,0.35)', 'rgba(255,255,255,0.15)']}
+                  style={styles.startButton}
+                >
+                  <Text style={styles.startButtonText}>{t('onboardingNotifAllow')}</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={finishOnboarding} activeOpacity={0.7} style={styles.skipNotifBtn}>
+                <Text style={styles.skipNotifText}>{t('onboardingNotifSkip')}</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
+        </LinearGradient>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
       <FlatList
         ref={flatListRef}
-        data={slides}
-        renderItem={renderSlide}
+        data={[0, 1, 2, 3]}
+        renderItem={renderStep}
         horizontal
         pagingEnabled
+        scrollEnabled={false}
         showsHorizontalScrollIndicator={false}
         keyExtractor={(_, i) => i.toString()}
         onMomentumScrollEnd={(e) => {
@@ -120,16 +294,19 @@ export default function OnboardingScreen() {
         }}
       />
 
-      {/* Controls */}
+      {/* Controls overlay */}
       <View style={[styles.controls, { paddingBottom: insets.bottom + 20 }]}>
         {/* Skip */}
-        <TouchableOpacity onPress={handleSkip} activeOpacity={0.7} style={styles.skipButton}>
-          <Text style={styles.skipText}>{t('skip')}</Text>
-        </TouchableOpacity>
+        {currentIndex < STEP_COUNT - 1 && (
+          <TouchableOpacity onPress={handleSkip} activeOpacity={0.7} style={styles.skipButton}>
+            <Text style={styles.skipText}>{t('skip')}</Text>
+          </TouchableOpacity>
+        )}
+        {currentIndex === STEP_COUNT - 1 && <View style={styles.skipButton} />}
 
         {/* Dots */}
         <View style={styles.dots}>
-          {slides.map((_, i) => (
+          {[0, 1, 2, 3].map((i) => (
             <View
               key={i}
               style={[styles.dot, i === currentIndex && styles.dotActive]}
@@ -137,17 +314,7 @@ export default function OnboardingScreen() {
           ))}
         </View>
 
-        {/* Next / Get Started */}
-        <TouchableOpacity onPress={handleNext} activeOpacity={0.85}>
-          <LinearGradient
-            colors={['rgba(255,255,255,0.3)', 'rgba(255,255,255,0.15)']}
-            style={styles.nextButton}
-          >
-            <Text style={styles.nextText}>
-              {currentIndex === slides.length - 1 ? t('getStarted') : t('next')}
-            </Text>
-          </LinearGradient>
-        </TouchableOpacity>
+        <View style={styles.skipButton} />
       </View>
 
       {/* Top safe area */}
@@ -175,13 +342,14 @@ const styles = StyleSheet.create({
   slideContent: {
     alignItems: 'center',
     paddingHorizontal: SPACING.xl,
+    width: '100%',
   },
   slideEmoji: {
     fontSize: 100,
     marginBottom: SPACING.xl,
   },
   slideTitle: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: '900',
     color: '#fff',
     textAlign: 'center',
@@ -197,6 +365,115 @@ const styles = StyleSheet.create({
     lineHeight: 26,
     paddingHorizontal: SPACING.md,
   },
+  startButton: {
+    marginTop: SPACING.xl,
+    paddingVertical: SPACING.sm + 4,
+    paddingHorizontal: SPACING.xl + SPACING.md,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
+  },
+  startButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  // Step 1 — child info
+  formEmoji: {
+    fontSize: 80,
+    marginBottom: SPACING.lg,
+  },
+  formTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: SPACING.md,
+  },
+  nameInput: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: RADIUS.lg,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+    textAlign: 'center',
+    width: '80%',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
+  },
+  ageRow: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  ageOption: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: RADIUS.lg,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
+    minWidth: 90,
+  },
+  ageOptionSelected: {
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    borderColor: '#fff',
+  },
+  ageEmoji: {
+    fontSize: 28,
+    marginBottom: SPACING.xs,
+  },
+  ageLabel: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  ageLabelSelected: {
+    color: '#fff',
+  },
+  // Step 2 — gift
+  featureList: {
+    marginTop: SPACING.lg,
+    gap: SPACING.md,
+    width: '100%',
+    paddingHorizontal: SPACING.lg,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: RADIUS.lg,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.md,
+  },
+  featureItemIcon: {
+    fontSize: 24,
+  },
+  featureItemText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+    flex: 1,
+  },
+  // Step 3 — notifications
+  notifButtons: {
+    marginTop: SPACING.lg,
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  skipNotifBtn: {
+    padding: SPACING.sm,
+  },
+  skipNotifText: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  // Controls
   controls: {
     position: 'absolute',
     bottom: 0,
@@ -230,18 +507,6 @@ const styles = StyleSheet.create({
   dotActive: {
     width: 24,
     backgroundColor: '#fff',
-  },
-  nextButton: {
-    paddingVertical: SPACING.sm + 2,
-    paddingHorizontal: SPACING.lg,
-    borderRadius: RADIUS.full,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.3)',
-  },
-  nextText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '800',
   },
   topBar: {
     position: 'absolute',

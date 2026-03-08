@@ -18,6 +18,7 @@ import { CHARACTER_CATEGORIES } from '../../constants/modern-characters';
 import type { ModernCharacter } from '../../constants/modern-characters';
 import { selection } from '../../packages/shared/services/haptics';
 import { useLanguage } from '../../constants/LanguageContext';
+import { useSubscriptionContext } from '../../constants/SubscriptionContext';
 
 const { width } = Dimensions.get('window');
 
@@ -25,6 +26,7 @@ export default function SelectCharacterScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { t, language: appLanguage } = useLanguage();
+  const { isPremium } = useSubscriptionContext();
   const { themeId, ageGroup, language, customPrompt, childName, childAge } = useLocalSearchParams<{
     themeId: string;
     ageGroup: string;
@@ -55,6 +57,11 @@ export default function SelectCharacterScreen() {
   }, [selectedCategory, filteredCategories]);
 
   const handleSelectModernCharacter = (char: ModernCharacter) => {
+    if (char.isPremium && !isPremium) {
+      selection();
+      router.push({ pathname: '/paywall', params: { childName: childName ?? '' } });
+      return;
+    }
     selection();
     router.push({
       pathname: '/story/personalize',
@@ -192,6 +199,12 @@ export default function SelectCharacterScreen() {
                 <Text style={styles.modernDesc} numberOfLines={2}>
                   {t(char.descKey as any)}
                 </Text>
+                {char.isPremium && !isPremium && (
+                  <View style={styles.lockOverlay}>
+                    <Text style={styles.lockIcon}>{'\u{1F512}'}</Text>
+                    <Text style={styles.lockLabel}>{t('premiumBadge')}</Text>
+                  </View>
+                )}
               </TouchableOpacity>
             </Animated.View>
           ))}
@@ -484,5 +497,21 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     fontWeight: '600',
     marginLeft: SPACING.sm,
+  },
+  lockOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0.75)',
+    borderRadius: RADIUS.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lockIcon: {
+    fontSize: 28,
+  },
+  lockLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: COLORS.primary,
+    marginTop: 2,
   },
 });

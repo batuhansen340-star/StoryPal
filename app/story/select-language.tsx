@@ -14,6 +14,7 @@ import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
 import { LANGUAGES, type Language } from '../../constants/languages';
 import { selection } from '../../packages/shared/services/haptics';
 import { useLanguage } from '../../constants/LanguageContext';
+import { useSubscriptionContext } from '../../constants/SubscriptionContext';
 
 const { width } = Dimensions.get('window');
 const CARD_SIZE = (width - SPACING.lg * 2 - SPACING.md) / 2;
@@ -24,9 +25,13 @@ export default function SelectLanguageScreen() {
   const { t, language, storyLanguage, setLanguage, setStoryLanguage } = useLanguage();
   const { ageGroup, mode } = useLocalSearchParams<{ ageGroup?: string; mode?: string }>();
 
+  const { isPremium } = useSubscriptionContext();
+
   const isAppMode = mode === 'app';
   const isStorySettingsMode = mode === 'story-settings';
   const isSettingsMode = isAppMode || isStorySettingsMode;
+
+  const FREE_LANGUAGES = ['en', 'tr', language]; // device lang is always free
 
   const [selectedCode, setSelectedCode] = useState<string | null>(
     isAppMode ? language : storyLanguage
@@ -37,7 +42,17 @@ export default function SelectLanguageScreen() {
     else setSelectedCode(storyLanguage);
   }, [language, storyLanguage, isAppMode]);
 
+  const isLanguageLocked = (code: string): boolean => {
+    if (isPremium || isAppMode) return false;
+    return !FREE_LANGUAGES.includes(code);
+  };
+
   const handleSelectLanguage = (lang: Language) => {
+    if (isLanguageLocked(lang.code)) {
+      selection();
+      router.push({ pathname: '/paywall', params: { childName: '' } });
+      return;
+    }
     selection();
     setSelectedCode(lang.code);
 
@@ -124,6 +139,11 @@ export default function SelectLanguageScreen() {
                   </Text>
                   {isSelected && (
                     <View style={styles.selectedGlow} />
+                  )}
+                  {isLanguageLocked(lang.code) && (
+                    <View style={styles.langLockOverlay}>
+                      <Text style={styles.langLockIcon}>{'\u{1F512}'}</Text>
+                    </View>
                   )}
                 </TouchableOpacity>
               </Animated.View>
@@ -244,5 +264,15 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     textAlign: 'center',
     marginTop: 1,
+  },
+  langLockOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    borderRadius: RADIUS.lg - 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  langLockIcon: {
+    fontSize: 28,
   },
 });

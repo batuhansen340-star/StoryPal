@@ -15,6 +15,7 @@ import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types'
 import { VOICE_CHARACTERS } from '../../constants/voice-characters';
 import { speak, stop as stopTTS, getSpeechLanguageCode } from '../../packages/shared/services/tts';
 import { useLanguage } from '../../constants/LanguageContext';
+import { useSubscriptionContext } from '../../constants/SubscriptionContext';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - SPACING.lg * 2 - SPACING.md) / 2;
@@ -35,12 +36,18 @@ export default function SelectVoiceScreen() {
       childAge: string;
     }>();
 
+  const { isPremium } = useSubscriptionContext();
   const [selectedVoice, setSelectedVoice] = useState('narrator');
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
 
   const previewVoice = async (voiceId: string) => {
     const voice = VOICE_CHARACTERS.find(v => v.id === voiceId);
     if (!voice) return;
+
+    if (voice.isPremium && !isPremium) {
+      router.push({ pathname: '/paywall', params: { childName: childName ?? '' } });
+      return;
+    }
 
     setSelectedVoice(voiceId);
     setIsPreviewPlaying(true);
@@ -142,6 +149,11 @@ export default function SelectVoiceScreen() {
                     <Text style={styles.voiceEmoji}>{voice.emoji}</Text>
                     <Text style={styles.voiceName}>{voice.name}</Text>
                     <Text style={styles.voiceDesc}>{voice.description}</Text>
+                    {voice.isPremium && !isPremium && (
+                      <View style={styles.voiceLockOverlay}>
+                        <Text style={styles.voiceLockIcon}>{'\u{1F512}'}</Text>
+                      </View>
+                    )}
                     {voice.isPremium && (
                       <View style={styles.premiumBadge}>
                         <Text style={styles.premiumText}>{'\u{1F451}'}</Text>
@@ -332,5 +344,15 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     fontSize: 15,
     fontWeight: '600',
+  },
+  voiceLockOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    borderRadius: RADIUS.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  voiceLockIcon: {
+    fontSize: 32,
   },
 });

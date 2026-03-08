@@ -28,7 +28,10 @@ import { createAudioPlayer } from 'expo-audio';
 import type { AudioPlayer } from 'expo-audio';
 import { saveStory, getStoryById } from '../../packages/shared/services/story-storage';
 import { shareStoryPDF } from '../../packages/shared/services/story-export';
+import { Share } from 'react-native';
 import { useLanguage } from '../../constants/LanguageContext';
+import { useSubscriptionContext } from '../../constants/SubscriptionContext';
+import { useUsage } from '../../constants/UsageContext';
 
 const initialDims = Dimensions.get('window');
 
@@ -43,6 +46,9 @@ const BEDTIME_TEXT = '#E8E8F0';
 
 export default function ViewerScreen() {
   const { t } = useLanguage();
+  const { isPremium } = useSubscriptionContext();
+  const { canCreateStory } = useUsage();
+  const [showFinished, setShowFinished] = useState(false);
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const params = useLocalSearchParams<{
@@ -719,7 +725,7 @@ export default function ViewerScreen() {
                 if (bedtimeMode) {
                   setShowSweetDreams(true);
                 } else {
-                  router.replace('/(tabs)');
+                  setShowFinished(true);
                 }
               }}
               activeOpacity={0.8}
@@ -736,6 +742,62 @@ export default function ViewerScreen() {
           </View>
         )}
       </View>
+
+      {/* Finished Overlay */}
+      {showFinished && (
+        <View style={styles.finishedOverlay}>
+          <LinearGradient
+            colors={['rgba(0,0,0,0.85)', 'rgba(0,0,0,0.95)']}
+            style={styles.finishedGradient}
+          >
+            <Animated.View entering={FadeInDown.duration(600)} style={styles.finishedContent}>
+              <Text style={styles.finishedTitle}>
+                {t('storyFinishedTitle').replace('{name}', params.storyId ?? '')}
+              </Text>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => {
+                  setShowFinished(false);
+                  if (!isPremium && !canCreateStory) {
+                    router.push({ pathname: '/paywall', params: { childName: '' } });
+                  } else {
+                    router.replace('/story/select-theme');
+                  }
+                }}
+              >
+                <LinearGradient
+                  colors={['#F39C12', '#E67E22']}
+                  style={styles.finishedButton}
+                >
+                  <Text style={styles.finishedButtonText}>{t('oneMoreButton')}</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={async () => {
+                  try {
+                    await Share.share({
+                      message: `${title} - StoryPal'da oluşturuldu ✨`,
+                    });
+                  } catch {
+                    // Share cancelled
+                  }
+                }}
+                style={styles.shareBtn}
+              >
+                <Text style={styles.shareBtnText}>{t('shareButton')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => { setShowFinished(false); router.replace('/(tabs)'); }}
+                activeOpacity={0.7}
+                style={styles.goHomeBtn}
+              >
+                <Text style={styles.goHomeBtnText}>{t('goHomeButton')}</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </LinearGradient>
+        </View>
+      )}
     </View>
   );
 }
@@ -1146,6 +1208,64 @@ const styles = StyleSheet.create({
   sweetDreamsCloseText: {
     color: 'rgba(255,255,255,0.4)',
     fontSize: 16,
+    fontWeight: '600',
+  },
+  finishedOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 100,
+  },
+  finishedGradient: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: SPACING.xl,
+  },
+  finishedContent: {
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  finishedTitle: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#fff',
+    textAlign: 'center',
+    lineHeight: 36,
+    marginBottom: SPACING.md,
+  },
+  finishedButton: {
+    paddingVertical: SPACING.md + 2,
+    paddingHorizontal: SPACING.xxl,
+    borderRadius: RADIUS.full,
+    shadowColor: '#F39C12',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  finishedButtonText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '900',
+  },
+  shareBtn: {
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.4)',
+    paddingVertical: SPACING.sm + 2,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: RADIUS.full,
+  },
+  shareBtnText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  goHomeBtn: {
+    marginTop: SPACING.sm,
+    padding: SPACING.sm,
+  },
+  goHomeBtnText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 14,
     fontWeight: '600',
   },
 });

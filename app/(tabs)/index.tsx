@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,10 +15,13 @@ import Animated, {
   FadeInDown,
   FadeInRight,
 } from 'react-native-reanimated';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 import { THEMES, CHARACTERS } from '../../apps/storypal/constants/themes';
 import { impact } from '../../packages/shared/services/haptics';
 import { useLanguage } from '../../constants/LanguageContext';
+import { useSubscriptionContext } from '../../constants/SubscriptionContext';
+import { useUsage } from '../../constants/UsageContext';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.7;
@@ -27,6 +30,16 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { t } = useLanguage();
+  const { isPremium } = useSubscriptionContext();
+  const { dailyStoriesUsed, freeLimit } = useUsage();
+  const [childName, setChildName] = useState<string | null>(null);
+  const remaining = freeLimit - dailyStoriesUsed;
+
+  useEffect(() => {
+    AsyncStorage.getItem('storypal_default_child_name').then((name) => {
+      if (name) setChildName(name);
+    });
+  }, []);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -37,10 +50,33 @@ export default function HomeScreen() {
         {/* Header */}
         <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
           <View>
-            <Text style={styles.greeting}>{t('greeting')} 👋</Text>
+            <Text style={styles.greeting}>{childName ? `${t('greeting').replace('!', '')} ${childName}!` : t('greeting')} 👋</Text>
             <Text style={styles.title}>{t('homeTitle')}</Text>
           </View>
         </Animated.View>
+
+        {/* Usage Banner */}
+        {!isPremium && (
+          <Animated.View entering={FadeInDown.duration(600).delay(100)}>
+            <LinearGradient
+              colors={['#EBF5FB', '#FFFFFF']}
+              style={styles.usageBanner}
+            >
+              <Text style={styles.usageBannerText}>
+                {remaining > 0
+                  ? `✨ ${remaining} ${t('storiesRemaining')}`
+                  : t('noStoriesLeft')}
+              </Text>
+              <TouchableOpacity
+                onPress={() => router.push({ pathname: '/paywall', params: { childName: childName ?? '' } })}
+                activeOpacity={0.8}
+                style={styles.usagePremiumBtn}
+              >
+                <Text style={styles.usagePremiumText}>{t('goPremium')}</Text>
+              </TouchableOpacity>
+            </LinearGradient>
+          </Animated.View>
+        )}
 
         {/* Create Story CTA */}
         <Animated.View entering={FadeInDown.duration(600).delay(150)}>
@@ -176,6 +212,33 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: COLORS.text,
     lineHeight: 40,
+  },
+  usageBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.glassBorder,
+  },
+  usageBannerText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.text,
+    flex: 1,
+  },
+  usagePremiumBtn: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs + 2,
+    borderRadius: RADIUS.full,
+  },
+  usagePremiumText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '800',
   },
   ctaCard: {
     borderRadius: RADIUS.lg,

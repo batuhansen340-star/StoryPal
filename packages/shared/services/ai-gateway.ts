@@ -1,5 +1,64 @@
 import OpenAI from 'openai';
+import * as FileSystem from 'expo-file-system';
 import type { AgeGroup, StoryGenerationResponse, PersonalizationData, CharacterSheet } from '../types';
+
+const IMAGE_CACHE_DIR = `${FileSystem.cacheDirectory}storypal-images/`;
+
+function simpleHash(str: string): string {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(36);
+}
+
+async function ensureCacheDir(): Promise<void> {
+  const dirInfo = await FileSystem.getInfoAsync(IMAGE_CACHE_DIR);
+  if (!dirInfo.exists) {
+    await FileSystem.makeDirectoryAsync(IMAGE_CACHE_DIR, { intermediates: true });
+  }
+}
+
+async function getCachedImage(cacheKey: string): Promise<string | null> {
+  try {
+    const filePath = `${IMAGE_CACHE_DIR}${cacheKey}.png`;
+    const info = await FileSystem.getInfoAsync(filePath);
+    if (info.exists) {
+      if (__DEV__) console.log(`[ImageCache] HIT: ${cacheKey}`);
+      return filePath;
+    }
+  } catch {
+    // Cache read failed
+  }
+  return null;
+}
+
+async function cacheImage(cacheKey: string, imageUri: string): Promise<string> {
+  try {
+    await ensureCacheDir();
+    const filePath = `${IMAGE_CACHE_DIR}${cacheKey}.png`;
+
+    if (imageUri.startsWith('data:')) {
+      const base64Data = imageUri.split(',')[1];
+      if (base64Data) {
+        await FileSystem.writeAsStringAsync(filePath, base64Data, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        if (__DEV__) console.log(`[ImageCache] MISS → cached: ${cacheKey}`);
+        return filePath;
+      }
+    } else {
+      const downloadResult = await FileSystem.downloadAsync(imageUri, filePath);
+      if (__DEV__) console.log(`[ImageCache] MISS → cached: ${cacheKey}`);
+      return downloadResult.uri;
+    }
+  } catch {
+    if (__DEV__) console.log(`[ImageCache] Cache write failed for: ${cacheKey}`);
+  }
+  return imageUri;
+}
 
 const SAFETY_POSITIVE = 'safe for children, friendly, colorful, whimsical, storybook illustration style';
 const SAFETY_NEGATIVE = 'scary, violent, dark, horror, blood, weapon, nsfw, realistic, photograph';
@@ -143,14 +202,19 @@ export async function generateStoryImage(params: {
   character: string;
   characterSheet?: CharacterSheet;
 }): Promise<string> {
-  const openai = getClient();
-
   let fullPrompt: string;
   if (params.characterSheet) {
     fullPrompt = `${params.characterSheet.consistencyPrompt}, CURRENTLY: ${params.prompt}, ${params.characterSheet.style}, ${SAFETY_POSITIVE}`;
   } else {
     fullPrompt = `${params.prompt}, ${SAFETY_POSITIVE}, ${params.theme} theme, featuring ${params.character}`;
   }
+
+  // Check client-side cache
+  const cacheKey = `${params.theme}-${simpleHash(fullPrompt)}`;
+  const cached = await getCachedImage(cacheKey);
+  if (cached) return cached;
+
+  const openai = getClient();
 
   const response = await openai.images.generate({
     model: 'gpt-image-1',
@@ -163,15 +227,17 @@ export async function generateStoryImage(params: {
   const imageData = response.data?.[0];
   if (!imageData) throw new Error('No image generated');
 
-  // gpt-image-1 returns b64_json by default
+  let imageUri: string;
   if (imageData.b64_json) {
-    return `data:image/png;base64,${imageData.b64_json}`;
-  }
-  if (imageData.url) {
-    return imageData.url;
+    imageUri = `data:image/png;base64,${imageData.b64_json}`;
+  } else if (imageData.url) {
+    imageUri = imageData.url;
+  } else {
+    throw new Error('No image data in response');
   }
 
-  throw new Error('No image data in response');
+  // Cache and return local path
+  return cacheImage(cacheKey, imageUri);
 }
 
 export async function generateCoverImage(params: {

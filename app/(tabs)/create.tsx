@@ -156,6 +156,7 @@ export default function CreateScreen() {
       {/* Paywall Modal */}
       <Modal visible={showPaywall} animationType="slide">
         <PaywallScreen
+          t={t}
           onClose={() => setShowPaywall(false)}
           onSuccess={() => {
             setShowPaywall(false);

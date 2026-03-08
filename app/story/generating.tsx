@@ -8,6 +8,8 @@ import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
 import type { AgeGroup } from '../../packages/shared/types';
 import { notification } from '../../packages/shared/services/haptics';
 import { useLanguage } from '../../constants/LanguageContext';
+import { useSubscriptionContext } from '../../constants/SubscriptionContext';
+import { useUsage } from '../../constants/UsageContext';
 import { CHARACTERS } from '../../apps/storypal/constants/themes';
 import { REGIONAL_CHARACTERS } from '../../apps/storypal/constants/regional-characters';
 import { CHARACTER_CATEGORIES } from '../../constants/modern-characters';
@@ -16,7 +18,10 @@ export default function GeneratingScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { t, storyLanguage } = useLanguage();
+  const { isPremium } = useSubscriptionContext();
+  const { canCreateStory, incrementUsage } = useUsage();
   const hasStarted = useRef(false);
+  const hasCheckedPaywall = useRef(false);
   const { themeId, characterId, ageGroup, language, personalization, customPrompt, voiceCharacterId, childName, childAge } =
     useLocalSearchParams<{
       themeId: string;
@@ -42,6 +47,14 @@ export default function GeneratingScreen() {
     generateFullStory,
     reset,
   } = useAI();
+
+  useEffect(() => {
+    if (!isPremium && !canCreateStory && !hasCheckedPaywall.current) {
+      hasCheckedPaywall.current = true;
+      router.replace({ pathname: '/paywall', params: { childName: childName || '' } });
+      return;
+    }
+  }, [isPremium, canCreateStory]);
 
   useEffect(() => {
     if (themeId && characterId && !hasStarted.current) {
@@ -97,6 +110,9 @@ export default function GeneratingScreen() {
   useEffect(() => {
     if (status === 'complete' && story) {
       notification('success');
+      if (!isPremium) {
+        incrementUsage();
+      }
       const timer = setTimeout(() => {
         router.replace({
           pathname: '/story/viewer',

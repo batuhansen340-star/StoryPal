@@ -19,15 +19,39 @@ interface PaywallScreenProps {
   userId?: string;
   onClose: () => void;
   onSuccess: () => void;
+  t: (key: string) => string;
 }
 
-const PLAN_LABELS: Record<string, { name: string; badge?: string }> = {
-  '$rc_monthly': { name: 'Monthly', badge: undefined },
-  '$rc_annual': { name: 'Yearly', badge: 'Save 50%' },
-  '$rc_lifetime': { name: 'Lifetime', badge: 'Best Value' },
+type TierKey = 'starter' | 'premium' | 'family';
+
+interface TierConfig {
+  key: TierKey;
+  labelKey: string;
+  badgeKey?: string;
+  periodKey: string;
+}
+
+const TIER_MAP: Record<string, TierConfig> = {
+  '$rc_monthly': {
+    key: 'starter',
+    labelKey: 'paywallStarter',
+    periodKey: 'paywallPerMonth',
+  },
+  '$rc_annual': {
+    key: 'premium',
+    labelKey: 'paywallPremium',
+    badgeKey: 'paywallMostPopular',
+    periodKey: 'paywallPerYear',
+  },
+  '$rc_lifetime': {
+    key: 'family',
+    labelKey: 'paywallFamily',
+    badgeKey: 'paywallBestValue',
+    periodKey: 'paywallOneTime',
+  },
 };
 
-export function PaywallScreen({ userId, onClose, onSuccess }: PaywallScreenProps) {
+export function PaywallScreen({ userId, onClose, onSuccess, t }: PaywallScreenProps) {
   const { packages, isLoading, purchase, restore } = useSubscription(userId);
 
   const handlePurchase = useCallback(async (pkg: PurchasesPackage) => {
@@ -39,6 +63,10 @@ export function PaywallScreen({ userId, onClose, onSuccess }: PaywallScreenProps
     const success = await restore();
     if (success) onSuccess();
   }, [restore, onSuccess]);
+
+  const premiumPkg = packages.find(
+    (p) => String(p.packageType) === '$rc_annual'
+  );
 
   return (
     <View style={styles.container}>
@@ -53,66 +81,125 @@ export function PaywallScreen({ userId, onClose, onSuccess }: PaywallScreenProps
         </TouchableOpacity>
 
         <Text style={styles.crownEmoji}>👑</Text>
-        <Text style={styles.title}>Unlock StoryPal Premium</Text>
-        <Text style={styles.subtitle}>Create unlimited magical stories</Text>
+        <Text style={styles.title}>{t('paywallTitle')}</Text>
+        <Text style={styles.subtitle}>{t('paywallSubtitle')}</Text>
       </LinearGradient>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Features */}
         <View style={styles.featuresCard}>
           {[
-            { icon: '✨', text: 'Unlimited stories per day' },
-            { icon: '🎨', text: 'All themes & characters' },
-            { icon: '📖', text: 'HD illustrations' },
-            { icon: '💾', text: 'Save & share stories' },
+            { icon: '✨', key: 'paywallUnlimitedStories' },
+            { icon: '🎨', key: 'paywallAllThemes' },
+            { icon: '📖', key: 'paywallHdIllustrations' },
+            { icon: '💾', key: 'paywallSaveShare' },
           ].map((feature, i) => (
             <View key={i} style={styles.featureRow}>
               <Text style={styles.featureIcon}>{feature.icon}</Text>
-              <Text style={styles.featureText}>{feature.text}</Text>
+              <Text style={styles.featureText}>{t(feature.key)}</Text>
             </View>
           ))}
         </View>
 
+        {/* Social Proof */}
+        <View style={styles.socialProof}>
+          <Text style={styles.socialProofText}>⭐ {t('paywallSocialProof')}</Text>
+        </View>
+
+        {/* Plans */}
         {isLoading ? (
           <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
+        ) : packages.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>{t('paywallLoadingPlans')}</Text>
+          </View>
         ) : (
           <View style={styles.plans}>
             {packages.map((pkg) => {
-              const planInfo = PLAN_LABELS[pkg.packageType] ?? {
-                name: pkg.product.title,
+              const tier = TIER_MAP[String(pkg.packageType)] ?? {
+                key: 'starter' as TierKey,
+                labelKey: 'paywallStarter',
+                periodKey: 'paywallPerMonth',
               };
+              const isPremiumTier = tier.key === 'premium';
+
               return (
                 <TouchableOpacity
                   key={pkg.identifier}
                   style={[
                     styles.planCard,
-                    planInfo.badge ? styles.planCardHighlighted : undefined,
+                    isPremiumTier && styles.planCardHighlighted,
                   ]}
                   onPress={() => handlePurchase(pkg)}
                   activeOpacity={0.8}
                 >
-                  {planInfo.badge && (
-                    <View style={styles.badge}>
-                      <Text style={styles.badgeText}>{planInfo.badge}</Text>
+                  {tier.badgeKey && (
+                    <View style={[
+                      styles.badge,
+                      isPremiumTier && styles.badgePremium,
+                    ]}>
+                      <Text style={styles.badgeText}>{t(tier.badgeKey)}</Text>
                     </View>
                   )}
-                  <Text style={styles.planName}>{planInfo.name}</Text>
-                  <Text style={styles.planPrice}>{pkg.product.priceString}</Text>
-                  <Text style={styles.planPeriod}>
-                    {String(pkg.packageType) === '$rc_lifetime' ? 'one time' : `per ${String(pkg.packageType) === '$rc_annual' ? 'year' : 'month'}`}
+                  <Text style={[
+                    styles.planName,
+                    isPremiumTier && styles.planNameHighlighted,
+                  ]}>
+                    {t(tier.labelKey)}
                   </Text>
+                  <Text style={[
+                    styles.planPrice,
+                    isPremiumTier && styles.planPriceHighlighted,
+                  ]}>
+                    {pkg.product.priceString}
+                  </Text>
+                  <Text style={styles.planPeriod}>{t(tier.periodKey)}</Text>
                 </TouchableOpacity>
               );
             })}
           </View>
         )}
 
+        {/* CTA Button */}
+        {premiumPkg && (
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => handlePurchase(premiumPkg)}
+          >
+            <LinearGradient
+              colors={GRADIENTS.primary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.ctaButton}
+            >
+              <Text style={styles.ctaText}>{t('paywallFreeTrial')}</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        )}
+
+        {/* Trust Badges */}
+        <View style={styles.trustRow}>
+          <View style={styles.trustBadge}>
+            <Text style={styles.trustIcon}>🔒</Text>
+            <Text style={styles.trustText}>{t('paywallTrustCancel')}</Text>
+          </View>
+          <View style={styles.trustBadge}>
+            <Text style={styles.trustIcon}>🛡️</Text>
+            <Text style={styles.trustText}>{t('paywallTrustCoppa')}</Text>
+          </View>
+        </View>
+
+        {/* Restore */}
         <TouchableOpacity style={styles.restoreButton} onPress={handleRestore}>
-          <Text style={styles.restoreText}>Restore Purchases</Text>
+          <Text style={styles.restoreText}>{t('paywallRestorePurchases')}</Text>
         </TouchableOpacity>
 
-        <Text style={styles.disclaimer}>
-          Payment will be charged to your App Store account. Subscriptions auto-renew unless cancelled 24 hours before the end of the current period.
-        </Text>
+        {/* Continue free */}
+        <TouchableOpacity style={styles.continueButton} onPress={onClose}>
+          <Text style={styles.continueText}>{t('paywallContinueFree')}</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.disclaimer}>{t('paywallDisclaimer')}</Text>
       </ScrollView>
     </View>
   );
@@ -157,9 +244,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: 'rgba(255,255,255,0.9)',
     marginTop: SPACING.xs,
+    textAlign: 'center',
+    paddingHorizontal: SPACING.lg,
   },
   content: {
     flex: 1,
@@ -190,13 +279,34 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.text,
   },
+  socialProof: {
+    alignItems: 'center',
+    marginTop: SPACING.lg,
+    paddingVertical: SPACING.sm,
+  },
+  socialProofText: {
+    fontSize: 13,
+    color: COLORS.textLight,
+    fontWeight: '600',
+    fontStyle: 'italic',
+  },
   loader: {
     marginTop: SPACING.xl,
+  },
+  emptyState: {
+    alignItems: 'center',
+    marginTop: SPACING.xl,
+    padding: SPACING.lg,
+  },
+  emptyStateText: {
+    fontSize: 15,
+    color: COLORS.textLight,
+    textAlign: 'center',
   },
   plans: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: SPACING.lg,
+    marginTop: SPACING.md,
     gap: SPACING.sm,
   },
   planCard: {
@@ -212,18 +322,27 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 12,
     elevation: 4,
+    minHeight: 130,
+    justifyContent: 'center',
   },
   planCardHighlighted: {
     borderColor: COLORS.primary,
-    transform: [{ scale: 1.02 }],
+    transform: [{ scale: 1.05 }],
+    shadowColor: COLORS.primary,
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
   },
   badge: {
     position: 'absolute',
     top: -10,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.accent,
     paddingHorizontal: SPACING.sm,
-    paddingVertical: 2,
+    paddingVertical: 3,
     borderRadius: RADIUS.full,
+  },
+  badgePremium: {
+    backgroundColor: COLORS.primary,
   },
   badgeText: {
     color: '#fff',
@@ -231,20 +350,62 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   planName: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
-    color: COLORS.text,
+    color: COLORS.textLight,
     marginTop: SPACING.sm,
+  },
+  planNameHighlighted: {
+    color: COLORS.primary,
   },
   planPrice: {
     fontSize: 22,
     fontWeight: '800',
-    color: COLORS.primary,
+    color: COLORS.text,
     marginTop: SPACING.xs,
+  },
+  planPriceHighlighted: {
+    color: COLORS.primary,
   },
   planPeriod: {
     fontSize: 12,
     color: COLORS.textMuted,
+    marginTop: 2,
+  },
+  ctaButton: {
+    marginTop: SPACING.lg,
+    borderRadius: RADIUS.full,
+    paddingVertical: SPACING.md + 2,
+    alignItems: 'center',
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  ctaText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  trustRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: SPACING.lg,
+    marginTop: SPACING.lg,
+  },
+  trustBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  trustIcon: {
+    fontSize: 16,
+  },
+  trustText: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    fontWeight: '600',
   },
   restoreButton: {
     alignSelf: 'center',
@@ -256,6 +417,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     textDecorationLine: 'underline',
+  },
+  continueButton: {
+    alignSelf: 'center',
+    marginTop: SPACING.sm,
+    padding: SPACING.sm,
+  },
+  continueText: {
+    color: COLORS.textMuted,
+    fontSize: 14,
+    fontWeight: '500',
   },
   disclaimer: {
     fontSize: 11,
