@@ -16,7 +16,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
-import * as ScreenOrientation from 'expo-screen-orientation';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
 import type { StoryChoice } from '../../packages/shared/types';
 import { THEMES } from '../../apps/storypal/constants/themes';
@@ -137,13 +136,11 @@ export default function ViewerScreen() {
   }, [autoPlay]);
 
   useEffect(() => {
-    ScreenOrientation.unlockAsync();
     const sub = Dimensions.addEventListener('change', ({ window }) => setDims(window));
     return () => {
       stopTTS();
       soundRef.current?.remove();
       sub.remove();
-      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
     };
   }, []);
 
@@ -299,7 +296,8 @@ export default function ViewerScreen() {
 
   const handleChoice = (choice: StoryChoice) => {
     stopTTS();
-    flatListRef.current?.scrollToIndex({ index: choice.nextPageIndex + 1 }); // +1 for cover
+    const safeIndex = Math.min(choice.nextPageIndex + 1, allPages.length - 1); // +1 for cover
+    flatListRef.current?.scrollToIndex({ index: safeIndex });
   };
 
   const handleRecordVoice = () => {
@@ -752,7 +750,7 @@ export default function ViewerScreen() {
           >
             <Animated.View entering={FadeInDown.duration(600)} style={styles.finishedContent}>
               <Text style={styles.finishedTitle}>
-                {t('storyFinishedTitle').replace('{name}', params.storyId ?? '')}
+                {t('storyFinishedTitle').replace('{name}', title || 'Story')}
               </Text>
               <TouchableOpacity
                 activeOpacity={0.85}
@@ -761,7 +759,7 @@ export default function ViewerScreen() {
                   if (!isPremium && !canCreateStory) {
                     router.push({ pathname: '/paywall', params: { childName: '' } });
                   } else {
-                    router.replace('/story/select-theme');
+                    router.replace('/(tabs)/create');
                   }
                 }}
               >
@@ -777,7 +775,7 @@ export default function ViewerScreen() {
                 onPress={async () => {
                   try {
                     await Share.share({
-                      message: `${title} - StoryPal'da oluşturuldu ✨`,
+                      message: `${title} - StoryPal ✨`,
                     });
                   } catch {
                     // Share cancelled

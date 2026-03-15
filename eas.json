@@ -18,8 +18,17 @@
       }
     },
     "production": {
+      "distribution": "store",
       "ios": {
         "autoIncrement": true
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "batuuhansen@icloud.com",
+        "appleTeamId": "3Q7F7PB9HV"
       }
     }
   }

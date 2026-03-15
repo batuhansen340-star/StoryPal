@@ -390,7 +390,7 @@ type TranslationKeys = {
   goHomeButton: string;
   premiumBadge: string;
   lockedFeature: string;
-  dailyLimitReached: string;
+  dailyStoryLimitReached: string;
   perMonth: string;
   tierStarterDesc: string;
   tierHeroDesc: string;
@@ -766,7 +766,7 @@ const translations: Record<string, TranslationKeys> = {
     goHomeButton: '\uD83C\uDFE0 Home',
     premiumBadge: 'PRO',
     lockedFeature: 'This feature is in Premium',
-    dailyLimitReached: 'Daily story limit reached',
+    dailyStoryLimitReached: 'Daily story limit reached',
     perMonth: '/mo',
     tierStarterDesc: '3 stories/day, 30 characters',
     tierHeroDesc: 'Unlimited stories, \uD83D\uDCF8 photo hero',
@@ -1139,7 +1139,7 @@ const translations: Record<string, TranslationKeys> = {
     goHomeButton: '🏠 Ana Sayfa',
     premiumBadge: 'PRO',
     lockedFeature: 'Bu özellik Premium\'da',
-    dailyLimitReached: 'Günlük hikaye limitine ulaştın',
+    dailyStoryLimitReached: 'Günlük hikaye limitine ulaştın',
     perMonth: '/ay',
     tierStarterDesc: 'Günde 3 hikaye, 30 karakter',
     tierHeroDesc: 'Sınırsız hikaye, 📸 fotoğraf kahraman',
@@ -1512,7 +1512,7 @@ const translations: Record<string, TranslationKeys> = {
     goHomeButton: '🏠 Home',
     premiumBadge: 'PRO',
     lockedFeature: 'This feature is in Premium',
-    dailyLimitReached: 'Daily story limit reached',
+    dailyStoryLimitReached: 'Daily story limit reached',
     perMonth: '/mo',
     tierStarterDesc: '3 stories/day, 30 characters',
     tierHeroDesc: 'Unlimited stories, 📸 photo hero',
@@ -1885,7 +1885,7 @@ const translations: Record<string, TranslationKeys> = {
     goHomeButton: '🏠 Home',
     premiumBadge: 'PRO',
     lockedFeature: 'This feature is in Premium',
-    dailyLimitReached: 'Daily story limit reached',
+    dailyStoryLimitReached: 'Daily story limit reached',
     perMonth: '/mo',
     tierStarterDesc: '3 stories/day, 30 characters',
     tierHeroDesc: 'Unlimited stories, 📸 photo hero',
@@ -2258,7 +2258,7 @@ const translations: Record<string, TranslationKeys> = {
     goHomeButton: '🏠 Home',
     premiumBadge: 'PRO',
     lockedFeature: 'This feature is in Premium',
-    dailyLimitReached: 'Daily story limit reached',
+    dailyStoryLimitReached: 'Daily story limit reached',
     perMonth: '/mo',
     tierStarterDesc: '3 stories/day, 30 characters',
     tierHeroDesc: 'Unlimited stories, 📸 photo hero',
@@ -2631,7 +2631,7 @@ const translations: Record<string, TranslationKeys> = {
     goHomeButton: '🏠 Home',
     premiumBadge: 'PRO',
     lockedFeature: 'This feature is in Premium',
-    dailyLimitReached: 'Daily story limit reached',
+    dailyStoryLimitReached: 'Daily story limit reached',
     perMonth: '/mo',
     tierStarterDesc: '3 stories/day, 30 characters',
     tierHeroDesc: 'Unlimited stories, 📸 photo hero',
@@ -3004,7 +3004,7 @@ const translations: Record<string, TranslationKeys> = {
     goHomeButton: '🏠 Home',
     premiumBadge: 'PRO',
     lockedFeature: 'This feature is in Premium',
-    dailyLimitReached: 'Daily story limit reached',
+    dailyStoryLimitReached: 'Daily story limit reached',
     perMonth: '/mo',
     tierStarterDesc: '3 stories/day, 30 characters',
     tierHeroDesc: 'Unlimited stories, 📸 photo hero',
@@ -3377,7 +3377,7 @@ const translations: Record<string, TranslationKeys> = {
     goHomeButton: '🏠 Home',
     premiumBadge: 'PRO',
     lockedFeature: 'This feature is in Premium',
-    dailyLimitReached: 'Daily story limit reached',
+    dailyStoryLimitReached: 'Daily story limit reached',
     perMonth: '/mo',
     tierStarterDesc: '3 stories/day, 30 characters',
     tierHeroDesc: 'Unlimited stories, 📸 photo hero',
@@ -3750,7 +3750,7 @@ const translations: Record<string, TranslationKeys> = {
     goHomeButton: '🏠 Home',
     premiumBadge: 'PRO',
     lockedFeature: 'This feature is in Premium',
-    dailyLimitReached: 'Daily story limit reached',
+    dailyStoryLimitReached: 'Daily story limit reached',
     perMonth: '/mo',
     tierStarterDesc: '3 stories/day, 30 characters',
     tierHeroDesc: 'Unlimited stories, 📸 photo hero',
@@ -4123,7 +4123,7 @@ const translations: Record<string, TranslationKeys> = {
     goHomeButton: '🏠 Home',
     premiumBadge: 'PRO',
     lockedFeature: 'This feature is in Premium',
-    dailyLimitReached: 'Daily story limit reached',
+    dailyStoryLimitReached: 'Daily story limit reached',
     perMonth: '/mo',
     tierStarterDesc: '3 stories/day, 30 characters',
     tierHeroDesc: 'Unlimited stories, 📸 photo hero',

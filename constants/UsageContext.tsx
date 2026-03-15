@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const FREE_DAILY_LIMIT = 1;
+const FREE_DAILY_LIMIT = 2;
 const STORAGE_KEY = 'storypal_daily_usage';
 
 interface UsageContextType {

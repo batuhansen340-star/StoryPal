@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
+  Linking,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,6 +17,10 @@ import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types'
 import { getLanguageByCode } from '../../constants/languages';
 import { type AuthUser, getAuthUser, signOut } from '../../packages/shared/services/auth';
 import { useLanguage } from '../../constants/LanguageContext';
+import { useSubscriptionContext } from '../../constants/SubscriptionContext';
+
+const PRIVACY_URL = 'https://batuhansen340-star.github.io/storypal-privacy/';
+const SUPPORT_EMAIL = 'support@storypal.app';
 
 interface SettingsRowProps {
   emoji: string;
@@ -51,6 +56,7 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { t, language, storyLanguage } = useLanguage();
+  const { restorePurchases } = useSubscriptionContext();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
 
@@ -84,7 +90,7 @@ export default function SettingsScreen() {
 
         {/* Profile Card */}
         <Animated.View entering={FadeInDown.duration(500).delay(100)}>
-          <TouchableOpacity activeOpacity={0.85}>
+          <TouchableOpacity activeOpacity={0.85} onPress={() => router.push({ pathname: '/paywall', params: { childName: '' } })}>
             <LinearGradient
               colors={GRADIENTS.primary}
               start={{ x: 0, y: 0 }}
@@ -143,7 +149,7 @@ export default function SettingsScreen() {
               emoji="👶"
               title={t('defaultAgeGroup')}
               subtitle="3-5"
-              onPress={() => {}}
+              onPress={() => Alert.alert(t('defaultAgeGroup'), '3-5 / 5-7 / 7-10', [{ text: 'OK' }])}
             />
           </View>
         </Animated.View>
@@ -155,13 +161,13 @@ export default function SettingsScreen() {
             <SettingsRow
               emoji="👑"
               title={t('manageSubscription')}
-              onPress={() => {}}
+              onPress={() => router.push({ pathname: '/paywall', params: { childName: '' } })}
             />
             <View style={styles.divider} />
             <SettingsRow
               emoji="🔄"
               title={t('restorePurchases')}
-              onPress={() => Alert.alert(t('restore'), t('checkingPurchases'))}
+              onPress={async () => { await restorePurchases(); Alert.alert(t('restore'), t('checkingPurchases')); }}
             />
           </View>
         </Animated.View>
@@ -171,27 +177,21 @@ export default function SettingsScreen() {
           <Text style={styles.sectionLabel}>{t('support')}</Text>
           <View style={styles.settingsCard}>
             <SettingsRow
-              emoji="❓"
-              title={t('helpCenter')}
-              onPress={() => {}}
-            />
-            <View style={styles.divider} />
-            <SettingsRow
               emoji="📧"
               title={t('contactUs')}
-              onPress={() => {}}
+              onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}`)}
             />
             <View style={styles.divider} />
             <SettingsRow
               emoji="⭐"
               title={t('rateStoryPal')}
-              onPress={() => {}}
+              onPress={() => Linking.openURL('https://apps.apple.com/app/storypal/id6740021570?action=write-review')}
             />
             <View style={styles.divider} />
             <SettingsRow
               emoji="📜"
               title={t('privacyPolicy')}
-              onPress={() => {}}
+              onPress={() => Linking.openURL(PRIVACY_URL)}
             />
           </View>
         </Animated.View>

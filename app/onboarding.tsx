@@ -161,7 +161,7 @@ export default function OnboardingScreen() {
                       styles.ageLabel,
                       ageGroup === opt.key && styles.ageLabelSelected,
                     ]}>
-                      {t(opt.labelKey)}
+                      {t(opt.labelKey as any)}
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -212,12 +212,12 @@ export default function OnboardingScreen() {
               <Animated.View entering={FadeInUp.duration(600).delay(500)} style={styles.featureList}>
                 {[
                   { icon: '✨', key: 'onboardingGiftFeature1' },
-                  { icon: '🎨', key: 'onboardingGiftFeature2' },
-                  { icon: '🚀', key: 'onboardingGiftFeature3' },
+                  { icon: '🎨', key: 'onboardingGiftFeature2' as const },
+                  { icon: '🚀', key: 'onboardingGiftFeature3' as const },
                 ].map((f, i) => (
                   <View key={i} style={styles.featureItem}>
                     <Text style={styles.featureItemIcon}>{f.icon}</Text>
-                    <Text style={styles.featureItemText}>{t(f.key)}</Text>
+                    <Text style={styles.featureItemText}>{t(f.key as any)}</Text>
                   </View>
                 ))}
               </Animated.View>

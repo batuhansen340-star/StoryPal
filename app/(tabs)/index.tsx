@@ -166,7 +166,7 @@ export default function HomeScreen() {
           <View style={styles.statsCard}>
             <View style={styles.statsGlass}>
               <View style={styles.statItem}>
-                <Text style={styles.statNumber}>2</Text>
+                <Text style={styles.statNumber}>{freeLimit}</Text>
                 <Text style={styles.statLabel}>{t('freeStoriesToday')}</Text>
               </View>
               <View style={styles.statDivider} />
