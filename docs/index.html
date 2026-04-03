@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StoryPal — AI Story Maker for Kids</title>
+<meta name="description" content="Create personalized AI storybooks for your kids. 10 themes, 20+ characters, 10 languages. Beautiful illustrations in minutes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; color: #2D2D2D; background: #FFF8F0; }
+  a { text-decoration: none; }
+
+  .hero {
+    min-height: 100vh;
+    background: linear-gradient(165deg, #FF6B6B 0%, #FF8E53 40%, #FFB347 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 30% 40%, rgba(255,255,255,0.1) 0%, transparent 50%);
+  }
+  .hero-content { position: relative; z-index: 1; max-width: 600px; }
+  .hero-emoji { font-size: 80px; margin-bottom: 16px; }
+  .hero h1 { font-size: clamp(36px, 6vw, 64px); font-weight: 900; color: #fff; line-height: 1.1; margin-bottom: 16px; }
+  .hero h1 span { background: linear-gradient(90deg, #FFE66D, #FFF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero p { font-size: 20px; color: rgba(255,255,255,0.9); line-height: 1.5; margin-bottom: 32px; }
+  .hero-btn {
+    display: inline-block;
+    background: #fff;
+    color: #FF6B6B;
+    font-weight: 800;
+    font-size: 18px;
+    padding: 16px 40px;
+    border-radius: 50px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    transition: transform 0.2s;
+  }
+  .hero-btn:hover { transform: translateY(-2px); }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.2);
+    padding: 8px 20px;
+    border-radius: 50px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    margin-top: 20px;
+    backdrop-filter: blur(8px);
+  }
+
+  .features {
+    padding: 80px 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .features h2 { font-size: 36px; font-weight: 900; text-align: center; margin-bottom: 48px; }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+  .feature-card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(255,107,107,0.08);
+    border: 1px solid rgba(255,107,107,0.06);
+  }
+  .feature-card .emoji { font-size: 40px; margin-bottom: 12px; }
+  .feature-card h3 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+  .feature-card p { font-size: 15px; color: #6B6B6B; line-height: 1.6; }
+
+  .pricing {
+    padding: 80px 24px;
+    background: linear-gradient(180deg, #FFF8F0 0%, #FFE8D6 100%);
+    text-align: center;
+  }
+  .pricing h2 { font-size: 36px; font-weight: 900; margin-bottom: 12px; }
+  .pricing .sub { font-size: 18px; color: #6B6B6B; margin-bottom: 40px; }
+  .pricing-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .price-card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 32px;
+    width: 260px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    position: relative;
+  }
+  .price-card.popular {
+    border: 3px solid #FF6B6B;
+    transform: scale(1.05);
+  }
+  .price-card.popular::after {
+    content: 'BEST VALUE';
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 16px;
+    border-radius: 50px;
+  }
+  .price-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+  .price-card .price { font-size: 36px; font-weight: 900; color: #FF6B6B; }
+  .price-card .period { font-size: 14px; color: #9B9B9B; margin-bottom: 16px; }
+  .price-card ul { list-style: none; text-align: left; }
+  .price-card li { font-size: 14px; color: #6B6B6B; padding: 4px 0; }
+  .price-card li::before { content: '✓ '; color: #4ECDC4; font-weight: 800; }
+
+  .footer {
+    padding: 40px 24px;
+    text-align: center;
+    background: #2D2D2D;
+    color: rgba(255,255,255,0.6);
+    font-size: 14px;
+  }
+  .footer a { color: rgba(255,255,255,0.8); font-weight: 600; }
+  .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-emoji">✨📖</div>
+    <h1>Create <span>Magical</span> Stories for Your Kids</h1>
+    <p>AI-powered personalized storybooks with beautiful illustrations. Pick a theme, choose a character, and watch the magic happen in minutes.</p>
+    <a href="https://apps.apple.com/app/storypal/id000000000" class="hero-btn">Download on App Store</a>
+    <div class="hero-badge">🌍 Available in 10 languages</div>
+  </div>
+</section>
+
+<section class="features">
+  <h2>Why Parents Love StoryPal</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="emoji">🎨</div>
+      <h3>10 Magical Themes</h3>
+      <p>Space, Ocean, Forest, Castle, Dinosaur, Fairy, Pirate, Robot, Animal, and Superhero worlds to explore.</p>
+    </div>
+    <div class="feature-card">
+      <div class="emoji">👤</div>
+      <h3>Personalized Characters</h3>
+      <p>Add your child's name, photo, and appearance. They become the hero of every story.</p>
+    </div>
+    <div class="feature-card">
+      <div class="emoji">🖼️</div>
+      <h3>AI Illustrations</h3>
+      <p>Every page features a unique, child-safe watercolor-style illustration generated by AI.</p>
+    </div>
+    <div class="feature-card">
+      <div class="emoji">🌙</div>
+      <h3>Bedtime Mode</h3>
+      <p>Soothing dark theme with gentle narration and auto-play. Perfect for winding down.</p>
+    </div>
+    <div class="feature-card">
+      <div class="emoji">🎤</div>
+      <h3>Voice Narration</h3>
+      <p>Multiple voice characters, adjustable speed, and even record your own voice for your child.</p>
+    </div>
+    <div class="feature-card">
+      <div class="emoji">📊</div>
+      <h3>Stats & Achievements</h3>
+      <p>Track reading streaks, unlock achievements, and watch your child's story library grow.</p>
+    </div>
+  </div>
+</section>
+
+<section class="pricing">
+  <h2>Simple Pricing</h2>
+  <p class="sub">Start with 2 free stories every day</p>
+  <div class="pricing-cards">
+    <div class="price-card">
+      <h3>Free</h3>
+      <div class="price">$0</div>
+      <div class="period">forever</div>
+      <ul>
+        <li>2 stories per day</li>
+        <li>All themes & characters</li>
+        <li>Voice narration</li>
+      </ul>
+    </div>
+    <div class="price-card popular">
+      <h3>Yearly</h3>
+      <div class="price">$29.99</div>
+      <div class="period">per year (save 50%)</div>
+      <ul>
+        <li>Unlimited stories</li>
+        <li>All premium voices</li>
+        <li>PDF export</li>
+        <li>All 10 languages</li>
+      </ul>
+    </div>
+    <div class="price-card">
+      <h3>Lifetime</h3>
+      <div class="price">$59.99</div>
+      <div class="period">one-time purchase</div>
+      <ul>
+        <li>Everything, forever</li>
+        <li>All future updates</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-links">
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="support.html">Support</a>
+    <a href="mailto:batuhansen340@gmail.com">Contact</a>
+  </div>
+  <p>&copy; 2026 StoryPal. All rights reserved.</p>
+</footer>
+
+</body>
+</html>

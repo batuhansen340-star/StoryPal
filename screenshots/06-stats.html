@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1290">
+<title>StoryPal — Stats & Achievements</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+
+  body {
+    width: 1290px;
+    height: 2796px;
+    font-family: 'Inter', -apple-system, sans-serif;
+    overflow: hidden;
+    background: linear-gradient(165deg, #F39C12 0%, #E67E22 40%, #D35400 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tagline-area {
+    text-align: center;
+    padding-top: 120px;
+    padding-bottom: 60px;
+  }
+  .tagline {
+    font-size: 64px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.15;
+    letter-spacing: -1px;
+    text-shadow: 0 4px 30px rgba(0,0,0,0.15);
+  }
+  .tagline em {
+    font-style: normal;
+    background: linear-gradient(90deg, #FFE66D, #FFF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    font-size: 32px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+    margin-top: 16px;
+  }
+
+  .phone-frame {
+    width: 420px;
+    height: 860px;
+    border-radius: 60px;
+    background: #000;
+    padding: 14px;
+    box-shadow:
+      0 50px 100px rgba(0,0,0,0.3),
+      0 20px 60px rgba(0,0,0,0.2),
+      inset 0 0 0 2px rgba(255,255,255,0.1);
+    position: relative;
+    transform: scale(2.5);
+    transform-origin: top center;
+    margin-top: 20px;
+  }
+
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 48px;
+    background: #FFF8F0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .phone-notch {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 130px;
+    height: 34px;
+    background: #000;
+    border-radius: 0 0 20px 20px;
+    z-index: 10;
+  }
+
+  .app-content {
+    padding: 56px 18px 18px;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .stats-title {
+    font-size: 26px;
+    font-weight: 900;
+    color: #2D2D2D;
+    margin-bottom: 2px;
+  }
+  .stats-subtitle {
+    font-size: 13px;
+    color: #6B6B6B;
+    margin-bottom: 14px;
+  }
+
+  /* Stats grid */
+  .stats-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .stat-card {
+    width: calc(50% - 4px);
+    background: #fff;
+    border-radius: 16px;
+    padding: 12px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(255,107,107,0.1);
+  }
+  .stat-emoji { font-size: 22px; margin-bottom: 2px; }
+  .stat-value { font-size: 24px; font-weight: 900; color: #2D2D2D; }
+  .stat-label { font-size: 10px; font-weight: 700; color: #9B9B9B; }
+
+  /* Achievements */
+  .section {
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(255,107,107,0.1);
+  }
+  .section-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #2D2D2D;
+    margin-bottom: 10px;
+  }
+
+  .achievements-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .achievement {
+    width: calc(50% - 3px);
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .achievement.unlocked {
+    color: #fff;
+  }
+  .achievement.locked {
+    background: #FFF0E0;
+  }
+  .ach-emoji { font-size: 22px; margin-bottom: 2px; }
+  .ach-title { font-size: 11px; font-weight: 800; }
+  .ach-desc { font-size: 8px; margin-top: 1px; }
+  .achievement.unlocked .ach-title { color: #fff; }
+  .achievement.unlocked .ach-desc { color: rgba(255,255,255,0.8); }
+  .achievement.locked .ach-emoji { opacity: 0.3; }
+  .achievement.locked .ach-title { color: #9B9B9B; }
+  .achievement.locked .ach-desc { color: #9B9B9B; }
+
+  /* Favorites */
+  .fav-row {
+    display: flex;
+    gap: 8px;
+  }
+  .fav-card {
+    flex: 1;
+    background: #FFF0E0;
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+  }
+  .fav-emoji { font-size: 26px; margin-bottom: 2px; }
+  .fav-label { font-size: 9px; font-weight: 700; color: #9B9B9B; text-transform: uppercase; letter-spacing: 0.5px; }
+  .fav-name { font-size: 12px; font-weight: 800; color: #2D2D2D; margin-top: 1px; }
+
+  /* Tab bar */
+  .tab-bar {
+    position: absolute;
+    bottom: 16px;
+    left: 18px;
+    right: 18px;
+    height: 60px;
+    background: #fff;
+    border-radius: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    box-shadow: 0 -4px 20px rgba(255,107,107,0.15);
+  }
+  .tab { text-align: center; font-size: 20px; opacity: 0.4; }
+  .tab.active { opacity: 1; transform: scale(1.15); }
+  .tab .label { font-size: 8px; font-weight: 800; color: #FF6B6B; margin-top: 1px; }
+  .tab.active .dot {
+    width: 4px; height: 4px; border-radius: 2px;
+    background: #FF6B6B; margin: 2px auto 0;
+  }
+</style>
+</head>
+<body>
+  <div class="tagline-area">
+    <div class="tagline">Track Progress,<br>Earn <em>Achievements</em></div>
+    <div class="subtitle">Streaks, stats & reading milestones</div>
+  </div>
+
+  <div class="phone-frame">
+    <div class="phone-notch"></div>
+    <div class="phone-screen">
+      <div class="app-content">
+        <div class="stats-title">Your Stats 📊</div>
+        <div class="stats-subtitle">Your storytelling journey</div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-emoji">📚</div>
+            <div class="stat-value">24</div>
+            <div class="stat-label">Stories</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-emoji">📄</div>
+            <div class="stat-value">186</div>
+            <div class="stat-label">Pages</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-emoji">🔥</div>
+            <div class="stat-value">5d</div>
+            <div class="stat-label">Streak</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-emoji">🏆</div>
+            <div class="stat-value">12d</div>
+            <div class="stat-label">Best Streak</div>
+          </div>
+        </div>
+
+        <!-- Achievements -->
+        <div class="section">
+          <div class="section-title">🏆 Achievements (5/8)</div>
+          <div class="achievements-grid">
+            <div class="achievement unlocked" style="background:linear-gradient(135deg,#FFD700,#FFA500)">
+              <div class="ach-emoji">🌟</div>
+              <div class="ach-title">First Tale</div>
+              <div class="ach-desc">Create 1st story</div>
+            </div>
+            <div class="achievement unlocked" style="background:linear-gradient(135deg,#FF6B6B,#FF8E53)">
+              <div class="ach-emoji">📚</div>
+              <div class="ach-title">Storyteller</div>
+              <div class="ach-desc">Create 5 stories</div>
+            </div>
+            <div class="achievement unlocked" style="background:linear-gradient(135deg,#A18CD1,#FBC2EB)">
+              <div class="ach-emoji">🐛</div>
+              <div class="ach-title">Bookworm</div>
+              <div class="ach-desc">Create 10 stories</div>
+            </div>
+            <div class="achievement unlocked" style="background:linear-gradient(135deg,#F39C12,#E74C3C)">
+              <div class="ach-emoji">🔥</div>
+              <div class="ach-title">On Fire</div>
+              <div class="ach-desc">3-day streak</div>
+            </div>
+            <div class="achievement unlocked" style="background:linear-gradient(135deg,#2ECC71,#27AE60)">
+              <div class="ach-emoji">🌍</div>
+              <div class="ach-title">Explorer</div>
+              <div class="ach-desc">Use 3+ themes</div>
+            </div>
+            <div class="achievement locked">
+              <div class="ach-emoji">🔒</div>
+              <div class="ach-title">Author</div>
+              <div class="ach-desc">Create 25 stories</div>
+            </div>
+            <div class="achievement locked">
+              <div class="ach-emoji">🔒</div>
+              <div class="ach-title">Unstoppable</div>
+              <div class="ach-desc">7-day streak</div>
+            </div>
+            <div class="achievement locked">
+              <div class="ach-emoji">🔒</div>
+              <div class="ach-title">Polyglot</div>
+              <div class="ach-desc">2+ languages</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Favorites -->
+        <div class="section">
+          <div class="section-title">⭐ Favorites</div>
+          <div class="fav-row">
+            <div class="fav-card">
+              <div class="fav-emoji">🚀</div>
+              <div class="fav-label">Theme</div>
+              <div class="fav-name">Space</div>
+            </div>
+            <div class="fav-card">
+              <div class="fav-emoji">🐉</div>
+              <div class="fav-label">Character</div>
+              <div class="fav-name">Spark</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab"><div>🏠</div></div>
+        <div class="tab"><div>✨</div></div>
+        <div class="tab"><div>📚</div></div>
+        <div class="tab active">
+          <div>📊</div>
+          <div class="label">Stats</div>
+          <div class="dot"></div>
+        </div>
+        <div class="tab"><div>⚙️</div></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
