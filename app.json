@@ -12,11 +12,11 @@
       "resizeMode": "contain",
       "backgroundColor": "#FFF8F0"
     },
-    "privacyUrl": "https://batuhansen340-star.github.io/storypal-privacy/",
+    "privacyUrl": "https://batuhansen340-star.github.io/StoryPal/privacy-policy.html",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.storypal.app",
-      "buildNumber": "1",
+      "buildNumber": "3",
       "infoPlist": {
         "NSCameraUsageDescription": "StoryPal needs camera access to take your child's photo for personalized story characters.",
         "NSPhotoLibraryUsageDescription": "StoryPal needs photo library access to select your child's photo for personalized story characters.",
@@ -32,7 +32,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "package": "com.storypal.app",
-      "versionCode": 1,
+      "versionCode": 3,
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
