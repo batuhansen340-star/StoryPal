@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,14 +17,17 @@ import Animated, {
 } from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
+import { EmojiText } from '../../packages/shared/components/EmojiText';
 import { THEMES, CHARACTERS } from '../../apps/storypal/constants/themes';
-import { impact } from '../../packages/shared/services/haptics';
+import { impact, selection } from '../../packages/shared/services/haptics';
 import { useLanguage } from '../../constants/LanguageContext';
 import { useSubscriptionContext } from '../../constants/SubscriptionContext';
 import { useUsage } from '../../constants/UsageContext';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.7;
+const POPULAR_THEMES = THEMES.slice(0, 6);
+const FEATURED_CHARACTERS = CHARACTERS.slice(0, 6);
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -36,9 +39,9 @@ export default function HomeScreen() {
   const remaining = freeLimit - dailyStoriesUsed;
 
   useEffect(() => {
-    AsyncStorage.getItem('storypal_default_child_name').then((name) => {
-      if (name) setChildName(name);
-    });
+    AsyncStorage.getItem('storypal_default_child_name')
+      .then((name) => { if (name) setChildName(name); })
+      .catch(() => { /* storage read failed — safe to ignore */ });
   }, []);
 
   return (
@@ -50,7 +53,9 @@ export default function HomeScreen() {
         {/* Header */}
         <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
           <View>
-            <Text style={styles.greeting}>{childName ? `${t('greeting').replace('!', '')} ${childName}!` : t('greeting')} 👋</Text>
+            <Text style={styles.greeting} accessibilityRole="header">
+              {childName ? `${t('greeting').replace('!', '')} ${childName}!` : t('greeting')} 👋
+            </Text>
             <Text style={styles.title}>{t('homeTitle')}</Text>
           </View>
         </Animated.View>
@@ -96,7 +101,7 @@ export default function HomeScreen() {
               style={styles.ctaCard}
             >
               <View style={styles.ctaContent}>
-                <Text style={styles.ctaEmoji}>✨</Text>
+                <EmojiText style={styles.ctaEmoji}>✨</EmojiText>
                 <Text style={styles.ctaTitle}>{t('createNewStory')}</Text>
                 <Text style={styles.ctaSubtitle}>{t('ctaSubtitle')}</Text>
               </View>
@@ -115,14 +120,19 @@ export default function HomeScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.horizontalScroll}
           >
-            {THEMES.slice(0, 6).map((theme, index) => (
+            {POPULAR_THEMES.map((theme, index) => (
               <Animated.View
                 key={theme.id}
                 entering={FadeInRight.duration(400).delay(index * 100)}
               >
                 <TouchableOpacity
                   activeOpacity={0.85}
-                  onPress={() => router.push('/(tabs)/create')}
+                  onPress={() => {
+                    selection();
+                    router.push('/(tabs)/create');
+                  }}
+                  accessibilityLabel={`${theme.name} — ${theme.description}`}
+                  accessibilityRole="button"
                 >
                   <LinearGradient
                     colors={theme.gradient}
@@ -130,7 +140,7 @@ export default function HomeScreen() {
                     end={{ x: 1, y: 1 }}
                     style={styles.themeCard}
                   >
-                    <Text style={styles.themeEmoji}>{theme.emoji}</Text>
+                    <EmojiText style={styles.themeEmoji}>{theme.emoji}</EmojiText>
                     <Text style={styles.themeName}>{theme.name}</Text>
                     <Text style={styles.themeDesc}>{theme.description}</Text>
                   </LinearGradient>
@@ -144,14 +154,23 @@ export default function HomeScreen() {
         <Animated.View entering={FadeInDown.duration(600).delay(450)}>
           <Text style={styles.sectionTitle}>{t('meetCharacters')}</Text>
           <View style={styles.characterGrid}>
-            {CHARACTERS.slice(0, 6).map((char, index) => (
+            {FEATURED_CHARACTERS.map((char, index) => (
               <Animated.View
                 key={char.id}
                 entering={FadeInDown.duration(400).delay(index * 80)}
               >
-                <TouchableOpacity style={styles.characterCard} activeOpacity={0.85}>
+                <TouchableOpacity
+                  style={styles.characterCard}
+                  activeOpacity={0.85}
+                  onPress={() => {
+                    selection();
+                    router.push('/(tabs)/create');
+                  }}
+                  accessibilityLabel={`${char.name} — ${char.trait}`}
+                  accessibilityRole="button"
+                >
                   <View style={styles.characterEmojiContainer}>
-                    <Text style={styles.characterEmoji}>{char.emoji}</Text>
+                    <EmojiText style={styles.characterEmoji}>{char.emoji}</EmojiText>
                   </View>
                   <Text style={styles.characterName}>{char.name}</Text>
                   <Text style={styles.characterTrait}>{char.trait}</Text>

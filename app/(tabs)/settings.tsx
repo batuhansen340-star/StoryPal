@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
+import { EmojiText } from '../../packages/shared/components/EmojiText';
 import { getLanguageByCode } from '../../constants/languages';
 import { type AuthUser, getAuthUser, signOut } from '../../packages/shared/services/auth';
 import { useLanguage } from '../../constants/LanguageContext';
@@ -40,7 +41,7 @@ function SettingsRow({ emoji, title, subtitle, onPress, rightElement }: Settings
     >
       <View style={styles.settingsRowLeft}>
         <View style={styles.settingsIconContainer}>
-          <Text style={styles.settingsEmoji}>{emoji}</Text>
+          <EmojiText style={styles.settingsEmoji}>{emoji}</EmojiText>
         </View>
         <View>
           <Text style={styles.settingsTitle}>{title}</Text>
@@ -85,7 +86,7 @@ export default function SettingsScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>{t('settingsTitle')} ⚙️</Text>
+          <Text style={styles.title}>{t('settingsTitle')} <EmojiText>⚙️</EmojiText></Text>
         </Animated.View>
 
         {/* Profile Card */}
@@ -98,7 +99,7 @@ export default function SettingsScreen() {
               style={styles.profileCard}
             >
               <View style={styles.avatarContainer}>
-                <Text style={styles.avatarEmoji}>{authUser?.isGuest ? '\u{1F47B}' : '\u{1F9D2}'}</Text>
+                <EmojiText style={styles.avatarEmoji}>{authUser?.isGuest ? '\u{1F47B}' : '\u{1F9D2}'}</EmojiText>
               </View>
               <View style={styles.profileInfo}>
                 <Text style={styles.profileName}>{authUser?.displayName ?? t('storyExplorer')}</Text>
@@ -107,7 +108,7 @@ export default function SettingsScreen() {
                 </Text>
               </View>
               <View style={styles.upgradeBadge}>
-                <Text style={styles.upgradeBadgeText}>{t('upgrade')} {'\u{1F451}'}</Text>
+                <Text style={styles.upgradeBadgeText}>{t('upgrade')} <EmojiText>{'\u{1F451}'}</EmojiText></Text>
               </View>
             </LinearGradient>
           </TouchableOpacity>

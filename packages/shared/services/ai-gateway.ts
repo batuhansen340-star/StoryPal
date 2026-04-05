@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import type { AgeGroup, StoryGenerationResponse, PersonalizationData, CharacterSheet } from '../types';
 
 const IMAGE_CACHE_DIR = `${FileSystem.cacheDirectory}storypal-images/`;
@@ -114,11 +114,33 @@ export async function generateStoryText(params: {
     ? `\nSpecial request from the child: "${params.customPrompt}"`
     : '';
 
+  // Add variety to prevent repetitive stories
+  const storyTypes = [
+    'a mystery/detective adventure where the character solves a puzzle',
+    'a friendship story where unlikely characters become best friends',
+    'a comedy with silly mishaps and funny situations',
+    'a quest/journey to find or deliver something important',
+    'a story about overcoming a fear or trying something new',
+    'an invention/creation story where the character builds or makes something amazing',
+    'a celebration/festival story with cultural elements and traditions',
+    'a rescue mission where the character helps someone in need',
+    'a musical/artistic adventure where creativity saves the day',
+    'a discovery story where the character finds a hidden world',
+    'a teamwork story where everyone has a special role',
+    'a transformation story where something ordinary becomes magical',
+  ];
+  const randomType = storyTypes[Math.floor(Math.random() * storyTypes.length)];
+  const randomSeed = Math.floor(Math.random() * 99999);
+
   const systemPrompt = `You are a world-class children's storybook author — think Julia Donaldson, Mo Willems, and Oliver Jeffers combined. Create a magical, age-appropriate story that children will BEG to hear again.
+
+CREATIVITY SEED: ${randomSeed}
+STORY TYPE: This story should be ${randomType}. Make it UNIQUE and SURPRISING — avoid generic plotlines. The character and theme should deeply influence the story.
 
 STORY STRUCTURE:
 - Clear three-act structure: Setup (introduce character + world), Conflict (challenge/adventure), Resolution (growth + satisfying ending)
 - The character must CHANGE or LEARN something by the end
+- Include at least one unexpected twist or surprise moment
 - Include at least one moment of genuine emotion (wonder, friendship, bravery, kindness)
 - End with warmth — the child should feel happy and safe
 
@@ -129,6 +151,7 @@ WRITING CRAFT:
 - Sprinkle in gentle humor
 - Use onomatopoeia where it fits (whoosh, splish-splash, crackle)
 - Each page should end at a natural turning point that makes kids want the next page
+- Give the story a creative, catchy title — NOT just "[Character] and the [Theme]"
 
 CONTENT RULES:
 - Positive, uplifting, safe for children — NO scary, violent, or dark content
@@ -163,8 +186,8 @@ Create a ${config.pages}-page story. Each page max ${config.maxWords} words.`;
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
     ],
-    temperature: 0.9,
-    max_tokens: 4000,
+    temperature: 0.85,
+    max_tokens: 3000,
     response_format: { type: 'json_object' },
   });
 
@@ -186,14 +209,27 @@ Create a ${config.pages}-page story. Each page max ${config.maxWords} words.`;
     throw new Error('Invalid story format from AI');
   }
 
-  // Validate each page has text and imagePrompt
+  // Validate and normalize each page
+  const validatedPages: StoryGenerationResponse['pages'] = [];
   for (const page of parsed.pages) {
-    if (typeof page !== 'object' || !page || typeof (page as Record<string, unknown>).text !== 'string') {
+    if (typeof page !== 'object' || !page) {
       throw new Error('Invalid page format from AI');
     }
+    const p = page as Record<string, unknown>;
+    if (typeof p.text !== 'string') {
+      throw new Error('Invalid page format from AI — missing text');
+    }
+    validatedPages.push({
+      text: p.text,
+      imagePrompt: typeof p.imagePrompt === 'string' ? p.imagePrompt : '',
+      choices: Array.isArray(p.choices) ? p.choices as StoryGenerationResponse['pages'][0]['choices'] : undefined,
+    });
   }
 
-  return parsed as unknown as StoryGenerationResponse;
+  return {
+    title: parsed.title as string,
+    pages: validatedPages,
+  };
 }
 
 export async function generateStoryImage(params: {

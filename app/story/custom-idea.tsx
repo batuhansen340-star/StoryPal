@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
+import { EmojiText } from '../../packages/shared/components/EmojiText';
 import { useLanguage } from '../../constants/LanguageContext';
 
 const { width } = Dimensions.get('window');
@@ -82,7 +83,7 @@ export default function CustomIdeaScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>{t('yourIdea')} {'\u{1F4A1}'}</Text>
+          <Text style={styles.title}>{t('yourIdea')} <EmojiText>{'\u{1F4A1}'}</EmojiText></Text>
           <Text style={styles.subtitle}>
             {t('tellUsIdea')}
           </Text>
@@ -117,7 +118,7 @@ export default function CustomIdeaScreen() {
                   onPress={() => setIdea(starter.text)}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.starterEmoji}>{starter.emoji}</Text>
+                  <EmojiText style={styles.starterEmoji}>{starter.emoji}</EmojiText>
                   <Text style={styles.starterText} numberOfLines={2}>
                     {starter.text}
                   </Text>
@@ -138,7 +139,7 @@ export default function CustomIdeaScreen() {
               end={{ x: 1, y: 0 }}
               style={styles.continueButton}
             >
-              <Text style={styles.continueText}>{t('continueBtn')} {'\u2192'}</Text>
+              <Text style={styles.continueText}>{t('continueBtn')} <EmojiText>{'\u2192'}</EmojiText></Text>
             </LinearGradient>
           </TouchableOpacity>
         </Animated.View>

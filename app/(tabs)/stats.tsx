@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,14 +6,37 @@ import {
   ScrollView,
   RefreshControl,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
+import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
+import { EmojiText } from '../../packages/shared/components/EmojiText';
 import { useStats } from '../../packages/shared/hooks/useStats';
 import { THEMES, CHARACTERS } from '../../apps/storypal/constants/themes';
 import { REGIONAL_CHARACTERS } from '../../apps/storypal/constants/regional-characters';
 import { EmptyState } from '../../packages/shared/components/EmptyState';
 import { useLanguage } from '../../constants/LanguageContext';
+
+// Achievement definitions
+interface Achievement {
+  id: string;
+  emoji: string;
+  title: string;
+  description: string;
+  condition: (stats: ReturnType<typeof useStats>['stats']) => boolean;
+  gradient: [string, string];
+}
+
+const ACHIEVEMENTS: Achievement[] = [
+  { id: 'first_story', emoji: '\u{1F31F}', title: 'First Tale', description: 'Create your first story', condition: (s) => (s?.totalStories ?? 0) >= 1, gradient: ['#FFD700', '#FFA500'] },
+  { id: 'storyteller', emoji: '\u{1F4DA}', title: 'Storyteller', description: 'Create 5 stories', condition: (s) => (s?.totalStories ?? 0) >= 5, gradient: ['#FF6B6B', '#FF8E53'] },
+  { id: 'bookworm', emoji: '\u{1F41B}', title: 'Bookworm', description: 'Create 10 stories', condition: (s) => (s?.totalStories ?? 0) >= 10, gradient: ['#A18CD1', '#FBC2EB'] },
+  { id: 'author', emoji: '\u{270D}\u{FE0F}', title: 'Author', description: 'Create 25 stories', condition: (s) => (s?.totalStories ?? 0) >= 25, gradient: ['#4ECDC4', '#44B09E'] },
+  { id: 'streak_3', emoji: '\u{1F525}', title: 'On Fire', description: '3-day streak', condition: (s) => (s?.longestStreak ?? 0) >= 3, gradient: ['#F39C12', '#E74C3C'] },
+  { id: 'streak_7', emoji: '\u{1F680}', title: 'Unstoppable', description: '7-day streak', condition: (s) => (s?.longestStreak ?? 0) >= 7, gradient: ['#E74C3C', '#C0392B'] },
+  { id: 'explorer', emoji: '\u{1F30D}', title: 'Explorer', description: 'Use 3+ themes', condition: (s) => Object.keys(s?.storiesByTheme ?? {}).length >= 3, gradient: ['#2ECC71', '#27AE60'] },
+  { id: 'polyglot', emoji: '\u{1F5E3}\u{FE0F}', title: 'Polyglot', description: 'Write in 2+ languages', condition: (s) => (s?.languagesUsed?.length ?? 0) >= 2, gradient: ['#3498DB', '#2980B9'] },
+];
 
 const THEME_MAP: Record<string, { name: string; emoji: string }> = {};
 for (const th of THEMES) {
@@ -28,7 +51,7 @@ for (const c of [...CHARACTERS, ...REGIONAL_CHARACTERS]) {
 function StatCard({ emoji, label, value, delay }: { emoji: string; label: string; value: string | number; delay: number }) {
   return (
     <Animated.View entering={FadeInDown.duration(400).delay(delay)} style={styles.statCard}>
-      <Text style={styles.statEmoji}>{emoji}</Text>
+      <EmojiText style={styles.statEmoji}>{emoji}</EmojiText>
       <Text style={styles.statValue}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </Animated.View>
@@ -39,7 +62,7 @@ function BarItem({ label, emoji, count, max }: { label: string; emoji: string; c
   const width = max > 0 ? Math.max(8, (count / max) * 100) : 8;
   return (
     <View style={styles.barRow}>
-      <Text style={styles.barEmoji}>{emoji}</Text>
+      <EmojiText style={styles.barEmoji}>{emoji}</EmojiText>
       <Text style={styles.barLabel} numberOfLines={1}>{label}</Text>
       <View style={styles.barTrack}>
         <View style={[styles.barFill, { width: `${width}%` }]} />
@@ -79,6 +102,12 @@ export default function StatsScreen() {
   const favTheme = stats.favoriteTheme ? THEME_MAP[stats.favoriteTheme] : null;
   const favChar = stats.favoriteCharacter ? CHAR_MAP[stats.favoriteCharacter] : null;
 
+  const achievements = useMemo(() =>
+    ACHIEVEMENTS.map(a => ({ ...a, unlocked: a.condition(stats) })),
+    [stats]
+  );
+  const unlockedCount = achievements.filter(a => a.unlocked).length;
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView
@@ -87,7 +116,7 @@ export default function StatsScreen() {
         refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} />}
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>{t('yourStats')} {'\u{1F4CA}'}</Text>
+          <Text style={styles.title}>{t('yourStats')} <EmojiText>{'\u{1F4CA}'}</EmojiText></Text>
           <Text style={styles.subtitle}>{t('yourJourney')}</Text>
         </Animated.View>
 
@@ -101,7 +130,7 @@ export default function StatsScreen() {
 
         {/* Activity */}
         <Animated.View entering={FadeInDown.duration(400).delay(300)} style={styles.section}>
-          <Text style={styles.sectionTitle}>{'\u{1F4C5}'} {t('activity')}</Text>
+          <Text style={styles.sectionTitle}><EmojiText>{'\u{1F4C5}'}</EmojiText> {t('activity')}</Text>
           <View style={styles.activityRow}>
             <View style={styles.activityItem}>
               <Text style={styles.activityValue}>{stats.storiesThisWeek}</Text>
@@ -120,21 +149,47 @@ export default function StatsScreen() {
           </View>
         </Animated.View>
 
+        {/* Achievements */}
+        <Animated.View entering={FadeInDown.duration(400).delay(350)} style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            <EmojiText>{'\u{1F3C6}'}</EmojiText> {t('achievements') ?? 'Achievements'} ({unlockedCount}/{ACHIEVEMENTS.length})
+          </Text>
+          <View style={styles.achievementsGrid}>
+            {achievements.map((a) => (
+              <View key={a.id} style={[styles.achievementCard, !a.unlocked && styles.achievementLocked]}>
+                {a.unlocked ? (
+                  <LinearGradient colors={a.gradient} style={styles.achievementGradient}>
+                    <EmojiText style={styles.achievementEmoji}>{a.emoji}</EmojiText>
+                    <Text style={styles.achievementTitle}>{a.title}</Text>
+                    <Text style={styles.achievementDesc}>{a.description}</Text>
+                  </LinearGradient>
+                ) : (
+                  <View style={styles.achievementGradient}>
+                    <EmojiText style={[styles.achievementEmoji, { opacity: 0.3 }]}>{'\u{1F512}'}</EmojiText>
+                    <Text style={[styles.achievementTitle, { color: COLORS.textMuted }]}>{a.title}</Text>
+                    <Text style={[styles.achievementDesc, { color: COLORS.textMuted }]}>{a.description}</Text>
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
+        </Animated.View>
+
         {/* Favorites */}
         {(favTheme || favChar) && (
           <Animated.View entering={FadeInDown.duration(400).delay(400)} style={styles.section}>
-            <Text style={styles.sectionTitle}>{'\u2B50'} {t('favorites')}</Text>
+            <Text style={styles.sectionTitle}><EmojiText>{'\u2B50'}</EmojiText> {t('favorites')}</Text>
             <View style={styles.favoritesRow}>
               {favTheme && (
                 <View style={styles.favoriteCard}>
-                  <Text style={styles.favoriteEmoji}>{favTheme.emoji}</Text>
+                  <EmojiText style={styles.favoriteEmoji}>{favTheme.emoji}</EmojiText>
                   <Text style={styles.favoriteLabel}>{t('theme')}</Text>
                   <Text style={styles.favoriteName}>{favTheme.name}</Text>
                 </View>
               )}
               {favChar && (
                 <View style={styles.favoriteCard}>
-                  <Text style={styles.favoriteEmoji}>{favChar.emoji}</Text>
+                  <EmojiText style={styles.favoriteEmoji}>{favChar.emoji}</EmojiText>
                   <Text style={styles.favoriteLabel}>{t('character')}</Text>
                   <Text style={styles.favoriteName}>{favChar.name}</Text>
                 </View>
@@ -146,7 +201,7 @@ export default function StatsScreen() {
         {/* Theme Breakdown */}
         {themeEntries.length > 0 && (
           <Animated.View entering={FadeInDown.duration(400).delay(500)} style={styles.section}>
-            <Text style={styles.sectionTitle}>{'\u{1F3A8}'} {t('storiesByTheme')}</Text>
+            <Text style={styles.sectionTitle}><EmojiText>{'\u{1F3A8}'}</EmojiText> {t('storiesByTheme')}</Text>
             {themeEntries.map(([id, count]) => {
               const tm = THEME_MAP[id];
               return (
@@ -165,7 +220,7 @@ export default function StatsScreen() {
         {/* Character Breakdown */}
         {charEntries.length > 0 && (
           <Animated.View entering={FadeInDown.duration(400).delay(600)} style={styles.section}>
-            <Text style={styles.sectionTitle}>{'\u{1F31F}'} {t('storiesByCharacter')}</Text>
+            <Text style={styles.sectionTitle}><EmojiText>{'\u{1F31F}'}</EmojiText> {t('storiesByCharacter')}</Text>
             {charEntries.map(([id, count]) => {
               const c = CHAR_MAP[id];
               return (
@@ -236,6 +291,43 @@ const styles = StyleSheet.create({
   },
   barFill: { height: '100%', backgroundColor: COLORS.primary, borderRadius: 6 },
   barCount: { width: 24, fontSize: 13, fontWeight: '800', color: COLORS.text, textAlign: 'right' },
+
+  achievementsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+  },
+  achievementCard: {
+    width: '48%' as unknown as number,
+    borderRadius: RADIUS.lg,
+    overflow: 'hidden',
+  },
+  achievementLocked: {
+    backgroundColor: COLORS.backgroundDark,
+    borderRadius: RADIUS.lg,
+  },
+  achievementGradient: {
+    padding: SPACING.md,
+    alignItems: 'center',
+    minHeight: 100,
+    justifyContent: 'center',
+  },
+  achievementEmoji: {
+    fontSize: 28,
+    marginBottom: SPACING.xs,
+  },
+  achievementTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#fff',
+    textAlign: 'center',
+  },
+  achievementDesc: {
+    fontSize: 10,
+    color: 'rgba(255,255,255,0.8)',
+    textAlign: 'center',
+    marginTop: 2,
+  },
 
   emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: SPACING.xl },
 });

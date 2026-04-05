@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
+import { EmojiText } from '../../packages/shared/components/EmojiText';
 import { CHARACTERS, THEMES } from '../../apps/storypal/constants/themes';
 import { getCharactersForLanguage } from '../../apps/storypal/constants/regional-characters';
 import { CHARACTER_CATEGORIES } from '../../constants/modern-characters';
@@ -38,7 +39,7 @@ export default function SelectCharacterScreen() {
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const selectedTheme = THEMES.find(th => th.id === themeId);
+  const selectedTheme = THEMES.find(th => th.id === themeId) ?? THEMES[0];
   const classicCharacters = getCharactersForLanguage(CHARACTERS, appLanguage);
 
   const filteredCategories = useMemo(() => {
@@ -120,17 +121,17 @@ export default function SelectCharacterScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>{t('chooseCharacter')} {'\u{1F31F}'}</Text>
+          <Text style={styles.title}>{t('chooseCharacter')} <EmojiText>{'\u{1F31F}'}</EmojiText></Text>
           <Text style={styles.subtitle}>{t('characterSubtitle')}</Text>
 
           {selectedTheme && (
             <View style={styles.selectedTheme}>
               <LinearGradient
-                colors={selectedTheme.gradient}
+                colors={selectedTheme?.gradient ?? [COLORS.primary, COLORS.accent]}
                 style={styles.selectedThemeBadge}
               >
-                <Text style={styles.selectedThemeEmoji}>{selectedTheme.emoji}</Text>
-                <Text style={styles.selectedThemeText}>{selectedTheme.name}</Text>
+                <EmojiText style={styles.selectedThemeEmoji}>{selectedTheme?.emoji}</EmojiText>
+                <Text style={styles.selectedThemeText}>{selectedTheme?.nameKey ? (t as (key: string) => string)(selectedTheme.nameKey) : selectedTheme?.name}</Text>
               </LinearGradient>
             </View>
           )}
@@ -151,7 +152,7 @@ export default function SelectCharacterScreen() {
               onPress={() => { selection(); setSelectedCategory(null); }}
               activeOpacity={0.8}
             >
-              <Text style={styles.categoryChipEmoji}>{'\u2728'}</Text>
+              <EmojiText style={styles.categoryChipEmoji}>{'\u2728'}</EmojiText>
               <Text style={[
                 styles.categoryChipText,
                 !selectedCategory && styles.categoryChipTextActive,
@@ -167,11 +168,11 @@ export default function SelectCharacterScreen() {
                 onPress={() => { selection(); setSelectedCategory(cat.id); }}
                 activeOpacity={0.8}
               >
-                <Text style={styles.categoryChipEmoji}>{cat.emoji}</Text>
+                <EmojiText style={styles.categoryChipEmoji}>{cat.emoji}</EmojiText>
                 <Text style={[
                   styles.categoryChipText,
                   selectedCategory === cat.id && styles.categoryChipTextActive,
-                ]}>{t(cat.nameKey as any)}</Text>
+                ]}>{(t as (key: string) => string)(cat.nameKey)}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -191,17 +192,17 @@ export default function SelectCharacterScreen() {
                 onPress={() => handleSelectModernCharacter(char)}
               >
                 <View style={styles.modernEmojiContainer}>
-                  <Text style={styles.modernEmoji}>{char.emoji}</Text>
+                  <EmojiText style={styles.modernEmoji}>{char.emoji}</EmojiText>
                 </View>
                 <Text style={styles.modernName} numberOfLines={1}>
-                  {t(char.nameKey as any)}
+                  {(t as (key: string) => string)(char.nameKey)}
                 </Text>
                 <Text style={styles.modernDesc} numberOfLines={2}>
-                  {t(char.descKey as any)}
+                  {(t as (key: string) => string)(char.descKey)}
                 </Text>
                 {char.isPremium && !isPremium && (
                   <View style={styles.lockOverlay}>
-                    <Text style={styles.lockIcon}>{'\u{1F512}'}</Text>
+                    <EmojiText style={styles.lockIcon}>{'\u{1F512}'}</EmojiText>
                     <Text style={styles.lockLabel}>{t('premiumBadge')}</Text>
                   </View>
                 )}
@@ -229,15 +230,15 @@ export default function SelectCharacterScreen() {
                 style={styles.characterCard}
                 activeOpacity={0.85}
                 onPress={() => handleSelectClassicCharacter(char.id)}
-                accessibilityLabel={char.name + ', ' + char.trait}
+                accessibilityLabel={char.name + ', ' + (char.traitKey ? (t as (key: string) => string)(char.traitKey) : char.trait)}
               >
                 <View style={styles.characterEmojiContainer}>
-                  <Text style={styles.characterEmoji}>{char.emoji}</Text>
+                  <EmojiText style={styles.characterEmoji}>{char.emoji}</EmojiText>
                 </View>
                 <View style={styles.characterInfo}>
                   <View style={styles.characterNameRow}>
                     <Text style={styles.characterName}>{char.name}</Text>
-                    {char.region && <View style={styles.regionalBadge}><Text style={styles.regionalBadgeText}>{'\u{1F30D}'}</Text></View>}
+                    {char.region && <View style={styles.regionalBadge}><EmojiText style={styles.regionalBadgeText}>{'\u{1F30D}'}</EmojiText></View>}
                   </View>
                   <Text style={styles.characterTrait}>{char.trait}</Text>
                   <Text style={styles.characterDesc}>{char.description}</Text>

@@ -102,7 +102,7 @@ export function useAI() {
       status: 'generating-text',
       progress: 0,
       totalSteps: 5,
-      currentStep: '\u270D\uFE0F Writing your story...',
+      currentStep: 'writingStory',
       story: null,
       imageUrls: [],
       coverUrl: null,
@@ -111,8 +111,8 @@ export function useAI() {
 
     try {
       if (isDemoMode) {
-        // Step 1: Writing story (2s)
-        await sleep(randomDelay(1800, 2500));
+        // Step 1: Writing story (fast but visible)
+        await sleep(randomDelay(1000, 1500));
 
         const story = getDemoStory(params.theme, params.character, params.language, params.customPrompt);
         const totalSteps = 5;
@@ -122,25 +122,25 @@ export function useAI() {
           status: 'generating-images',
           progress: 1,
           totalSteps,
-          currentStep: '\uD83C\uDFA8 Designing the cover...',
+          currentStep: 'paintingCover',
           story,
         }));
 
-        // Step 2: Cover (2s)
-        await sleep(randomDelay(1800, 2500));
+        // Step 2: Cover (quick)
+        await sleep(randomDelay(800, 1200));
 
         const coverUrl = getCoverImage(params.theme);
         setState(prev => ({
           ...prev,
           progress: 2,
           coverUrl,
-          currentStep: '\uD83D\uDD8C\uFE0F Painting illustrations...',
+          currentStep: 'drawingPages',
         }));
 
-        // Step 3: Page illustrations (2-3s total)
+        // Step 3: Page illustrations (fast batch)
         const themeImages = getThemeImages(params.theme, story.pages.length);
         const imageUrls: string[] = [];
-        const batchDelay = randomDelay(1500, 2500) / story.pages.length;
+        const batchDelay = randomDelay(600, 1000) / story.pages.length;
 
         for (let i = 0; i < story.pages.length; i++) {
           await sleep(batchDelay);
@@ -149,32 +149,32 @@ export function useAI() {
             ...prev,
             progress: 2,
             imageUrls: [...imageUrls],
-            currentStep: `\uD83D\uDD8C\uFE0F Painting page ${i + 1} of ${story.pages.length}...`,
+            currentStep: `drawingPages:${i + 1}/${story.pages.length}`,
           }));
         }
 
-        // Step 4: Magical touches (1s)
+        // Step 4: Magical touches
         setState(prev => ({
           ...prev,
           progress: 3,
-          currentStep: '\u2728 Adding magical touches...',
+          currentStep: 'magicSpark',
         }));
-        await sleep(randomDelay(800, 1200));
+        await sleep(randomDelay(400, 600));
 
-        // Step 5: Complete (0.5s)
+        // Step 5: Complete
         setState(prev => ({
           ...prev,
           progress: 4,
-          currentStep: '\uD83D\uDCD6 Your story is ready!',
+          currentStep: 'storyComplete',
         }));
-        await sleep(500);
+        await sleep(300);
 
         setState(prev => ({
           ...prev,
           status: 'complete',
           progress: totalSteps,
           imageUrls,
-          currentStep: '\uD83D\uDCD6 Your story is ready!',
+          currentStep: 'storyComplete',
         }));
 
         recordStoryCreation().catch(() => {});
@@ -185,60 +185,71 @@ export function useAI() {
       const { generateStoryText, generateCoverImage, generateStoryImage } = await import('../services/ai-gateway');
 
       const story = await generateStoryText(params);
-      const totalImages = story.pages.length + 1;
+      const totalPages = story.pages.length;
+      const totalSteps = totalPages + 2; // text + cover + pages
 
       setState(prev => ({
         ...prev,
         status: 'generating-images',
         progress: 1,
-        totalSteps: totalImages + 1,
-        currentStep: '\uD83C\uDFA8 Creating cover illustration...',
+        totalSteps,
+        currentStep: 'paintingCover',
         story,
       }));
 
-      const coverUrl = await generateCoverImage({
+      // Generate cover + ALL page images in parallel for maximum speed
+      const imageUrls: string[] = new Array(totalPages).fill('');
+      let coverUrl = '';
+
+      const coverPromise = generateCoverImage({
         title: story.title,
         theme: params.theme,
         character: params.characterVisualDesc ?? params.character,
-      });
-
-      setState(prev => ({
-        ...prev,
-        progress: 2,
-        coverUrl,
-        currentStep: '\uD83D\uDD8C\uFE0F Drawing page illustrations...',
-      }));
-
-      const BATCH_SIZE = 4;
-      const imageUrls: string[] = new Array(story.pages.length).fill('');
-
-      for (let batch = 0; batch < story.pages.length; batch += BATCH_SIZE) {
-        const batchPages = story.pages.slice(batch, batch + BATCH_SIZE);
-        const batchPromises = batchPages.map((page) =>
-          generateStoryImage({
-            prompt: page.imagePrompt,
-            theme: params.theme,
-            character: params.characterVisualDesc ?? params.character,
-          }).catch(() => '')
-        );
-
-        const results = await Promise.all(batchPromises);
-        results.forEach((url, idx) => { imageUrls[batch + idx] = url; });
-
+      }).then(url => {
+        coverUrl = url;
         setState(prev => ({
           ...prev,
-          progress: Math.min(batch + BATCH_SIZE, story.pages.length) + 2,
-          imageUrls: [...imageUrls],
-          currentStep: `\uD83D\uDD8C\uFE0F Drawing pages ${batch + 1}-${Math.min(batch + BATCH_SIZE, story.pages.length)} of ${story.pages.length}...`,
+          coverUrl: url,
+          currentStep: 'drawingPages',
         }));
-      }
+        return url;
+      }).catch(() => '');
+
+      // Fire all page images in parallel (batch of 6 for rate limit safety)
+      const BATCH_SIZE = 6;
+      const pagePromise = (async () => {
+        for (let batch = 0; batch < totalPages; batch += BATCH_SIZE) {
+          const batchPages = story.pages.slice(batch, batch + BATCH_SIZE);
+          const batchPromises = batchPages.map((page) =>
+            generateStoryImage({
+              prompt: page.imagePrompt,
+              theme: params.theme,
+              character: params.characterVisualDesc ?? params.character,
+            }).catch(() => '')
+          );
+
+          const results = await Promise.all(batchPromises);
+          results.forEach((url, idx) => { imageUrls[batch + idx] = url; });
+
+          setState(prev => ({
+            ...prev,
+            progress: Math.min(batch + BATCH_SIZE, totalPages) + 2,
+            imageUrls: [...imageUrls],
+            currentStep: `drawingPages:${batch + 1}-${Math.min(batch + BATCH_SIZE, totalPages)}/${totalPages}`,
+          }));
+        }
+      })();
+
+      // Wait for both cover and pages to finish
+      await Promise.all([coverPromise, pagePromise]);
 
       setState(prev => ({
         ...prev,
         status: 'complete',
-        progress: totalImages + 1,
+        progress: totalSteps,
         imageUrls,
-        currentStep: '\uD83D\uDCD6 Story complete!',
+        coverUrl,
+        currentStep: 'storyComplete',
       }));
 
       recordStoryCreation().catch(() => {});
@@ -249,7 +260,7 @@ export function useAI() {
         ...prev,
         status: 'error',
         error: errorMessage,
-        currentStep: 'Oops! Something went wrong.',
+        currentStep: 'oops',
       }));
       throw err;
     }

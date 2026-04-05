@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp, FadeIn } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS } from '../../packages/shared/types';
+import { EmojiText } from '../../packages/shared/components/EmojiText';
 import { useGameData } from '../../packages/shared/hooks/useGameData';
 import { selection, notification } from '../../packages/shared/services/haptics';
 import { useLanguage } from '../../constants/LanguageContext';
@@ -29,11 +30,13 @@ export default function StorySortScreen() {
 
   const storyPages: string[] = (() => {
     try {
-      const parsed = JSON.parse(params.pages ?? '[]');
-      return parsed.map((p: string | { text: string }) =>
+      const pagesParsed = JSON.parse(params.pages ?? '[]');
+      if (!Array.isArray(pagesParsed)) return [];
+      return pagesParsed.map((p: string | { text: string }) =>
         typeof p === 'string' ? p : p.text
       );
-    } catch {
+    } catch (err) {
+      console.warn('[StorySortScreen] Failed to parse pages:', err);
       return [];
     }
   })();
@@ -135,7 +138,7 @@ export default function StorySortScreen() {
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyEmoji}>{'\uD83E\uDD14'}</Text>
+          <EmojiText style={styles.emptyEmoji}>{'\uD83E\uDD14'}</EmojiText>
           <Text style={styles.emptyText}>{t('noStoryEvents')}</Text>
           <TouchableOpacity style={styles.actionButton} onPress={() => router.back()}>
             <Text style={styles.actionButtonText}>{t('backToGames')}</Text>
@@ -150,7 +153,7 @@ export default function StorySortScreen() {
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <ScrollView contentContainerStyle={styles.celebrationContent}>
           <Animated.View entering={FadeInDown.duration(600)} style={styles.celebrationCard}>
-            <Text style={styles.celebrationEmoji}>{'\uD83C\uDF89'}</Text>
+            <EmojiText style={styles.celebrationEmoji}>{'\uD83C\uDF89'}</EmojiText>
             <Text style={styles.celebrationTitle}>{t('wellDone')}</Text>
             <Text style={styles.celebrationSubtitle}>
               {hintsUsed === 0
@@ -177,7 +180,7 @@ export default function StorySortScreen() {
                   end={{ x: 1, y: 0 }}
                   style={styles.celebrationButtonGradient}
                 >
-                  <Text style={styles.celebrationButtonText}>{t('playAgain')} {'\uD83D\uDD04'}</Text>
+                  <Text style={styles.celebrationButtonText}>{t('playAgain')} <EmojiText>{'\uD83D\uDD04'}</EmojiText></Text>
                 </LinearGradient>
               </TouchableOpacity>
 
@@ -212,7 +215,7 @@ export default function StorySortScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>{t('storySortTitle')} {'\uD83D\uDCD6'}</Text>
+          <Text style={styles.title}>{t('storySortTitle')} <EmojiText>{'\uD83D\uDCD6'}</EmojiText></Text>
           <Text style={styles.subtitle}>{t('storySortDesc')}</Text>
         </Animated.View>
 
@@ -271,7 +274,7 @@ export default function StorySortScreen() {
             onPress={handleHint}
             activeOpacity={0.8}
           >
-            <Text style={styles.hintButtonText}>{'\uD83D\uDCA1'} {t('hint')}</Text>
+            <Text style={styles.hintButtonText}><EmojiText>{'\uD83D\uDCA1'}</EmojiText> {t('hint')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity activeOpacity={0.85} onPress={handleCheckOrder}>
@@ -281,7 +284,7 @@ export default function StorySortScreen() {
               end={{ x: 1, y: 0 }}
               style={styles.checkButton}
             >
-              <Text style={styles.checkButtonText}>{t('checkOrder')} {'\u2713'}</Text>
+              <Text style={styles.checkButtonText}>{t('checkOrder')} <EmojiText>{'\u2713'}</EmojiText></Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -368,6 +371,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.md,
+    flexShrink: 0,
   },
   sortNumberSelected: {
     backgroundColor: COLORS.primary,
@@ -395,6 +399,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     fontWeight: '500',
     lineHeight: 21,
+    flexShrink: 1,
   },
   actionRow: {
     flexDirection: 'row',
@@ -521,6 +526,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#2E7D32',
     fontWeight: '500',
+    flexShrink: 1,
   },
   celebrationButtons: {
     width: '100%',

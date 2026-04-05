@@ -10,14 +10,17 @@ import { ErrorBoundary } from '../packages/shared/components/ErrorBoundary';
 import { LanguageProvider } from '../constants/LanguageContext';
 import { SubscriptionProvider } from '../constants/SubscriptionContext';
 import { UsageProvider } from '../constants/UsageContext';
+import { StoryResultProvider } from '../constants/StoryResultContext';
 import { configureRevenueCat } from '../packages/shared/services/revenue-cat';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   useEffect(() => {
-    SplashScreen.hideAsync();
-    configureRevenueCat();
+    SplashScreen.hideAsync().catch(() => { /* splash already hidden */ });
+    configureRevenueCat().catch((err) => {
+      if (__DEV__) console.warn('[RootLayout] RevenueCat init failed:', err);
+    });
   }, []);
 
   return (
@@ -26,6 +29,7 @@ export default function RootLayout() {
       <LanguageProvider>
       <SubscriptionProvider>
       <UsageProvider>
+      <StoryResultProvider>
       <StatusBar style="dark" />
       <NetworkBanner />
       <Stack
@@ -45,6 +49,7 @@ export default function RootLayout() {
         />
         <Stack.Screen name="paywall" options={{ presentation: 'modal', headerShown: false, animation: 'slide_from_bottom' }} />
       </Stack>
+      </StoryResultProvider>
       </UsageProvider>
       </SubscriptionProvider>
       </LanguageProvider>

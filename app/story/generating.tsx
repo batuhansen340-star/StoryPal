@@ -13,6 +13,7 @@ import { useUsage } from '../../constants/UsageContext';
 import { CHARACTERS } from '../../apps/storypal/constants/themes';
 import { REGIONAL_CHARACTERS } from '../../apps/storypal/constants/regional-characters';
 import { CHARACTER_CATEGORIES } from '../../constants/modern-characters';
+import { useStoryResult } from '../../constants/StoryResultContext';
 
 export default function GeneratingScreen() {
   const insets = useSafeAreaInsets();
@@ -47,6 +48,7 @@ export default function GeneratingScreen() {
     generateFullStory,
     reset,
   } = useAI();
+  const { setStoryResult } = useStoryResult();
 
   useEffect(() => {
     if (!isPremium && !canCreateStory && !hasCheckedPaywall.current) {
@@ -67,42 +69,46 @@ export default function GeneratingScreen() {
         // ignore parse errors
       }
 
-      // Check modern characters first
-      const modernChar = CHARACTER_CATEGORIES
-        .flatMap(cat => cat.characters)
-        .find(c => c.id === characterId);
+      try {
+        // Check modern characters first
+        const modernChar = CHARACTER_CATEGORIES
+          .flatMap(cat => cat.characters)
+          .find(c => c.id === characterId);
 
-      if (modernChar) {
-        generateFullStory({
-          theme: themeId,
-          character: modernChar.name,
-          ageGroup: (ageGroup as AgeGroup) ?? '3-5',
-          language: language ?? storyLanguage,
-          personalization: parsedPersonalization,
-          customPrompt: customPrompt || undefined,
-          childName: childName || undefined,
-          childAge: childAge ? parseInt(childAge, 10) : undefined,
-          characterDescription: modernChar.storyHook,
-          characterVisualDesc: parsedPersonalization?.faceDescription
-            ?? modernChar.visualDesc,
-        });
-      } else {
-        const allChars = [...CHARACTERS, ...REGIONAL_CHARACTERS];
-        const charInfo = allChars.find(c => c.id === characterId);
+        if (modernChar) {
+          generateFullStory({
+            theme: themeId,
+            character: modernChar.name,
+            ageGroup: (ageGroup as AgeGroup) ?? '3-5',
+            language: language ?? storyLanguage,
+            personalization: parsedPersonalization,
+            customPrompt: customPrompt || undefined,
+            childName: childName || undefined,
+            childAge: childAge ? parseInt(childAge, 10) : undefined,
+            characterDescription: modernChar.storyHook,
+            characterVisualDesc: parsedPersonalization?.faceDescription
+              ?? modernChar.visualDesc,
+          });
+        } else {
+          const allChars = [...CHARACTERS, ...REGIONAL_CHARACTERS];
+          const charInfo = allChars.find(c => c.id === characterId);
 
-        generateFullStory({
-          theme: themeId,
-          character: charInfo?.name ?? characterId,
-          ageGroup: (ageGroup as AgeGroup) ?? '3-5',
-          language: language ?? storyLanguage,
-          personalization: parsedPersonalization,
-          customPrompt: customPrompt || undefined,
-          childName: childName || undefined,
-          childAge: childAge ? parseInt(childAge, 10) : undefined,
-          characterDescription: charInfo?.description,
-          characterVisualDesc: parsedPersonalization?.faceDescription
-            ?? charInfo?.description,
-        });
+          generateFullStory({
+            theme: themeId,
+            character: charInfo?.name ?? characterId,
+            ageGroup: (ageGroup as AgeGroup) ?? '3-5',
+            language: language ?? storyLanguage,
+            personalization: parsedPersonalization,
+            customPrompt: customPrompt || undefined,
+            childName: childName || undefined,
+            childAge: childAge ? parseInt(childAge, 10) : undefined,
+            characterDescription: charInfo?.description,
+            characterVisualDesc: parsedPersonalization?.faceDescription
+              ?? charInfo?.description,
+          });
+        }
+      } catch (err) {
+        console.error('[GeneratingScreen] Error calling generateFullStory:', err);
       }
     }
   }, [themeId, characterId, ageGroup]);
@@ -113,18 +119,25 @@ export default function GeneratingScreen() {
       if (!isPremium) {
         incrementUsage();
       }
+      try {
+        setStoryResult({
+          title: story.title,
+          pages: story.pages,
+          imageUrls,
+          coverUrl: coverUrl ?? '',
+          themeId: themeId ?? '',
+          characterId: characterId ?? '',
+          language: language ?? 'en',
+          voiceCharacterId: voiceCharacterId ?? '',
+        });
+      } catch (e) {
+        console.warn('[StoryResult] Failed to set story result:', e);
+      }
       const timer = setTimeout(() => {
         router.replace({
           pathname: '/story/viewer',
           params: {
-            title: story.title,
-            pages: JSON.stringify(story.pages),
-            imageUrls: JSON.stringify(imageUrls),
-            coverUrl: coverUrl ?? '',
-            themeId: themeId ?? '',
-            characterId: characterId ?? '',
-            language: language ?? 'en',
-            voiceCharacterId: voiceCharacterId ?? '',
+            fromContext: 'true',
           },
         });
       }, 600);
@@ -171,6 +184,7 @@ export default function GeneratingScreen() {
       totalSteps={totalSteps}
       currentStep={currentStep}
       status={status}
+      t={t}
     />
   );
 }

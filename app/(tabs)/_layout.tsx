@@ -2,7 +2,9 @@ import { Tabs } from 'expo-router';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { COLORS, RADIUS, SPACING } from '../../packages/shared/types';
+import { EmojiText } from '../../packages/shared/components/EmojiText';
 import { useLanguage } from '../../constants/LanguageContext';
+import { selection } from '../../packages/shared/services/haptics';
 
 interface TabIconProps {
   emoji: string;
@@ -13,9 +15,9 @@ interface TabIconProps {
 function TabIcon({ emoji, label, focused }: TabIconProps) {
   return (
     <View style={[styles.tabItem, focused && styles.tabItemFocused]}>
-      <Text style={[styles.tabEmoji, focused && styles.tabEmojiFocused]}>
+      <EmojiText style={[styles.tabEmoji, focused && styles.tabEmojiFocused]}>
         {emoji}
-      </Text>
+      </EmojiText>
       <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]}>
         {label}
       </Text>
@@ -37,6 +39,10 @@ export default function TabLayout() {
         tabBarShowLabel: false,
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.textMuted,
+        tabBarAccessibilityLabel: undefined,
+      }}
+      screenListeners={{
+        tabPress: () => { selection(); },
       }}
     >
       <Tabs.Screen

@@ -21,9 +21,10 @@ import {
   deleteStory,
   type SavedStory,
 } from '../../packages/shared/services/story-storage';
+import { EmojiText } from '../../packages/shared/components/EmojiText';
 import { EmptyState } from '../../packages/shared/components/EmptyState';
 import { SkeletonCard } from '../../packages/shared/components/SkeletonLoader';
-import { notification } from '../../packages/shared/services/haptics';
+import { notification, impact, selection } from '../../packages/shared/services/haptics';
 import { useLanguage } from '../../constants/LanguageContext';
 
 const { width } = Dimensions.get('window');
@@ -79,6 +80,7 @@ export default function LibraryScreen() {
   };
 
   const openStory = (story: SavedStory) => {
+    impact('light');
     router.push({
       pathname: '/story/viewer',
       params: {
@@ -116,7 +118,7 @@ export default function LibraryScreen() {
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.headerArea}>
-          <Text style={styles.title}>{t('myLibrary')} {'\u{1F4DA}'}</Text>
+          <Text style={styles.title}>{t('myLibrary')} <EmojiText>{'\u{1F4DA}'}</EmojiText></Text>
         </View>
         <View style={styles.skeletonGrid}>
           <SkeletonCard style={{ width: CARD_WIDTH }} />
@@ -133,7 +135,7 @@ export default function LibraryScreen() {
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <Animated.View entering={FadeInDown.duration(600)} style={styles.headerArea}>
-          <Text style={styles.title}>{t('myLibrary')} {'\u{1F4DA}'}</Text>
+          <Text style={styles.title}>{t('myLibrary')} <EmojiText>{'\u{1F4DA}'}</EmojiText></Text>
         </Animated.View>
         <EmptyState
           emoji={'\u{1F512}'}
@@ -151,7 +153,7 @@ export default function LibraryScreen() {
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <Animated.View entering={FadeInDown.duration(600)} style={styles.headerArea}>
-          <Text style={styles.title}>{t('myLibrary')} {'\u{1F4DA}'}</Text>
+          <Text style={styles.title}>{t('myLibrary')} <EmojiText>{'\u{1F4DA}'}</EmojiText></Text>
           <Text style={styles.subtitle}>0 {t('storiesCreated')}</Text>
         </Animated.View>
         <EmptyState
@@ -177,7 +179,7 @@ export default function LibraryScreen() {
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={
           <Animated.View entering={FadeInDown.duration(600)}>
-            <Text style={styles.title}>{t('myLibrary')} {'\u{1F4DA}'}</Text>
+            <Text style={styles.title}>{t('myLibrary')} <EmojiText>{'\u{1F4DA}'}</EmojiText></Text>
             <Text style={styles.subtitle}>
               {stories.length} {t('storiesCreated')}
             </Text>
@@ -190,8 +192,13 @@ export default function LibraryScreen() {
               style={styles.storyCard}
               activeOpacity={0.85}
               onPress={() => openStory(item)}
-              onLongPress={() => handleDelete(item.id, item.title)}
-              accessibilityLabel={item.title}
+              onLongPress={() => {
+                impact('medium');
+                handleDelete(item.id, item.title);
+              }}
+              accessibilityLabel={`${item.title} — ${item.character}`}
+              accessibilityRole="button"
+              accessibilityHint={t('longPressToDelete') ?? 'Long press to delete'}
             >
               <LinearGradient
                 colors={getThemeGradient(item.theme)}
@@ -199,9 +206,9 @@ export default function LibraryScreen() {
                 end={{ x: 1, y: 1 }}
                 style={styles.storyCardCover}
               >
-                <Text style={styles.storyEmoji}>
+                <EmojiText style={styles.storyEmoji}>
                   {getThemeEmoji(item.theme)}
-                </Text>
+                </EmojiText>
               </LinearGradient>
               <View style={styles.storyInfo}>
                 <Text style={styles.storyTitle} numberOfLines={2}>

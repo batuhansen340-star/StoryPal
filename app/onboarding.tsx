@@ -19,6 +19,7 @@ import * as Notifications from 'expo-notifications';
 import { setOnboardingDone } from '../packages/shared/services/auth';
 import { createChildProfile } from '../packages/shared/services/child-profiles';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../packages/shared/types';
+import { EmojiText } from '../packages/shared/components/EmojiText';
 import { useLanguage } from '../constants/LanguageContext';
 
 const { width, height } = Dimensions.get('window');
@@ -91,9 +92,9 @@ export default function OnboardingScreen() {
             style={styles.slideGradient}
           >
             <View style={styles.slideContent}>
-              <Animated.Text entering={FadeIn.duration(800)} style={styles.slideEmoji}>
-                📖
-              </Animated.Text>
+              <Animated.View entering={FadeIn.duration(800)}>
+                <EmojiText style={styles.slideEmoji}>📖</EmojiText>
+              </Animated.View>
               <Animated.Text entering={FadeInUp.duration(600).delay(200)} style={styles.slideTitle}>
                 {t('onboardingWelcome')}
               </Animated.Text>
@@ -103,7 +104,7 @@ export default function OnboardingScreen() {
               <Animated.View entering={FadeInUp.duration(600).delay(600)}>
                 <TouchableOpacity onPress={handleNext} activeOpacity={0.85}>
                   <LinearGradient
-                    colors={['rgba(255,255,255,0.35)', 'rgba(255,255,255,0.15)']}
+                    colors={['rgba(255,255,255,0.95)', 'rgba(255,255,255,0.85)']}
                     style={styles.startButton}
                   >
                     <Text style={styles.startButtonText}>{t('onboardingStart')}</Text>
@@ -129,7 +130,7 @@ export default function OnboardingScreen() {
               behavior={Platform.OS === 'ios' ? 'padding' : undefined}
               style={styles.slideContent}
             >
-              <Text style={styles.formEmoji}>🧒</Text>
+              <EmojiText style={styles.formEmoji}>🧒</EmojiText>
               <Text style={styles.formTitle}>{t('onboardingChildName')}</Text>
               <TextInput
                 style={styles.nameInput}
@@ -156,7 +157,7 @@ export default function OnboardingScreen() {
                     onPress={() => setAgeGroup(opt.key)}
                     activeOpacity={0.8}
                   >
-                    <Text style={styles.ageEmoji}>{opt.emoji}</Text>
+                    <EmojiText style={styles.ageEmoji}>{opt.emoji}</EmojiText>
                     <Text style={[
                       styles.ageLabel,
                       ageGroup === opt.key && styles.ageLabelSelected,
@@ -174,7 +175,7 @@ export default function OnboardingScreen() {
                 style={{ opacity: canProceedFromStep1 ? 1 : 0.5 }}
               >
                 <LinearGradient
-                  colors={['rgba(255,255,255,0.35)', 'rgba(255,255,255,0.15)']}
+                  colors={['rgba(255,255,255,0.95)', 'rgba(255,255,255,0.85)']}
                   style={styles.startButton}
                 >
                   <Text style={styles.startButtonText}>{t('next')}</Text>
@@ -199,9 +200,9 @@ export default function OnboardingScreen() {
             style={styles.slideGradient}
           >
             <View style={styles.slideContent}>
-              <Animated.Text entering={FadeIn.duration(800)} style={styles.slideEmoji}>
-                🎁
-              </Animated.Text>
+              <Animated.View entering={FadeIn.duration(800)}>
+                <EmojiText style={styles.slideEmoji}>🎁</EmojiText>
+              </Animated.View>
               <Animated.Text entering={FadeInUp.duration(600).delay(200)} style={styles.slideTitle}>
                 {giftTitle}
               </Animated.Text>
@@ -216,7 +217,7 @@ export default function OnboardingScreen() {
                   { icon: '🚀', key: 'onboardingGiftFeature3' as const },
                 ].map((f, i) => (
                   <View key={i} style={styles.featureItem}>
-                    <Text style={styles.featureItemIcon}>{f.icon}</Text>
+                    <EmojiText style={styles.featureItemIcon}>{f.icon}</EmojiText>
                     <Text style={styles.featureItemText}>{t(f.key as any)}</Text>
                   </View>
                 ))}
@@ -225,7 +226,7 @@ export default function OnboardingScreen() {
               <Animated.View entering={FadeInUp.duration(600).delay(700)}>
                 <TouchableOpacity onPress={handleNext} activeOpacity={0.85}>
                   <LinearGradient
-                    colors={['rgba(255,255,255,0.35)', 'rgba(255,255,255,0.15)']}
+                    colors={['rgba(255,255,255,0.95)', 'rgba(255,255,255,0.85)']}
                     style={styles.startButton}
                   >
                     <Text style={styles.startButtonText}>{t('next')}</Text>
@@ -248,9 +249,9 @@ export default function OnboardingScreen() {
           style={styles.slideGradient}
         >
           <View style={styles.slideContent}>
-            <Animated.Text entering={FadeIn.duration(800)} style={styles.slideEmoji}>
-              🔔
-            </Animated.Text>
+            <Animated.View entering={FadeIn.duration(800)}>
+              <EmojiText style={styles.slideEmoji}>🔔</EmojiText>
+            </Animated.View>
             <Animated.Text entering={FadeInUp.duration(600).delay(200)} style={styles.slideTitle}>
               {t('onboardingNotifTitle')}
             </Animated.Text>
@@ -261,7 +262,7 @@ export default function OnboardingScreen() {
             <Animated.View entering={FadeInUp.duration(600).delay(600)} style={styles.notifButtons}>
               <TouchableOpacity onPress={handleNotifAllow} activeOpacity={0.85}>
                 <LinearGradient
-                  colors={['rgba(255,255,255,0.35)', 'rgba(255,255,255,0.15)']}
+                  colors={['rgba(255,255,255,0.95)', 'rgba(255,255,255,0.85)']}
                   style={styles.startButton}
                 >
                   <Text style={styles.startButtonText}>{t('onboardingNotifAllow')}</Text>
@@ -367,14 +368,17 @@ const styles = StyleSheet.create({
   },
   startButton: {
     marginTop: SPACING.xl,
-    paddingVertical: SPACING.sm + 4,
-    paddingHorizontal: SPACING.xl + SPACING.md,
+    paddingVertical: SPACING.sm + 6,
+    paddingHorizontal: SPACING.xl + SPACING.lg,
     borderRadius: RADIUS.full,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.3)',
+    shadowColor: 'rgba(0,0,0,0.15)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    elevation: 4,
   },
   startButtonText: {
-    color: '#fff',
+    color: '#2D2D2D',
     fontSize: 18,
     fontWeight: '800',
   },

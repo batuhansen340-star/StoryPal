@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
+import { EmojiText } from '../../packages/shared/components/EmojiText';
 import { THEMES } from '../../apps/storypal/constants/themes';
 import { selection } from '../../packages/shared/services/haptics';
 import { useLanguage } from '../../constants/LanguageContext';
@@ -66,7 +67,7 @@ export default function SelectThemeScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>{t('pickTheme')} 🎨</Text>
+          <Text style={styles.title}>{t('pickTheme')} <EmojiText>🎨</EmojiText></Text>
           <Text style={styles.subtitle}>
             {t('themeSubtitle')}
           </Text>
@@ -81,7 +82,7 @@ export default function SelectThemeScreen() {
               end={{ x: 1, y: 1 }}
               style={styles.customIdeaCard}
             >
-              <Text style={styles.customIdeaEmoji}>{'\u{1FA84}'}</Text>
+              <EmojiText style={styles.customIdeaEmoji}>{'\u{1FA84}'}</EmojiText>
               <View style={styles.customIdeaContent}>
                 <Text style={styles.customIdeaTitle}>{t('yourIdea')}</Text>
                 <Text style={styles.customIdeaDesc}>{t('writeOwnIdea')}</Text>
@@ -108,9 +109,9 @@ export default function SelectThemeScreen() {
                   end={{ x: 1, y: 1 }}
                   style={styles.themeCard}
                 >
-                  <Text style={styles.themeEmoji}>{theme.emoji}</Text>
-                  <Text style={styles.themeName}>{theme.name}</Text>
-                  <Text style={styles.themeDesc}>{theme.description}</Text>
+                  <EmojiText style={styles.themeEmoji}>{theme.emoji}</EmojiText>
+                  <Text style={styles.themeName}>{theme.nameKey ? t(theme.nameKey as any) : theme.name}</Text>
+                  <Text style={styles.themeDesc}>{theme.descKey ? t(theme.descKey as any) : theme.description}</Text>
                 </LinearGradient>
               </TouchableOpacity>
             </Animated.View>

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../types';
+import { EmojiText } from './EmojiText';
 
 interface EmptyStateProps {
   emoji: string;
@@ -15,7 +16,7 @@ interface EmptyStateProps {
 export function EmptyState({ emoji, title, subtitle, buttonText, onPress }: EmptyStateProps) {
   return (
     <Animated.View entering={FadeInDown.duration(600)} style={styles.container}>
-      <Text style={styles.emoji}>{emoji}</Text>
+      <EmojiText style={styles.emoji}>{emoji}</EmojiText>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>
       {buttonText && onPress && (

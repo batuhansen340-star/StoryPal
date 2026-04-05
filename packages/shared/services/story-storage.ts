@@ -3,6 +3,25 @@ import { supabase } from './supabase';
 
 const LOCAL_STORIES_KEY = 'storypal_saved_stories';
 
+// Supabase row shapes for type safety
+interface SupabaseStoryRow {
+  id: string;
+  title: string;
+  theme: string;
+  character: string;
+  language: string | null;
+  cover_image_url: string | null;
+  created_at: string;
+  story_pages?: SupabasePageRow[];
+}
+
+interface SupabasePageRow {
+  page_number: number;
+  text: string;
+  image_url: string | null;
+  image_prompt: string | null;
+}
+
 export interface SavedStory {
   id: string;
   title: string;
@@ -80,29 +99,27 @@ export async function getSavedStories(): Promise<SavedStory[]> {
       return local;
     }
 
-    const supabaseStories: SavedStory[] = data.map((s: Record<string, unknown>) => {
-      const sortedPages = ((s.story_pages as Record<string, unknown>[]) ?? [])
-        .sort((a: Record<string, unknown>, b: Record<string, unknown>) =>
-          (a.page_number as number) - (b.page_number as number)
-        );
+    const supabaseStories: SavedStory[] = (data as SupabaseStoryRow[]).map((s) => {
+      const sortedPages = (s.story_pages ?? [])
+        .sort((a, b) => a.page_number - b.page_number);
 
-      const pagesArr = sortedPages.map((p: Record<string, unknown>) => ({
-        text: p.text as string,
-        imagePrompt: (p.image_prompt as string) ?? '',
+      const pagesArr = sortedPages.map((p) => ({
+        text: p.text,
+        imagePrompt: p.image_prompt ?? '',
       }));
 
-      const imgUrls = sortedPages.map((p: Record<string, unknown>) => (p.image_url as string) ?? '');
+      const imgUrls = sortedPages.map((p) => p.image_url ?? '');
 
       return {
-        id: s.id as string,
-        title: s.title as string,
-        theme: s.theme as string,
-        character: s.character as string,
-        language: (s.language as string) ?? 'en',
+        id: s.id,
+        title: s.title,
+        theme: s.theme,
+        character: s.character,
+        language: s.language ?? 'en',
         pages: JSON.stringify(pagesArr),
         imageUrls: JSON.stringify(imgUrls),
-        coverUrl: (s.cover_image_url as string) ?? '',
-        createdAt: s.created_at as string,
+        coverUrl: s.cover_image_url ?? '',
+        createdAt: s.created_at,
       };
     });
 
@@ -219,17 +236,16 @@ export async function getStoryById(id: string): Promise<SavedStory | null> {
     if (error) throw error;
     if (!data) return null;
 
-    const sortedPages = ((data.story_pages as Record<string, unknown>[]) ?? [])
-      .sort((a: Record<string, unknown>, b: Record<string, unknown>) =>
-        (a.page_number as number) - (b.page_number as number)
-      );
+    const storyRow = data as SupabaseStoryRow;
+    const sortedPages = (storyRow.story_pages ?? [])
+      .sort((a, b) => a.page_number - b.page_number);
 
-    const pagesArr = sortedPages.map((p: Record<string, unknown>) => ({
-      text: p.text as string,
-      imagePrompt: (p.image_prompt as string) ?? '',
+    const pagesArr = sortedPages.map((p) => ({
+      text: p.text,
+      imagePrompt: p.image_prompt ?? '',
     }));
 
-    const imgUrls = sortedPages.map((p: Record<string, unknown>) => (p.image_url as string) ?? '');
+    const imgUrls = sortedPages.map((p) => p.image_url ?? '');
 
     return {
       id: data.id,

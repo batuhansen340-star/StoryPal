@@ -10,9 +10,11 @@ export interface AgeGroupConfig {
 export interface Theme {
   id: string;
   name: string;
+  nameKey?: string;
   emoji: string;
   gradient: [string, string];
   description: string;
+  descKey?: string;
 }
 
 export interface Character {
@@ -20,6 +22,7 @@ export interface Character {
   name: string;
   emoji: string;
   trait: string;
+  traitKey?: string;
   description: string;
   region?: string;
 }
@@ -114,8 +117,10 @@ export interface CharacterSheet {
 export interface VoiceCharacter {
   id: string;
   name: string;
+  nameKey?: string;
   emoji: string;
   description: string;
+  descKey?: string;
   pitch: number;
   rate: number;
   gradient: [string, string];

@@ -33,11 +33,13 @@ export default function WordHuntScreen() {
 
   const storyPages: string[] = (() => {
     try {
-      const parsed = JSON.parse(params.pages ?? '[]');
-      return parsed.map((p: string | { text: string }) =>
+      const pagesParsed = JSON.parse(params.pages ?? '[]');
+      if (!Array.isArray(pagesParsed)) return [];
+      return pagesParsed.map((p: string | { text: string }) =>
         typeof p === 'string' ? p : p.text
       );
-    } catch {
+    } catch (err) {
+      console.warn('[WordHuntScreen] Failed to parse pages:', err);
       return [];
     }
   })();
@@ -394,6 +396,7 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     textTransform: 'uppercase',
     letterSpacing: 1,
+    flexShrink: 1,
   },
   wordChipTextFound: {
     color: '#2E7D32',

@@ -17,48 +17,50 @@ import Animated, {
   interpolate,
 } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../types';
+import { EmojiText } from './EmojiText';
 
 const { width, height } = Dimensions.get('window');
 
 interface OnboardingSlide {
   emoji: string;
-  title: string;
-  description: string;
+  titleKey: string;
+  descriptionKey: string;
   gradient: [string, string];
 }
 
-const SLIDES: OnboardingSlide[] = [
+interface OnboardingFlowProps {
+  onComplete: () => void;
+  t?: (key: string) => string;
+}
+
+const SLIDE_KEYS: OnboardingSlide[] = [
   {
     emoji: '📚',
-    title: 'Welcome to StoryPal!',
-    description: 'Create magical stories for your little ones with the power of AI',
+    titleKey: 'onboardingWelcome',
+    descriptionKey: 'onboardingWelcomeSubtitle',
     gradient: GRADIENTS.primary,
   },
   {
     emoji: '🎨',
-    title: 'Pick a Theme & Character',
-    description: 'Choose from enchanting themes like space, ocean, or fairy tales and adorable characters',
+    titleKey: 'pickTheme',
+    descriptionKey: 'characterSubtitle',
     gradient: GRADIENTS.accent,
   },
   {
     emoji: '✨',
-    title: 'AI Creates Your Story',
-    description: 'Our AI writes a unique story and generates beautiful illustrations just for you',
+    titleKey: 'aiStoriesTitle',
+    descriptionKey: 'aiStoriesSubtitle',
     gradient: ['#A18CD1', '#FBC2EB'],
   },
   {
     emoji: '📖',
-    title: 'Read & Share',
-    description: 'Enjoy your personalized storybook and share magical moments together',
+    titleKey: 'readyTitle',
+    descriptionKey: 'readySubtitle',
     gradient: ['#FF6B6B', '#FFE66D'],
   },
 ];
 
-interface OnboardingFlowProps {
-  onComplete: () => void;
-}
-
-export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
+export function OnboardingFlow({ onComplete, t }: OnboardingFlowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const slideAnimation = useSharedValue(0);
@@ -73,7 +75,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
 
   const handleNext = () => {
-    if (currentIndex < SLIDES.length - 1) {
+    if (currentIndex < SLIDE_KEYS.length - 1) {
       flatListRef.current?.scrollToIndex({ index: currentIndex + 1 });
     } else {
       onComplete();
@@ -88,10 +90,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         end={{ x: 1, y: 1 }}
         style={styles.emojiContainer}
       >
-        <Text style={styles.emoji}>{item.emoji}</Text>
+        <EmojiText style={styles.emoji}>{item.emoji}</EmojiText>
       </LinearGradient>
-      <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.description}>{item.description}</Text>
+      <Text style={styles.title}>{t ? t(item.titleKey) : item.titleKey}</Text>
+      <Text style={styles.description}>{t ? t(item.descriptionKey) : item.descriptionKey}</Text>
     </View>
   );
 
@@ -104,7 +106,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     <View style={styles.container}>
       <FlatList
         ref={flatListRef}
-        data={SLIDES}
+        data={SLIDE_KEYS}
         renderItem={renderSlide}
         horizontal
         pagingEnabled
@@ -116,7 +118,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
       <View style={styles.footer}>
         <View style={styles.dots}>
-          {SLIDES.map((_, i) => (
+          {SLIDE_KEYS.map((_, i) => (
             <View
               key={i}
               style={[
@@ -140,15 +142,15 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               style={styles.nextButtonGradient}
             >
               <Text style={styles.nextButtonText}>
-                {currentIndex === SLIDES.length - 1 ? "Let's Go!" : 'Next'}
+                {currentIndex === SLIDE_KEYS.length - 1 ? (t ? t('onboardingStart') : "Let's Go!") : (t ? t('next') : 'Next')}
               </Text>
             </LinearGradient>
           </TouchableOpacity>
         </Animated.View>
 
-        {currentIndex < SLIDES.length - 1 && (
+        {currentIndex < SLIDE_KEYS.length - 1 && (
           <TouchableOpacity style={styles.skipButton} onPress={onComplete}>
-            <Text style={styles.skipText}>Skip</Text>
+            <Text style={styles.skipText}>{t ? t('skip') : 'Skip'}</Text>
           </TouchableOpacity>
         )}
       </View>

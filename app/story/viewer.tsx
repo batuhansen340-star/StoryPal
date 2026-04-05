@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useReducer, useMemo } from 'react';
 import {
   View,
   Text,
@@ -31,6 +31,8 @@ import { Share } from 'react-native';
 import { useLanguage } from '../../constants/LanguageContext';
 import { useSubscriptionContext } from '../../constants/SubscriptionContext';
 import { useUsage } from '../../constants/UsageContext';
+import { useStoryResult } from '../../constants/StoryResultContext';
+import { impact, selection } from '../../packages/shared/services/haptics';
 
 const initialDims = Dimensions.get('window');
 
@@ -61,7 +63,10 @@ export default function ViewerScreen() {
     language?: string;
     voiceCharacterId?: string;
     savedStoryId?: string;
+    fromContext?: string;
   }>();
+
+  const { storyResult, clearStoryResult } = useStoryResult();
 
   const [dims, setDims] = useState(initialDims);
   const [currentPage, setCurrentPage] = useState(0);
@@ -73,26 +78,41 @@ export default function ViewerScreen() {
   const [showSweetDreams, setShowSweetDreams] = useState(false);
   const [useParentVoice, setUseParentVoice] = useState(false);
   const [hasParentRecording, setHasParentRecording] = useState(false);
-  const [isLoadingSaved, setIsLoadingSaved] = useState(!!params.savedStoryId && !params.pages);
+  const [isLoadingSaved, setIsLoadingSaved] = useState(!!params.savedStoryId && !params.pages && !storyResult);
   const [isExporting, setIsExporting] = useState(false);
+  const [storyRating, setStoryRating] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const autoPlayRef = useRef(false);
   const soundRef = useRef<AudioPlayer | null>(null);
   const hasSaved = useRef(false);
 
-  // Story data as state — initialized from params, updated from storage for saved stories
-  const [title, setTitle] = useState(params.title ?? 'My Story');
-  const [themeId, setThemeId] = useState(params.themeId ?? 'space');
-  const [languageCode, setLanguageCode] = useState(params.language ?? 'en');
+  // Story data — prefer context (no URL size limit), fall back to params, then saved story
+  const [title, setTitle] = useState(() => {
+    if (params.fromContext === 'true' && storyResult) return storyResult.title;
+    return params.title ?? 'My Story';
+  });
+  const [themeId, setThemeId] = useState(() => {
+    if (params.fromContext === 'true' && storyResult) return storyResult.themeId;
+    return params.themeId ?? 'space';
+  });
+  const [languageCode, setLanguageCode] = useState(() => {
+    if (params.fromContext === 'true' && storyResult) return storyResult.language;
+    return params.language ?? 'en';
+  });
   const [pages, setPages] = useState<StoryPageData[]>(() => {
+    if (params.fromContext === 'true' && storyResult) return storyResult.pages;
     try { return params.pages ? JSON.parse(params.pages) : []; }
     catch { return []; }
   });
   const [imageUrls, setImageUrls] = useState<string[]>(() => {
+    if (params.fromContext === 'true' && storyResult) return storyResult.imageUrls;
     try { return params.imageUrls ? JSON.parse(params.imageUrls) : []; }
     catch { return []; }
   });
-  const [coverUrl, setCoverUrl] = useState(params.coverUrl ?? '');
+  const [coverUrl, setCoverUrl] = useState(() => {
+    if (params.fromContext === 'true' && storyResult) return storyResult.coverUrl;
+    return params.coverUrl ?? '';
+  });
 
   const voiceCharacterId = params.voiceCharacterId;
   const voiceCharacter = voiceCharacterId ? getVoiceCharacterById(voiceCharacterId) : undefined;
@@ -157,7 +177,9 @@ export default function ViewerScreen() {
         pages: params.pages,
         imageUrls: params.imageUrls ?? '[]',
         coverUrl: coverUrl,
-      }).catch(() => {});
+      }).catch((err) => {
+        if (__DEV__) console.warn('[Viewer] Story save failed:', err);
+      });
     }
   }, [params.savedStoryId, params.pages, params.title]);
 
@@ -204,7 +226,9 @@ export default function ViewerScreen() {
           setIsSpeaking(false);
           if (autoPlayRef.current && pageIndex < allPages.length - 1) {
             setTimeout(() => {
-              flatListRef.current?.scrollToIndex({ index: pageIndex + 1 });
+              if (pageIndex + 1 >= 0 && pageIndex + 1 < allPages.length) {
+                flatListRef.current?.scrollToIndex({ index: pageIndex + 1 });
+              }
             }, 800);
           }
         }
@@ -242,7 +266,9 @@ export default function ViewerScreen() {
           if (currentPageData?.choices && currentPageData.choices.length > 0) return;
 
           setTimeout(() => {
-            flatListRef.current?.scrollToIndex({ index: pageIndex + 1 });
+            if (pageIndex + 1 >= 0 && pageIndex + 1 < allPages.length) {
+              flatListRef.current?.scrollToIndex({ index: pageIndex + 1 });
+            }
           }, 800);
         } else if (autoPlayRef.current && pageIndex === allPages.length - 1 && bedtimeMode) {
           setShowSweetDreams(true);
@@ -258,6 +284,7 @@ export default function ViewerScreen() {
   }, [currentPage, autoPlay]);
 
   const handlePlayPause = async () => {
+    impact('light');
     if (isSpeaking) {
       await stopTTS();
       if (soundRef.current) {
@@ -271,33 +298,46 @@ export default function ViewerScreen() {
 
   const goToNext = () => {
     if (currentPage < allPages.length - 1) {
+      selection();
       stopTTS();
-      flatListRef.current?.scrollToIndex({ index: currentPage + 1 });
+      const nextIndex = currentPage + 1;
+      if (nextIndex >= 0 && nextIndex < allPages.length) {
+        flatListRef.current?.scrollToIndex({ index: nextIndex });
+      }
     }
   };
 
   const goToPrev = () => {
     if (currentPage > 0) {
+      selection();
       stopTTS();
-      flatListRef.current?.scrollToIndex({ index: currentPage - 1 });
+      const prevIndex = currentPage - 1;
+      if (prevIndex >= 0 && prevIndex < allPages.length) {
+        flatListRef.current?.scrollToIndex({ index: prevIndex });
+      }
     }
   };
 
   const cycleSpeed = () => {
+    selection();
     const speeds: TTSSpeed[] = ['slow', 'normal', 'fast'];
     const idx = speeds.indexOf(ttsSpeed);
     setTtsSpeed(speeds[(idx + 1) % speeds.length]);
   };
 
   const toggleBedtime = () => {
+    impact('medium');
     setBedtimeMode(prev => !prev);
     setShowSweetDreams(false);
   };
 
   const handleChoice = (choice: StoryChoice) => {
+    impact('light');
     stopTTS();
-    const safeIndex = Math.min(choice.nextPageIndex + 1, allPages.length - 1); // +1 for cover
-    flatListRef.current?.scrollToIndex({ index: safeIndex });
+    const safeIndex = Math.min(choice.nextPageIndex + 1, allPages.length - 1);
+    if (safeIndex >= 0 && safeIndex < allPages.length) {
+      flatListRef.current?.scrollToIndex({ index: safeIndex });
+    }
   };
 
   const handleRecordVoice = () => {
@@ -338,8 +378,16 @@ export default function ViewerScreen() {
   const currentPageData = allPages[currentPage];
   const hasChoices = currentPageData?.choices && currentPageData.choices.length > 0;
 
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
+
+  const handleImageError = useCallback((pageIndex: number) => {
+    setFailedImages(prev => new Set(prev).add(pageIndex));
+  }, []);
+
   const renderPage = ({ item, index }: { item: typeof allPages[0]; index: number }) => {
     const isCover = item.type === 'cover';
+    const hasImageFailed = failedImages.has(index);
+    const hasValidImage = item.imageUrl && !hasImageFailed;
 
     return (
       <View style={[styles.page, { width: dims.width, height: dims.height }]}>
@@ -347,12 +395,13 @@ export default function ViewerScreen() {
           colors={isCover ? (themeGradient as [string, string]) : (bgColors as [string, string])}
           style={styles.pageGradient}
         >
-          {item.imageUrl ? (
+          {hasValidImage ? (
             <Animated.View entering={FadeIn.duration(600)} style={styles.imageContainer}>
               <Image
                 source={{ uri: item.imageUrl }}
                 style={styles.pageImage}
                 resizeMode="cover"
+                onError={() => handleImageError(index)}
               />
               <LinearGradient
                 colors={['transparent', bedtimeMode ? 'rgba(26,26,46,0.8)' : 'rgba(0,0,0,0.6)']}
@@ -392,10 +441,13 @@ export default function ViewerScreen() {
                   styles.storyTextCard,
                   bedtimeMode && styles.storyTextCardBedtime,
                 ]}>
-                  <Text style={[
-                    styles.storyText,
-                    bedtimeMode && styles.storyTextBedtime,
-                  ]}>
+                  <Text
+                    style={[
+                      styles.storyText,
+                      bedtimeMode && styles.storyTextBedtime,
+                    ]}
+                    numberOfLines={10}
+                  >
                     {item.text}
                   </Text>
                 </View>
@@ -411,6 +463,7 @@ export default function ViewerScreen() {
                         <TouchableOpacity
                           activeOpacity={0.85}
                           onPress={() => handleChoice(choice)}
+                          style={styles.choiceButtonContainer}
                         >
                           <LinearGradient
                             colors={
@@ -423,7 +476,13 @@ export default function ViewerScreen() {
                             style={styles.choiceButton}
                           >
                             <Text style={styles.choiceEmoji}>{choice.emoji}</Text>
-                            <Text style={styles.choiceText}>{choice.text}</Text>
+                            <Text
+                              style={styles.choiceText}
+                              numberOfLines={2}
+                              ellipsizeMode="tail"
+                            >
+                              {choice.text}
+                            </Text>
                           </LinearGradient>
                         </TouchableOpacity>
                       </React.Fragment>
@@ -498,13 +557,19 @@ export default function ViewerScreen() {
       <View style={[styles.navBar, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity
           style={[styles.navButton, bedtimeMode && styles.navButtonBedtime]}
-          onPress={() => { stopTTS(); router.replace('/(tabs)'); }}
+          onPress={() => { impact('light'); stopTTS(); router.replace('/(tabs)'); }}
           activeOpacity={0.7}
+          accessibilityLabel={t('close')}
+          accessibilityRole="button"
         >
           <Text style={styles.navButtonText}>{'\u2715'}</Text>
         </TouchableOpacity>
 
-        <View style={[styles.pageIndicator, bedtimeMode && styles.pageIndicatorBedtime]}>
+        <View
+          style={[styles.pageIndicator, bedtimeMode && styles.pageIndicatorBedtime]}
+          accessibilityLabel={`${t('page') ?? 'Page'} ${currentPage + 1} / ${allPages.length}`}
+          accessibilityRole="text"
+        >
           <Text style={styles.pageIndicatorText}>
             {currentPage + 1} / {allPages.length}
           </Text>
@@ -512,8 +577,10 @@ export default function ViewerScreen() {
 
         <TouchableOpacity
           style={[styles.navButton, bedtimeMode && styles.navButtonBedtime]}
-          onPress={() => setShowControls(!showControls)}
+          onPress={() => { selection(); setShowControls(!showControls); }}
           activeOpacity={0.7}
+          accessibilityLabel={showControls ? t('hideControls') ?? 'Hide controls' : t('showControls') ?? 'Show controls'}
+          accessibilityRole="button"
         >
           <Text style={styles.navButtonText}>{'\u{1F3B5}'}</Text>
         </TouchableOpacity>
@@ -529,9 +596,9 @@ export default function ViewerScreen() {
           {voiceCharacter && (
             <>
               <View style={styles.controlRow}>
-                <Text style={styles.controlEmoji}>{voiceCharacter.emoji}</Text>
+                <Text style={styles.controlEmoji}>{voiceCharacter?.emoji}</Text>
                 <Text style={[styles.controlLabel, bedtimeMode && styles.controlLabelBedtime]}>
-                  {voiceCharacter.name}
+                  {voiceCharacter?.name}
                 </Text>
               </View>
               <View style={styles.controlDivider} />
@@ -646,6 +713,8 @@ export default function ViewerScreen() {
             style={[styles.arrowButton, bedtimeMode && styles.arrowButtonBedtime]}
             onPress={goToPrev}
             activeOpacity={0.8}
+            accessibilityLabel={t('previousPage') ?? 'Previous page'}
+            accessibilityRole="button"
           >
             <Text style={styles.arrowText}>{'\u2190'}</Text>
           </TouchableOpacity>
@@ -658,6 +727,8 @@ export default function ViewerScreen() {
           style={styles.playButton}
           onPress={handlePlayPause}
           activeOpacity={0.85}
+          accessibilityLabel={isSpeaking ? t('pause') ?? 'Pause' : t('play') ?? 'Play'}
+          accessibilityRole="button"
         >
           <LinearGradient
             colors={bedtimeMode ? ['#0f3460', '#1a1a2e'] : GRADIENTS.primary}
@@ -691,6 +762,8 @@ export default function ViewerScreen() {
               style={[styles.arrowButton, bedtimeMode && styles.arrowButtonBedtime]}
               onPress={goToNext}
               activeOpacity={0.8}
+              accessibilityLabel={t('nextPage') ?? 'Next page'}
+              accessibilityRole="button"
             >
               <Text style={styles.arrowText}>{'\u2192'}</Text>
             </TouchableOpacity>
@@ -752,6 +825,30 @@ export default function ViewerScreen() {
               <Text style={styles.finishedTitle}>
                 {t('storyFinishedTitle').replace('{name}', title || 'Story')}
               </Text>
+
+              {/* Star Rating */}
+              <View style={styles.ratingContainer}>
+                <Text style={styles.ratingLabel}>{t('rateStory') ?? 'How was this story?'}</Text>
+                <View style={styles.starsRow}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <TouchableOpacity
+                      key={star}
+                      onPress={() => {
+                        selection();
+                        setStoryRating(star);
+                      }}
+                      activeOpacity={0.7}
+                      accessibilityLabel={`${star} ${star === 1 ? 'star' : 'stars'}`}
+                      accessibilityRole="button"
+                    >
+                      <Text style={[styles.starIcon, star <= storyRating && styles.starIconActive]}>
+                        {star <= storyRating ? '\u2B50' : '\u2606'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={() => {
@@ -815,11 +912,12 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+    borderRadius: 16,
   },
   pageImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 16,
   },
   imageOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -890,6 +988,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 12,
     elevation: 4,
+    maxHeight: initialDims.height * 0.35,
   },
   storyTextCardBedtime: {
     backgroundColor: 'rgba(15, 52, 96, 0.85)',
@@ -901,6 +1000,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     lineHeight: 32,
     textAlign: 'center',
+    flexShrink: 1,
   },
   storyTextBedtime: {
     color: BEDTIME_TEXT,
@@ -912,6 +1012,9 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
     alignItems: 'center',
   },
+  choiceButtonContainer: {
+    maxWidth: initialDims.width * 0.8,
+  },
   choiceButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -919,6 +1022,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     borderRadius: RADIUS.lg,
     minWidth: initialDims.width * 0.65,
+    maxWidth: initialDims.width * 0.8,
     shadowColor: 'rgba(0,0,0,0.2)',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
@@ -928,11 +1032,14 @@ const styles = StyleSheet.create({
   choiceEmoji: {
     fontSize: 24,
     marginRight: SPACING.md,
+    flexShrink: 0,
   },
   choiceText: {
+    flex: 1,
     fontSize: 16,
     fontWeight: '800',
     color: '#fff',
+    flexWrap: 'wrap',
   },
   choiceOr: {
     fontSize: 13,
@@ -1221,6 +1328,27 @@ const styles = StyleSheet.create({
   finishedContent: {
     alignItems: 'center',
     gap: SPACING.md,
+  },
+  ratingContainer: {
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  ratingLabel: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.6)',
+    fontWeight: '600',
+    marginBottom: SPACING.sm,
+  },
+  starsRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+  },
+  starIcon: {
+    fontSize: 32,
+    color: 'rgba(255,255,255,0.3)',
+  },
+  starIconActive: {
+    color: '#FFD700',
   },
   finishedTitle: {
     fontSize: 26,

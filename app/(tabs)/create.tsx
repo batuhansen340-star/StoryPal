@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
+import { EmojiText } from '../../packages/shared/components/EmojiText';
 import { AGE_GROUPS } from '../../apps/storypal/constants/themes';
 import type { AgeGroup } from '../../packages/shared/types';
 import { usePremium } from '../../packages/shared/hooks/usePremium';
@@ -58,7 +59,7 @@ export default function CreateScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>{t('createStory')} ✨</Text>
+          <Text style={styles.title}>{t('createStory')} <EmojiText>✨</EmojiText></Text>
           <Text style={styles.subtitle}>
             {t('chooseAgeGroup')}
           </Text>
@@ -83,9 +84,9 @@ export default function CreateScreen() {
                     end={{ x: 1, y: 1 }}
                     style={styles.ageCard}
                   >
-                    <Text style={styles.ageEmoji}>
+                    <EmojiText style={styles.ageEmoji}>
                       {AGE_GROUP_EMOJIS[key]}
-                    </Text>
+                    </EmojiText>
                     <View style={styles.ageInfo}>
                       <Text style={styles.ageLabel}>{key === '3-5' ? t('ageLabel35') : key === '5-7' ? t('ageLabel57') : t('ageLabel710')}</Text>
                       <Text style={styles.ageDesc}>{key === '3-5' ? t('ageDesc35') : key === '5-7' ? t('ageDesc57') : t('ageDesc710')}</Text>
@@ -115,7 +116,7 @@ export default function CreateScreen() {
           style={styles.tipCard}
         >
           <View style={styles.tipGlass}>
-            <Text style={styles.tipEmoji}>💡</Text>
+            <EmojiText style={styles.tipEmoji}>💡</EmojiText>
             <Text style={styles.tipText}>
               {t('ageTip')}
             </Text>
@@ -126,7 +127,7 @@ export default function CreateScreen() {
         {!isPremium && (
           <Animated.View entering={FadeInDown.duration(400).delay(600)} style={styles.usageCard}>
             <View style={styles.usageGlass}>
-              <Text style={styles.usageEmoji}>{canCreate ? '\u{1F4A1}' : '\u{1F512}'}</Text>
+              <EmojiText style={styles.usageEmoji}>{canCreate ? '\u{1F4A1}' : '\u{1F512}'}</EmojiText>
               <View style={{ flex: 1 }}>
                 <Text style={styles.usageText}>
                   {canCreate
@@ -143,7 +144,7 @@ export default function CreateScreen() {
                   onPress={() => setShowPaywall(true)}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.upgradeBadgeText}>{'\u{1F451}'} {t('upgrade')}</Text>
+                  <Text style={styles.upgradeBadgeText}><EmojiText>{'\u{1F451}'}</EmojiText> {t('upgrade')}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -156,7 +157,7 @@ export default function CreateScreen() {
       {/* Paywall Modal */}
       <Modal visible={showPaywall} animationType="slide">
         <PaywallScreen
-          t={t}
+          t={t as (key: string) => string}
           onClose={() => setShowPaywall(false)}
           onSuccess={() => {
             setShowPaywall(false);

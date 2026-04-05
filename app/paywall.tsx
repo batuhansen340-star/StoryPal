@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS } from '../packages/shared/types';
+import { EmojiText } from '../packages/shared/components/EmojiText';
 import { useLanguage } from '../constants/LanguageContext';
 import { useSubscriptionContext } from '../constants/SubscriptionContext';
 
@@ -24,7 +25,7 @@ interface TierData {
   nameKey: string;
   price: string;
   descKey: string;
-  features: string[];
+  featureKeys: string[];
   highlighted: boolean;
   badgeKey?: string;
   borderColor: string;
@@ -37,7 +38,7 @@ const TIERS: TierData[] = [
     nameKey: 'tierStarter',
     price: '$2.99',
     descKey: 'tierStarterDesc',
-    features: ['3 stories/day', '30 characters', '2 voices', '5 languages', 'Quiz'],
+    featureKeys: ['threeStories', 'thirtyCharacters', 'twoVoices', 'fiveLanguages', 'quiz'],
     highlighted: false,
     borderColor: '#E0E0E0',
   },
@@ -47,7 +48,7 @@ const TIERS: TierData[] = [
     nameKey: 'tierHero',
     price: '$4.99',
     descKey: 'tierHeroDesc',
-    features: ['Unlimited stories', '62 characters', '\u{1F4F8} Photo hero', '6 voices', '10 languages', '3 games', 'Unlimited library'],
+    featureKeys: ['unlimitedStories', 'allCharacters', 'photoCharacter', 'allVoices', 'allLanguages', 'allGames', 'unlimitedLibrary'],
     highlighted: true,
     badgeKey: 'mostPopular',
     borderColor: '#F39C12',
@@ -58,7 +59,7 @@ const TIERS: TierData[] = [
     nameKey: 'tierFamily',
     price: '$9.99',
     descKey: 'tierFamilyDesc',
-    features: ['Everything in Hero', '3 kid profiles', 'Bedtime mode'],
+    featureKeys: ['everythingHero', 'threeProfiles', 'sleepMode'],
     highlighted: false,
     borderColor: '#E0E0E0',
   },
@@ -99,7 +100,7 @@ export default function PaywallScreen() {
         >
           {/* Header */}
           <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
-            <Text style={styles.headerEmoji}>{'\u2728'}</Text>
+            <EmojiText style={styles.headerEmoji}>{'\u2728'}</EmojiText>
             <Text style={styles.title}>{paywallTitle}</Text>
             <Text style={styles.subtitle}>{t('paywallSubtitle')}</Text>
           </Animated.View>
@@ -135,12 +136,12 @@ export default function PaywallScreen() {
                         <Text style={styles.badgeText}>{t(tier.badgeKey as any)}</Text>
                       </View>
                     )}
-                    <Text style={styles.tierEmoji}>{tier.emoji}</Text>
+                    <EmojiText style={styles.tierEmoji}>{tier.emoji}</EmojiText>
                     <Text style={styles.tierName}>{t(tier.nameKey as any)}</Text>
                     <Text style={styles.tierPrice}>{tier.price}<Text style={styles.tierPeriod}>{t('perMonth')}</Text></Text>
                     <View style={styles.tierFeatures}>
-                      {tier.features.map((f, i) => (
-                        <Text key={i} style={styles.tierFeature}>{'\u2713'} {f}</Text>
+                      {tier.featureKeys.map((key, i) => (
+                        <Text key={i} style={styles.tierFeature}><EmojiText>{'\u2713'}</EmojiText> {t(key as any)}</Text>
                       ))}
                     </View>
                   </TouchableOpacity>

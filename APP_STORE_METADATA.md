@@ -51,13 +51,13 @@ Download StoryPal and create magical memories tonight!
 Create personalized AI storybooks for your kids! 10 themes, 10 characters, 10 languages. Beautiful illustrations in minutes. Try 2 free stories today!
 
 ## Privacy Policy URL
-https://storypal.app/privacy
+https://batuhansen340-star.github.io/storypal-privacy/
 
 ## Support URL
-https://storypal.app/support
+https://batuhansen340-star.github.io/storypal-privacy/
 
 ## Marketing URL
-https://storypal.app
+https://batuhansen340-star.github.io/storypal-privacy/
 
 ## Age Rating
 - Made for Kids: Ages 4+

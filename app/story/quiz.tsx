@@ -27,16 +27,18 @@ export default function QuizScreen() {
 
   const storyPages: string[] = (() => {
     try {
-      const parsed = JSON.parse(params.pages ?? '[]');
-      return parsed.map((p: string | { text: string }) =>
+      const pagesParsed = JSON.parse(params.pages ?? '[]');
+      if (!Array.isArray(pagesParsed)) return [];
+      return pagesParsed.map((p: string | { text: string }) =>
         typeof p === 'string' ? p : p.text
       );
-    } catch {
+    } catch (err) {
+      console.warn('[QuizScreen] Failed to parse pages:', err);
       return [];
     }
   })();
 
-  const { quiz } = useGameData(storyPages, params.title ?? '', params.language ?? 'en');
+  const { quiz } = useGameData(storyPages, params.title ?? '', params.language ?? 'en', t as (key: string) => string);
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -193,8 +195,8 @@ export default function QuizScreen() {
 
           <View style={styles.answersContainer}>
             {question.options.map((option, index) => {
-              let buttonStyle = styles.answerButton;
-              let textStyle = styles.answerText;
+              let buttonStyle: object = styles.answerButton;
+              let textStyle: object = styles.answerText;
 
               if (selectedAnswer !== null) {
                 if (index === question.correctIndex) {
@@ -348,7 +350,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.primary,
     marginRight: SPACING.md,
-    overflow: 'hidden',
+    flexShrink: 0,
   },
   answerText: {
     flex: 1,
@@ -356,6 +358,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     fontWeight: '500',
     lineHeight: 22,
+    flexShrink: 1,
   },
   correctAnswerText: {
     color: '#2E7D32',

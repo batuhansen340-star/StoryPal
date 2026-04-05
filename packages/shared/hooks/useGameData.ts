@@ -75,10 +75,36 @@ function extractInterestingWords(pages: string[], count: number): string[] {
     .slice(0, count);
 }
 
-function generateQuiz(pages: string[], title: string): QuizQuestion[] {
+type TranslateFn = (key: string) => string;
+
+// Fun quiz question templates per type
+const TITLE_QUESTIONS = [
+  'quizTitleQ1', // "Can you remember the name of this story?"
+  'quizTitleQ2', // "What is our story called?"
+];
+
+const WORD_QUESTIONS = [
+  'quizWordQ1', // "Which magical word appears in our story?"
+  'quizWordQ2', // "Can you spot the word from the adventure?"
+];
+
+const EVENT_QUESTIONS = [
+  'quizEventQ1', // "How does our adventure begin?"
+  'quizEventQ2', // "What happens first in the story?"
+];
+
+const ENDING_QUESTIONS = [
+  'quizEndQ1', // "How does the story end?"
+];
+
+function pickRandom<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function generateQuiz(pages: string[], title: string, t?: TranslateFn): QuizQuestion[] {
   const questions: QuizQuestion[] = [];
-  const allWords = pages.flatMap(extractWords);
   const interestingWords = extractInterestingWords(pages, 20);
+  const fallback = (key: string, def: string) => t ? t(key) : def;
 
   // Question about the title
   if (title) {
@@ -87,17 +113,17 @@ function generateQuiz(pages: string[], title: string): QuizQuestion[] {
       'A Sunny Day',
       'The Magic Garden',
       'Under the Stars',
-    ].filter((t) => t.toLowerCase() !== title.toLowerCase());
+    ].filter((ti) => ti.toLowerCase() !== title.toLowerCase());
     const options = shuffleArray([title, ...wrongTitles.slice(0, 3)]);
     questions.push({
-      question: 'What is the title of this story?',
+      question: fallback(pickRandom(TITLE_QUESTIONS), 'Can you remember the name of this story?'),
       options,
       correctIndex: options.indexOf(title),
     });
   }
 
-  // Questions about content from each page
-  for (let i = 0; i < Math.min(pages.length, 4); i++) {
+  // Questions about interesting words (more fun framing)
+  for (let i = 0; i < Math.min(pages.length, 3); i++) {
     const pageText = pages[i];
     const pageSentences = extractSentences(pageText);
     if (pageSentences.length === 0) continue;
@@ -118,7 +144,7 @@ function generateQuiz(pages: string[], title: string): QuizQuestion[] {
     const options = shuffleArray([targetWord, ...selectedWrong]);
 
     questions.push({
-      question: `Which word appears in the story on page ${i + 1}?`,
+      question: fallback(pickRandom(WORD_QUESTIONS), 'Which magical word appears in our story?'),
       options,
       correctIndex: options.indexOf(targetWord),
     });
@@ -140,11 +166,11 @@ function generateQuiz(pages: string[], title: string): QuizQuestion[] {
 
       if (wrongSentences.length >= 2) {
         while (wrongSentences.length < 3) {
-          wrongSentences.push('Something completely different happened');
+          wrongSentences.push(fallback('quizFalseOption', 'Something totally different!'));
         }
         const options = shuffleArray([correctSentence, ...wrongSentences]);
         questions.push({
-          question: 'What happened at the beginning of the story?',
+          question: fallback(pickRandom(EVENT_QUESTIONS), 'How does our adventure begin?'),
           options,
           correctIndex: options.indexOf(correctSentence),
         });
@@ -152,7 +178,35 @@ function generateQuiz(pages: string[], title: string): QuizQuestion[] {
     }
   }
 
-  return questions.slice(0, 5);
+  // Question about ending
+  if (pages.length > 2) {
+    const lastSentences = extractSentences(pages[pages.length - 1]);
+    if (lastSentences.length > 0) {
+      const correctSentence = lastSentences[lastSentences.length - 1].slice(0, 60) + (lastSentences[lastSentences.length - 1].length > 60 ? '...' : '');
+      const wrongSentences: string[] = [];
+      for (let i = 0; i < pages.length - 1 && wrongSentences.length < 3; i++) {
+        const sents = extractSentences(pages[i]);
+        if (sents.length > 0) {
+          const s = sents[sents.length - 1].slice(0, 60) + (sents[sents.length - 1].length > 60 ? '...' : '');
+          wrongSentences.push(s);
+        }
+      }
+
+      if (wrongSentences.length >= 2) {
+        while (wrongSentences.length < 3) {
+          wrongSentences.push(fallback('quizFalseOption', 'Something totally different!'));
+        }
+        const options = shuffleArray([correctSentence, ...wrongSentences]);
+        questions.push({
+          question: fallback(pickRandom(ENDING_QUESTIONS), 'How does the story end?'),
+          options,
+          correctIndex: options.indexOf(correctSentence),
+        });
+      }
+    }
+  }
+
+  return shuffleArray(questions).slice(0, 5);
 }
 
 function generateWordHunt(pages: string[]): WordHuntData {
@@ -267,7 +321,7 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
-export function useGameData(storyPages: string[], title: string, _language: string): GameData {
+export function useGameData(storyPages: string[], title: string, _language: string, t?: TranslateFn): GameData {
   return useMemo(() => {
     if (!storyPages || storyPages.length === 0) {
       return {
@@ -282,9 +336,9 @@ export function useGameData(storyPages: string[], title: string, _language: stri
     }
 
     return {
-      quiz: generateQuiz(storyPages, title),
+      quiz: generateQuiz(storyPages, title, t),
       wordHunt: generateWordHunt(storyPages),
       storySort: generateStorySort(storyPages),
     };
-  }, [storyPages, title]);
+  }, [storyPages, title, t]);
 }

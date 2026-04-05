@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
+import { EmojiText } from '../../packages/shared/components/EmojiText';
 import { pickPhoto, takePhoto, analyzeFace, buildCharacterPrompt } from '../../packages/shared/services/face-analysis';
 import type { FaceDescription } from '../../packages/shared/services/face-analysis';
 import { useLanguage } from '../../constants/LanguageContext';
@@ -22,24 +23,24 @@ import { useLanguage } from '../../constants/LanguageContext';
 const { width } = Dimensions.get('window');
 
 const HAIR_COLORS = [
-  { id: 'blonde', label: 'Blonde', color: '#F5D76E' },
-  { id: 'brown', label: 'Brown', color: '#8B6914' },
-  { id: 'black', label: 'Black', color: '#2D2D2D' },
-  { id: 'red', label: 'Red', color: '#D4380D' },
-  { id: 'pink', label: 'Pink', color: '#FF69B4' },
-  { id: 'blue', label: 'Blue', color: '#4A90D9' },
+  { id: 'blonde', labelKey: 'hairBlonde', color: '#F5D76E' },
+  { id: 'brown', labelKey: 'hairBrown', color: '#8B6914' },
+  { id: 'black', labelKey: 'hairBlack', color: '#2D2D2D' },
+  { id: 'red', labelKey: 'hairRed', color: '#D4380D' },
+  { id: 'pink', labelKey: 'hairPink', color: '#FF69B4' },
+  { id: 'blue', labelKey: 'hairBlue', color: '#4A90D9' },
 ];
 
 const SKIN_TONES = [
-  { id: 'light', label: 'Light', color: '#FDDBB4' },
-  { id: 'medium', label: 'Medium', color: '#D4A574' },
-  { id: 'dark', label: 'Dark', color: '#8D5524' },
+  { id: 'light', labelKey: 'skinLight', color: '#FDDBB4' },
+  { id: 'medium', labelKey: 'skinMedium', color: '#D4A574' },
+  { id: 'dark', labelKey: 'skinDark', color: '#8D5524' },
 ];
 
 const GENDERS = [
-  { id: 'girl', emoji: '\u{1F467}' },
-  { id: 'boy', emoji: '\u{1F466}' },
-  { id: 'skip', emoji: '\u{2728}' },
+  { id: 'girl', emoji: '👧' },
+  { id: 'boy', emoji: '👦' },
+  { id: 'skip', emoji: '✨' },
 ];
 
 export default function PersonalizeScreen() {
@@ -108,30 +109,35 @@ export default function PersonalizeScreen() {
   };
 
   const handleContinue = () => {
-    const personalization = JSON.stringify({
-      name: name.trim() || undefined,
-      gender: gender !== 'skip' ? gender : undefined,
-      hairColor,
-      skinTone,
-      hasGlasses,
-      photoUri: photoUri ?? undefined,
-      faceDescription: faceDesc ? buildCharacterPrompt(faceDesc) : undefined,
-      usePhotoFace: !!faceDesc,
-    });
+    try {
+      const personalizationObj = {
+        name: name.trim() || undefined,
+        gender: gender !== 'skip' ? gender : undefined,
+        hairColor,
+        skinTone,
+        hasGlasses,
+        photoUri: photoUri ? 'photo_captured' : undefined,
+        faceDescription: faceDesc ? buildCharacterPrompt(faceDesc) : undefined,
+        usePhotoFace: !!faceDesc,
+      };
+      const personalization = JSON.stringify(personalizationObj);
 
-    router.push({
-      pathname: '/story/select-voice',
-      params: {
-        themeId,
-        characterId,
-        ageGroup: ageGroup ?? '3-5',
-        language: language ?? 'en',
-        personalization,
-        customPrompt: customPrompt ?? '',
-        childName: childName ?? '',
-        childAge: childAge ?? '',
-      },
-    });
+      router.push({
+        pathname: '/story/select-voice',
+        params: {
+          themeId,
+          characterId,
+          ageGroup: ageGroup ?? '3-5',
+          language: language ?? 'en',
+          personalization,
+          customPrompt: customPrompt ?? '',
+          childName: childName ?? '',
+          childAge: childAge ?? '',
+        },
+      });
+    } catch (err) {
+      console.error('[PersonalizeScreen] Failed to serialize personalization:', err);
+    }
   };
 
   const handleSkip = () => {
@@ -164,7 +170,7 @@ export default function PersonalizeScreen() {
 
         <View style={styles.lockedContainer}>
           <Animated.View entering={FadeInDown.duration(600)} style={styles.lockedContent}>
-            <Text style={styles.lockedEmoji}>{'\u{1F512}'}</Text>
+            <EmojiText style={styles.lockedEmoji}>{'\u{1F512}'}</EmojiText>
             <Text style={styles.lockedTitle}>{t('premiumFeature')}</Text>
             <Text style={styles.lockedText}>
               {t('unlockPersonalization')}
@@ -176,7 +182,7 @@ export default function PersonalizeScreen() {
                 end={{ x: 1, y: 0 }}
                 style={styles.unlockGradient}
               >
-                <Text style={styles.unlockText}>{'\u{1F451}'} {t('unlockPremium')}</Text>
+                <Text style={styles.unlockText}><EmojiText>{'\u{1F451}'}</EmojiText> {t('unlockPremium')}</Text>
               </LinearGradient>
             </TouchableOpacity>
             <TouchableOpacity
@@ -218,7 +224,7 @@ export default function PersonalizeScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>{t('personalize')} {'\u{2728}'}</Text>
+          <Text style={styles.title}>{t('personalize')} <EmojiText>{'\u{2728}'}</EmojiText></Text>
           <Text style={styles.subtitle}>{t('personalizeSubtitle')}</Text>
         </Animated.View>
 
@@ -228,26 +234,26 @@ export default function PersonalizeScreen() {
             {photoUri ? (
               <Image source={{ uri: photoUri }} style={styles.photoImage} />
             ) : (
-              <Text style={styles.photoPlaceholder}>{'\u{1F4F7}'}</Text>
+              <EmojiText style={styles.photoPlaceholder}>{'\u{1F4F7}'}</EmojiText>
             )}
             {isAnalyzing && (
               <View style={styles.analyzingOverlay}>
                 <ActivityIndicator color="#fff" size="small" />
-                <Text style={styles.analyzingText}>{'\u{2728}'} {t('analyzing')}</Text>
+                <Text style={styles.analyzingText}><EmojiText>{'\u{2728}'}</EmojiText> {t('analyzing')}</Text>
               </View>
             )}
             {photoAdded && !isAnalyzing && (
               <View style={styles.photoAddedBadge}>
-                <Text style={styles.photoAddedText}>{'\u{1F4F8}'} {t('photoAdded')}</Text>
+                <Text style={styles.photoAddedText}><EmojiText>{'\u{1F4F8}'}</EmojiText> {t('photoAdded')}</Text>
               </View>
             )}
           </View>
           <View style={styles.photoButtons}>
             <TouchableOpacity style={styles.photoBtn} onPress={handleTakePhoto} activeOpacity={0.8}>
-              <Text style={styles.photoBtnText}>{'\u{1F4F7}'} {t('takePhoto')}</Text>
+              <Text style={styles.photoBtnText}><EmojiText>{'\u{1F4F7}'}</EmojiText> {t('takePhoto')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.photoBtn} onPress={handlePickPhoto} activeOpacity={0.8}>
-              <Text style={styles.photoBtnText}>{'\u{1F5BC}\u{FE0F}'} {t('gallery')}</Text>
+              <Text style={styles.photoBtnText}><EmojiText>{'\u{1F5BC}\u{FE0F}'}</EmojiText> {t('gallery')}</Text>
             </TouchableOpacity>
           </View>
           {faceDesc && (
@@ -308,7 +314,7 @@ export default function PersonalizeScreen() {
                 onPress={() => setGender(g.id)}
                 activeOpacity={0.8}
               >
-                <Text style={styles.genderEmoji}>{g.emoji}</Text>
+                <EmojiText style={styles.genderEmoji}>{g.emoji}</EmojiText>
                 <Text style={[styles.genderLabel, gender === g.id && styles.optionLabelSelected]}>
                   {g.id === 'girl' ? t('genderGirl') : g.id === 'boy' ? t('genderBoy') : t('genderPreferNot')}
                 </Text>
@@ -364,7 +370,7 @@ export default function PersonalizeScreen() {
               onPress={() => setHasGlasses(false)}
               activeOpacity={0.8}
             >
-              <Text style={styles.glassesEmoji}>{'\u{1F60A}'}</Text>
+              <EmojiText style={styles.glassesEmoji}>{'\u{1F60A}'}</EmojiText>
               <Text style={[styles.genderLabel, !hasGlasses && styles.optionLabelSelected]}>{t('glassesNo')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -372,7 +378,7 @@ export default function PersonalizeScreen() {
               onPress={() => setHasGlasses(true)}
               activeOpacity={0.8}
             >
-              <Text style={styles.glassesEmoji}>{'\u{1F913}'}</Text>
+              <EmojiText style={styles.glassesEmoji}>{'\u{1F913}'}</EmojiText>
               <Text style={[styles.genderLabel, hasGlasses && styles.optionLabelSelected]}>{t('glassesYes')}</Text>
             </TouchableOpacity>
           </View>
@@ -387,7 +393,7 @@ export default function PersonalizeScreen() {
               end={{ x: 1, y: 0 }}
               style={styles.continueButton}
             >
-              <Text style={styles.continueText}>{t('continueBtn')} {'\u2192'}</Text>
+              <Text style={styles.continueText}>{t('continueBtn')} <EmojiText>{'\u2192'}</EmojiText></Text>
             </LinearGradient>
           </TouchableOpacity>
 

@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
+import { EmojiText } from '../../packages/shared/components/EmojiText';
 import { VOICE_CHARACTERS } from '../../constants/voice-characters';
 import { speak, stop as stopTTS, getSpeechLanguageCode } from '../../packages/shared/services/tts';
 import { useLanguage } from '../../constants/LanguageContext';
@@ -122,7 +123,7 @@ export default function SelectVoiceScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>{t('chooseVoice')} {'\u{1F3A4}'}</Text>
+          <Text style={styles.title}>{t('chooseVoice')} <EmojiText>{'\u{1F3A4}'}</EmojiText></Text>
           <Text style={styles.subtitle}>
             {t('tapToPreview')}
           </Text>
@@ -146,22 +147,22 @@ export default function SelectVoiceScreen() {
                     end={{ x: 1, y: 1 }}
                     style={[styles.voiceCard, isSelected && styles.voiceCardSelected]}
                   >
-                    <Text style={styles.voiceEmoji}>{voice.emoji}</Text>
-                    <Text style={styles.voiceName}>{voice.name}</Text>
-                    <Text style={styles.voiceDesc}>{voice.description}</Text>
+                    <EmojiText style={styles.voiceEmoji}>{voice.emoji}</EmojiText>
+                    <Text style={styles.voiceName}>{voice.nameKey ? t(voice.nameKey as any) : voice.name}</Text>
+                    <Text style={styles.voiceDesc}>{voice.descKey ? t(voice.descKey as any) : voice.description}</Text>
                     {voice.isPremium && !isPremium && (
                       <View style={styles.voiceLockOverlay}>
-                        <Text style={styles.voiceLockIcon}>{'\u{1F512}'}</Text>
+                        <EmojiText style={styles.voiceLockIcon}>{'\u{1F512}'}</EmojiText>
                       </View>
                     )}
                     {voice.isPremium && (
                       <View style={styles.premiumBadge}>
-                        <Text style={styles.premiumText}>{'\u{1F451}'}</Text>
+                        <EmojiText style={styles.premiumText}>{'\u{1F451}'}</EmojiText>
                       </View>
                     )}
                     {isSelected && (
                       <View style={styles.selectedCheck}>
-                        <Text style={styles.checkText}>{'\u2713'}</Text>
+                        <EmojiText style={styles.checkText}>{'\u2713'}</EmojiText>
                       </View>
                     )}
                   </LinearGradient>
@@ -179,7 +180,7 @@ export default function SelectVoiceScreen() {
               end={{ x: 1, y: 0 }}
               style={styles.continueButton}
             >
-              <Text style={styles.continueText}>{t('continueBtn')} {'\u2192'}</Text>
+              <Text style={styles.continueText}>{t('continueBtn')} <EmojiText>{'\u2192'}</EmojiText></Text>
             </LinearGradient>
           </TouchableOpacity>
 

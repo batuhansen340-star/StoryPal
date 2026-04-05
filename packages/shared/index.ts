@@ -18,5 +18,6 @@ export { LoadingAI } from './components/LoadingAI';
 export { EmptyState } from './components/EmptyState';
 export { NetworkBanner } from './components/NetworkBanner';
 export { Skeleton, SkeletonCard, SkeletonList } from './components/SkeletonLoader';
+export { EmojiText } from './components/EmojiText';
 
 export * from './types';

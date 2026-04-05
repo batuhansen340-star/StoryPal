@@ -2,8 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS } from '../types';
+import { EmojiText } from './EmojiText';
 
-export function NetworkBanner() {
+interface NetworkBannerProps {
+  t?: (key: string) => string;
+}
+
+export function NetworkBanner({ t }: NetworkBannerProps = {}) {
   const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
@@ -28,8 +33,8 @@ export function NetworkBanner() {
 
   return (
     <Animated.View entering={FadeInUp.duration(300)} exiting={FadeOutUp.duration(300)} style={styles.banner}>
-      <Text style={styles.emoji}>{'\u{1F4E1}'}</Text>
-      <Text style={styles.text}>No internet connection</Text>
+      <EmojiText style={styles.emoji}>{'\u{1F4E1}'}</EmojiText>
+      <Text style={styles.text}>{t ? t('noInternet') : 'No internet connection'}</Text>
     </Animated.View>
   );
 }

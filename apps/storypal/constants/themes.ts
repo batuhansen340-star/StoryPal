@@ -4,72 +4,92 @@ export const THEMES: Theme[] = [
   {
     id: 'space',
     name: 'Space Adventure',
+    nameKey: 'themeSpace',
     emoji: '🚀',
     gradient: ['#2C3E50', '#4CA1AF'],
     description: 'Blast off to the stars!',
+    descKey: 'themeSpaceDesc',
   },
   {
     id: 'ocean',
     name: 'Ocean Discovery',
+    nameKey: 'themeOcean',
     emoji: '🌊',
     gradient: ['#0077B6', '#00B4D8'],
     description: 'Dive into the deep blue sea!',
+    descKey: 'themeOceanDesc',
   },
   {
     id: 'forest',
     name: 'Enchanted Forest',
+    nameKey: 'themeForest',
     emoji: '🌳',
     gradient: ['#2D6A4F', '#52B788'],
     description: 'Explore magical woodlands!',
+    descKey: 'themeForestDesc',
   },
   {
     id: 'castle',
     name: 'Royal Castle',
+    nameKey: 'themeCastle',
     emoji: '🏰',
     gradient: ['#7B2D8E', '#C77DFF'],
     description: 'Enter a kingdom of wonder!',
+    descKey: 'themeCastleDesc',
   },
   {
     id: 'dinosaur',
     name: 'Dinosaur World',
+    nameKey: 'themeDinosaur',
     emoji: '🦕',
     gradient: ['#BC6C25', '#DDA15E'],
     description: 'Travel back in time!',
+    descKey: 'themeDinosaurDesc',
   },
   {
     id: 'fairy',
     name: 'Fairy Garden',
+    nameKey: 'themeFairy',
     emoji: '🧚',
     gradient: ['#FF69B4', '#FFB6C1'],
     description: 'Enter a world of tiny magic!',
+    descKey: 'themeFairyDesc',
   },
   {
     id: 'pirate',
     name: 'Pirate Treasure',
+    nameKey: 'themePirate',
     emoji: '🏴‍☠️',
     gradient: ['#8B4513', '#DAA520'],
     description: 'Set sail for adventure!',
+    descKey: 'themePirateDesc',
   },
   {
     id: 'robot',
     name: 'Robot City',
+    nameKey: 'themeRobot',
     emoji: '🤖',
     gradient: ['#4A4E69', '#9A8C98'],
     description: 'Build and create in the future!',
+    descKey: 'themeRobotDesc',
   },
   {
     id: 'animal',
     name: 'Animal Kingdom',
+    nameKey: 'themeAnimal',
     emoji: '🦁',
     gradient: ['#F4A261', '#E76F51'],
     description: 'Meet amazing animal friends!',
+    descKey: 'themeAnimalDesc',
   },
   {
     id: 'superhero',
     name: 'Superhero Academy',
+    nameKey: 'themeSuperhero',
     emoji: '🦸',
     gradient: ['#E63946', '#457B9D'],
     description: 'Discover your superpowers!',
+    descKey: 'themeSuperheroDesc',
   },
 ];
 
@@ -80,6 +100,7 @@ export const CHARACTERS: Character[] = [
     name: 'Stardust',
     emoji: '🦄',
     trait: 'Magical Unicorn',
+    traitKey: 'charStardustTrait',
     description: 'A shimmering unicorn whose rainbow mane glows when she makes a wish — but each wish must be earned through kindness',
   },
   {
@@ -87,6 +108,7 @@ export const CHARACTERS: Character[] = [
     name: 'Spark',
     emoji: '🐉',
     trait: 'Baby Dragon',
+    traitKey: 'charSparkTrait',
     description: 'A tiny dragon who sneezes confetti instead of fire and desperately wants to learn to fly before the Dragon Festival',
   },
   {
@@ -94,6 +116,7 @@ export const CHARACTERS: Character[] = [
     name: 'Coral',
     emoji: '🧜‍♀️',
     trait: 'Little Mermaid',
+    traitKey: 'charCoralTrait',
     description: 'A curious mermaid who collects human treasures in her underwater cave and dreams of seeing snow for the first time',
   },
   {
@@ -101,6 +124,7 @@ export const CHARACTERS: Character[] = [
     name: 'Iris',
     emoji: '🧚',
     trait: 'Garden Fairy',
+    traitKey: 'charIrisTrait',
     description: 'A tiny fairy who lives inside a sunflower and can make any plant grow, but her magic goes hilariously wrong when she sneezes',
   },
   // Brave Kids
@@ -109,6 +133,7 @@ export const CHARACTERS: Character[] = [
     name: 'Luna',
     emoji: '👧',
     trait: 'Stargazer Girl',
+    traitKey: 'charLunaTrait',
     description: 'A girl who talks to the moon every night and one day receives a mysterious map that leads to the place where stars are born',
   },
   {
@@ -116,6 +141,7 @@ export const CHARACTERS: Character[] = [
     name: 'Kai',
     emoji: '👦',
     trait: 'Inventor Boy',
+    traitKey: 'charKaiTrait',
     description: 'A boy who builds amazing inventions from things he finds in his recycling bin — his latest creation might just save the day',
   },
   {
@@ -123,6 +149,7 @@ export const CHARACTERS: Character[] = [
     name: 'Nova',
     emoji: '🦸‍♀️',
     trait: 'Tiny Superhero',
+    traitKey: 'charNovaTrait',
     description: 'An ordinary kid who discovers a magical cape in her grandmother\'s attic — it gives her one superpower each day, but she never knows which one',
   },
   // Animal Friends
@@ -131,6 +158,7 @@ export const CHARACTERS: Character[] = [
     name: 'Biscuit',
     emoji: '🐶',
     trait: 'Adventurous Puppy',
+    traitKey: 'charBiscuitTrait',
     description: 'A golden puppy with one floppy ear who follows interesting smells into the most extraordinary adventures',
   },
   {
@@ -138,6 +166,7 @@ export const CHARACTERS: Character[] = [
     name: 'Mochi',
     emoji: '🐱',
     trait: 'Clever Kitten',
+    traitKey: 'charMochiTrait',
     description: 'A fluffy kitten who can read books and secretly helps the neighborhood kids with their homework through the window',
   },
   {
@@ -145,6 +174,7 @@ export const CHARACTERS: Character[] = [
     name: 'Clover',
     emoji: '🐰',
     trait: 'Brave Bunny',
+    traitKey: 'charCloverTrait',
     description: 'The smallest bunny in the warren who proves that the biggest heart matters more than the biggest ears',
   },
   {
@@ -152,6 +182,7 @@ export const CHARACTERS: Character[] = [
     name: 'Rex',
     emoji: '🦖',
     trait: 'Friendly Dinosaur',
+    traitKey: 'charRexTrait',
     description: 'A vegetarian T-Rex who is gentle as a lamb and uses his enormous size to help all the smaller animals in Dino Valley',
   },
   // Fantasy & Fun
@@ -160,6 +191,7 @@ export const CHARACTERS: Character[] = [
     name: 'Beep',
     emoji: '🤖',
     trait: 'Curious Robot',
+    traitKey: 'charBeepTrait',
     description: 'A little robot who was built to clean but wants to learn about feelings — especially this strange thing humans call "laughter"',
   },
   {
@@ -167,6 +199,7 @@ export const CHARACTERS: Character[] = [
     name: 'Captain Finn',
     emoji: '🏴‍☠️',
     trait: 'Kid Pirate',
+    traitKey: 'charFinnTrait',
     description: 'A seven-year-old pirate captain who sails a ship made of cardboard boxes and discovers treasures that money can\'t buy',
   },
   {
@@ -174,6 +207,7 @@ export const CHARACTERS: Character[] = [
     name: 'Honey',
     emoji: '🐻',
     trait: 'Cuddly Bear Cub',
+    traitKey: 'charHoneyTrait',
     description: 'A bear cub who gives the warmest hugs in the forest and is determined to stay awake for her very first winter to see snow',
   },
   {
@@ -181,6 +215,7 @@ export const CHARACTERS: Character[] = [
     name: 'Zorp',
     emoji: '👽',
     trait: 'Friendly Alien',
+    traitKey: 'charZorpTrait',
     description: 'A purple alien visiting Earth for a school project who is baffled by pizza, rain, and why humans keep fluffy creatures called "dogs" in their houses',
   },
 ];

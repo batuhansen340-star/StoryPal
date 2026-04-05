@@ -16,8 +16,8 @@ const puppeteer = require('puppeteer-core');
 const path = require('path');
 const fs = require('fs');
 
-const SCREENSHOT_WIDTH = 1290;
-const SCREENSHOT_HEIGHT = 2796;
+const SCREENSHOT_WIDTH = 1284;
+const SCREENSHOT_HEIGHT = 2778;
 
 const SCREENSHOTS = [
   { file: '01-home.html', name: '01-home' },

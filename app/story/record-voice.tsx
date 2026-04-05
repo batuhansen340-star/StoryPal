@@ -40,9 +40,12 @@ export default function RecordVoiceScreen() {
 
   let parsedPages: { text: string; imagePrompt: string }[] = [];
   try {
-    if (pages) parsedPages = JSON.parse(pages);
-  } catch {
-    // fallback
+    if (pages) {
+      parsedPages = JSON.parse(pages);
+    }
+  } catch (err) {
+    console.warn('[RecordVoiceScreen] Failed to parse pages:', err);
+    parsedPages = [];
   }
 
   const totalPages = parsedPages.length;

@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
+import { EmojiText } from '../../packages/shared/components/EmojiText';
 import {
   getChildProfiles,
   createChildProfile,
@@ -37,7 +38,7 @@ export default function SelectProfileScreen() {
   const [newAvatar, setNewAvatar] = useState('child');
 
   useEffect(() => {
-    getChildProfiles().then(setProfiles);
+    getChildProfiles().then(setProfiles).catch(() => {});
   }, []);
 
   const handleSelect = (profile: ChildProfile) => {
@@ -64,17 +65,21 @@ export default function SelectProfileScreen() {
     const age = parseInt(newAge, 10);
     if (isNaN(age) || age < 1 || age > 12) return;
 
-    const profile = await createChildProfile({
-      name: newName.trim(),
-      age,
-      avatarId: newAvatar,
-    });
+    try {
+      const profile = await createChildProfile({
+        name: newName.trim(),
+        age,
+        avatarId: newAvatar,
+      });
 
-    setProfiles(prev => [...prev, profile]);
-    setShowModal(false);
-    setNewName('');
-    setNewAge('');
-    setNewAvatar('child');
+      setProfiles(prev => [...prev, profile]);
+      setShowModal(false);
+      setNewName('');
+      setNewAge('');
+      setNewAvatar('child');
+    } catch {
+      // Profile creation failed
+    }
   };
 
   const avatarOptions = getAvatarOptions();
@@ -83,7 +88,7 @@ export default function SelectProfileScreen() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>{t('whoIsStoryFor')} {'\u{1F9D2}'}</Text>
+          <Text style={styles.title}>{t('whoIsStoryFor')} <EmojiText>{'\u{1F9D2}'}</EmojiText></Text>
           <Text style={styles.subtitle}>{t('selectChildSkip')}</Text>
         </Animated.View>
 
@@ -95,7 +100,7 @@ export default function SelectProfileScreen() {
               onPress={() => handleSelect(p)}
             >
               <View style={styles.profileAvatar}>
-                <Text style={styles.profileAvatarText}>{getAvatarEmoji(p.avatarId)}</Text>
+                <EmojiText style={styles.profileAvatarText}>{getAvatarEmoji(p.avatarId)}</EmojiText>
               </View>
               <View style={styles.profileInfo}>
                 <Text style={styles.profileName}>{p.name}</Text>
@@ -128,7 +133,7 @@ export default function SelectProfileScreen() {
       <Modal visible={showModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{t('newChild')} {'\u{1F31F}'}</Text>
+            <Text style={styles.modalTitle}>{t('newChild')} <EmojiText>{'\u{1F31F}'}</EmojiText></Text>
 
             <Text style={styles.inputLabel}>{t('name')}</Text>
             <TextInput
@@ -159,7 +164,7 @@ export default function SelectProfileScreen() {
                   style={[styles.avatarOption, newAvatar === a.id && styles.avatarOptionSelected]}
                   onPress={() => setNewAvatar(a.id)}
                 >
-                  <Text style={styles.avatarOptionText}>{a.emoji}</Text>
+                  <EmojiText style={styles.avatarOptionText}>{a.emoji}</EmojiText>
                 </TouchableOpacity>
               ))}
             </View>
@@ -175,7 +180,7 @@ export default function SelectProfileScreen() {
                   end={{ x: 1, y: 0 }}
                   style={styles.createButton}
                 >
-                  <Text style={styles.createText}>{t('add')} {'\u{2728}'}</Text>
+                  <Text style={styles.createText}>{t('add')} <EmojiText>{'\u{2728}'}</EmojiText></Text>
                 </LinearGradient>
               </TouchableOpacity>
             </View>

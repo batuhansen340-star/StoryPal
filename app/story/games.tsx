@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS, GRADIENTS } from '../../packages/shared/types';
+import { EmojiText } from '../../packages/shared/components/EmojiText';
 import { selection } from '../../packages/shared/services/haptics';
 import { useLanguage } from '../../constants/LanguageContext';
 
@@ -62,14 +63,18 @@ export default function GamesScreen() {
 
   const handleSelectGame = (game: GameCard) => {
     selection();
-    router.push({
-      pathname: game.route,
-      params: {
-        pages: params.pages ?? '[]',
-        title: params.title ?? '',
-        language: params.language ?? 'en',
-      },
-    });
+    try {
+      router.push({
+        pathname: game.route,
+        params: {
+          pages: params.pages ?? '[]',
+          title: params.title ?? '',
+          language: params.language ?? 'en',
+        },
+      });
+    } catch (err) {
+      console.error('[GamesScreen] Failed to navigate to game:', err);
+    }
   };
 
   return (
@@ -96,8 +101,8 @@ export default function GamesScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <Animated.View entering={FadeInDown.duration(600)}>
-          <Text style={styles.title}>{t('storyGames')} {'\uD83C\uDFAE'}</Text>
-          <Text style={styles.subtitle}>{t('testWhatYouLearned')} {'\uD83E\uDDE0'}</Text>
+          <Text style={styles.title}>{t('storyGames')} <EmojiText>{'\uD83C\uDFAE'}</EmojiText></Text>
+          <Text style={styles.subtitle}>{t('testWhatYouLearned')} <EmojiText>{'\uD83E\uDDE0'}</EmojiText></Text>
         </Animated.View>
 
         <View style={styles.cardsContainer}>
@@ -116,12 +121,12 @@ export default function GamesScreen() {
                   end={{ x: 1, y: 1 }}
                   style={styles.gameCard}
                 >
-                  <Text style={styles.gameEmoji}>{game.emoji}</Text>
+                  <EmojiText style={styles.gameEmoji}>{game.emoji}</EmojiText>
                   <View style={styles.gameInfo}>
                     <Text style={styles.gameTitle}>{t(game.titleKey)}</Text>
                     <Text style={styles.gameDesc}>{t(game.descKey)}</Text>
                   </View>
-                  <Text style={styles.gameArrow}>{'\u203A'}</Text>
+                  <EmojiText style={styles.gameArrow}>{'\u203A'}</EmojiText>
                 </LinearGradient>
               </TouchableOpacity>
             </Animated.View>
@@ -195,25 +200,30 @@ const styles = StyleSheet.create({
   gameEmoji: {
     fontSize: 40,
     marginRight: SPACING.md,
+    flexShrink: 0,
   },
   gameInfo: {
     flex: 1,
+    flexShrink: 1,
   },
   gameTitle: {
     fontSize: 22,
     fontWeight: '700',
     color: '#FFFFFF',
     marginBottom: SPACING.xs,
+    flexShrink: 1,
   },
   gameDesc: {
     fontSize: 14,
     color: 'rgba(255, 255, 255, 0.9)',
     fontWeight: '500',
+    flexShrink: 1,
   },
   gameArrow: {
     fontSize: 32,
     color: 'rgba(255, 255, 255, 0.8)',
     fontWeight: '300',
     marginLeft: SPACING.sm,
+    flexShrink: 0,
   },
 });

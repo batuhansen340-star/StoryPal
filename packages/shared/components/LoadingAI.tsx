@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import React, { useEffect } from "react";
+import { View, Text, StyleSheet, Dimensions } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -10,17 +10,18 @@ import Animated, {
   withDelay,
   Easing,
   interpolate,
-} from 'react-native-reanimated';
-import { COLORS, SPACING, RADIUS, GRADIENTS } from '../types';
+} from "react-native-reanimated";
+import { COLORS, SPACING, RADIUS, GRADIENTS } from "../types";
+import { EmojiText } from "./EmojiText";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 const LOADING_MESSAGES = [
-  { emoji: '✏️', text: 'Writing your story...' },
-  { emoji: '🎨', text: 'Painting illustrations...' },
-  { emoji: '✨', text: 'Adding magic sparkles...' },
-  { emoji: '📖', text: 'Binding your book...' },
-  { emoji: '🌟', text: 'Almost ready...' },
+  { emoji: "✏️", key: "writingStory" },
+  { emoji: "🎨", key: "drawingPages" },
+  { emoji: "✨", key: "magicSpark" },
+  { emoji: "📖", key: "bookBinding" },
+  { emoji: "🌟", key: "almostReady" },
 ];
 
 interface LoadingAIProps {
@@ -28,9 +29,16 @@ interface LoadingAIProps {
   totalSteps: number;
   currentStep: string;
   status: string;
+  t?: (key: string | any) => string;
 }
 
-export function LoadingAI({ progress, totalSteps, currentStep, status }: LoadingAIProps) {
+export function LoadingAI({
+  progress,
+  totalSteps,
+  currentStep,
+  status,
+  t,
+}: LoadingAIProps) {
   const bounceAnim = useSharedValue(0);
   const rotateAnim = useSharedValue(0);
   const pulseAnim = useSharedValue(1);
@@ -41,8 +49,14 @@ export function LoadingAI({ progress, totalSteps, currentStep, status }: Loading
   useEffect(() => {
     bounceAnim.value = withRepeat(
       withSequence(
-        withTiming(-20, { duration: 600, easing: Easing.bezier(0.25, 0.1, 0.25, 1) }),
-        withTiming(0, { duration: 600, easing: Easing.bezier(0.25, 0.1, 0.25, 1) }),
+        withTiming(-20, {
+          duration: 600,
+          easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+        }),
+        withTiming(0, {
+          duration: 600,
+          easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+        }),
       ),
       -1,
       true,
@@ -72,18 +86,24 @@ export function LoadingAI({ progress, totalSteps, currentStep, status }: Loading
     );
 
     sparkle2.value = withRepeat(
-      withDelay(300, withSequence(
-        withTiming(1, { duration: 800 }),
-        withTiming(0, { duration: 800 }),
-      )),
+      withDelay(
+        300,
+        withSequence(
+          withTiming(1, { duration: 800 }),
+          withTiming(0, { duration: 800 }),
+        ),
+      ),
       -1,
     );
 
     sparkle3.value = withRepeat(
-      withDelay(600, withSequence(
-        withTiming(1, { duration: 800 }),
-        withTiming(0, { duration: 800 }),
-      )),
+      withDelay(
+        600,
+        withSequence(
+          withTiming(1, { duration: 800 }),
+          withTiming(0, { duration: 800 }),
+        ),
+      ),
       -1,
     );
   }, [bounceAnim, rotateAnim, pulseAnim, sparkle1, sparkle2, sparkle3]);
@@ -123,23 +143,43 @@ export function LoadingAI({ progress, totalSteps, currentStep, status }: Loading
     ],
   }));
 
-  const progressPercent = totalSteps > 0 ? Math.round((progress / totalSteps) * 100) : 0;
+  const progressPercent =
+    totalSteps > 0 ? Math.round((progress / totalSteps) * 100) : 0;
   const messageIndex = Math.min(
     Math.floor((progress / Math.max(totalSteps, 1)) * LOADING_MESSAGES.length),
     LOADING_MESSAGES.length - 1,
   );
   const loadingMessage = LOADING_MESSAGES[messageIndex];
+  const translatedText = t ? t(loadingMessage.key) : loadingMessage.key;
+
+  const getDisplayText = () => {
+    if (!t) return currentStep;
+
+    // Handle drawingPages with pagination (e.g., "drawingPages:1-4/8")
+    if (currentStep.includes(":")) {
+      const [key, params] = currentStep.split(":");
+      return t(key) + " " + params;
+    }
+
+    return t(currentStep) || currentStep;
+  };
 
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#FFF8F0', '#FFE8D6', '#FFD4B8']}
+        colors={["#FFF8F0", "#FFE8D6", "#FFD4B8"]}
         style={styles.gradient}
       >
         <View style={styles.sparkleContainer}>
-          <Animated.Text style={[styles.sparkle, sparkle1Style]}>✨</Animated.Text>
-          <Animated.Text style={[styles.sparkle, sparkle2Style]}>⭐</Animated.Text>
-          <Animated.Text style={[styles.sparkle, sparkle3Style]}>💫</Animated.Text>
+          <Animated.View style={[styles.sparkle, sparkle1Style]}>
+            <EmojiText>✨</EmojiText>
+          </Animated.View>
+          <Animated.View style={[styles.sparkle, sparkle2Style]}>
+            <EmojiText>⭐</EmojiText>
+          </Animated.View>
+          <Animated.View style={[styles.sparkle, sparkle3Style]}>
+            <EmojiText>💫</EmojiText>
+          </Animated.View>
         </View>
 
         <Animated.View style={[styles.emojiContainer, bounceStyle]}>
@@ -148,13 +188,15 @@ export function LoadingAI({ progress, totalSteps, currentStep, status }: Loading
               colors={GRADIENTS.primary}
               style={styles.emojiCircle}
             >
-              <Text style={styles.mainEmoji}>{loadingMessage.emoji}</Text>
+              <EmojiText style={styles.mainEmoji}>
+                {loadingMessage.emoji}
+              </EmojiText>
             </LinearGradient>
           </Animated.View>
         </Animated.View>
 
-        <Text style={styles.statusText}>{currentStep}</Text>
-        <Text style={styles.subText}>{loadingMessage.text}</Text>
+        <Text style={styles.statusText}>{getDisplayText()}</Text>
+        <Text style={styles.subText}>{translatedText}</Text>
 
         <View style={styles.progressContainer}>
           <View style={styles.progressBar}>
@@ -170,7 +212,7 @@ export function LoadingAI({ progress, totalSteps, currentStep, status }: Loading
 
         {totalSteps > 0 && (
           <Text style={styles.stepText}>
-            Step {progress} of {totalSteps}
+            {t ? `${t("loadingStep")} ${progress} / ${totalSteps}` : `Step ${progress} / ${totalSteps}`}
           </Text>
         )}
       </LinearGradient>
@@ -184,18 +226,18 @@ const styles = StyleSheet.create({
   },
   gradient: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: SPACING.xl,
   },
   sparkleContainer: {
-    position: 'absolute',
-    top: '30%',
-    alignItems: 'center',
+    position: "absolute",
+    top: "30%",
+    alignItems: "center",
   },
   sparkle: {
     fontSize: 28,
-    position: 'absolute',
+    position: "absolute",
   },
   emojiContainer: {
     marginBottom: SPACING.xl,
@@ -204,8 +246,8 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
@@ -217,37 +259,37 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 24,
-    fontWeight: '800',
+    fontWeight: "800",
     color: COLORS.text,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: SPACING.sm,
   },
   subText: {
     fontSize: 16,
     color: COLORS.textLight,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: SPACING.xl,
   },
   progressContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     width: width - 80,
     gap: SPACING.md,
   },
   progressBar: {
     flex: 1,
     height: 12,
-    backgroundColor: 'rgba(255,107,107,0.15)',
+    backgroundColor: "rgba(255,107,107,0.15)",
     borderRadius: RADIUS.full,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   progressFill: {
-    height: '100%',
+    height: "100%",
     borderRadius: RADIUS.full,
   },
   progressText: {
     fontSize: 16,
-    fontWeight: '800',
+    fontWeight: "800",
     color: COLORS.primary,
     minWidth: 45,
   },
