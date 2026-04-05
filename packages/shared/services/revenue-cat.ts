@@ -6,7 +6,7 @@ import { Platform } from 'react-native';
 
 const API_KEY_IOS = process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY ?? '';
 const API_KEY_ANDROID = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY ?? '';
-const ENTITLEMENT_ID = 'premium';
+const ENTITLEMENT_ID = 'test';
 
 let isConfigured = false;
 
